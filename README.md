@@ -1,6 +1,8 @@
 # Project Karman Avionics System
 The avionics system for the Northeastern University AIAA Project Karman rocket.
 
+Check out the [wiki](https://github.com/AIAANortheastern/karman-avionics/wiki)!
+
 ### Getting Started
 
 Download Cygwin, Git Bash, or some other command line interface (Bash for Windows 10, etc.)
@@ -46,18 +48,18 @@ Select "Add new item" and then choose either a .c file or a .h file. Don't add a
 
 If you commit something that doesn't compile, I will find you, and I will make you fix it until it does.
 
-Rule #1: Don't merge if it doesn't compile.
-	Corrolary to Rule #1: Avoid merging if you have compiler warnings.
-Rule #2: Don't merge if it doesn't compile.
+- Rule #1: Don't merge if it doesn't compile.
+- Corrolary to Rule #1: Avoid merging if you have compiler warnings.
+- Rule #2: Don't merge if it doesn't compile.
 
 
 Naming conventions:
 
 To keep everything consistent and readable, some naming conventions should be used. We can discuss these if you think they're terrible, but for some basic guidelines:
 	
--filenames should start with a capital letter, and try to have everything else be lowercase. The only caracters that should be used are A-Z, 0-9, and underscore. Avod dash or em-dash, or any other special characters.
+- filenames should start with a capital letter, and try to have everything else be lowercase. The only caracters that should be used are A-Z, 0-9, and underscore. Avod dash or em-dash, or any other special characters.
 	
--every .c file MUST have an accompanying header file (.h). In the header you will declare every function that's in your .c file. 
+- every .c file MUST have an accompanying header file (.h). In the header you will declare every function that's in your .c file. 
 	
 Note the difference between declaration and definition. A declaration is of the form
 ```c
@@ -72,9 +74,9 @@ void foo(uint8_t param1, float32_t param2)
 }
 ```
 	
--Make sure everything in the body of your header files is within the "include guards". These ensure that the body of the header file is only included once. This makes the compiler much happier.
+- Make sure everything in the body of your header files is within the "include guards". These ensure that the body of the header file is only included once. This makes the compiler much happier.
 	
--functions should use the snake_case convention
+- functions should use the snake_case convention
 	
--variables should use camelCase. That way we get to learn both! (don't hurt me)
+- variables should use camelCase. That way we get to learn both! (don't hurt me)
 	
