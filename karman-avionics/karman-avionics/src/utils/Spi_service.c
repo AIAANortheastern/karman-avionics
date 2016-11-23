@@ -62,10 +62,11 @@ Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *por
  */
 Bool spi_master_enqueue(spi_master_t *spi_interface,
                             chip_select_info_t *csInfo,
-                            void *sendBuff,
+                            volatile void *sendBuff,
                             uint8_t sendLen,
-                            void *recvBuff,
-                            uint8_t recvLen)
+                            volatile void *recvBuff,
+                            uint8_t recvLen,
+                            volatile Bool *complete)
 {
     Bool createStatus = true;
     uint8_t newIndex = spi_interface->back;
@@ -106,6 +107,7 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
         newRequest->recvLen = recvLen;
         newRequest->bytesRecv = 0;
 
+        newRequest->complete = complete;
         *(newRequest->complete) = false;
         newRequest->valid = true;
 

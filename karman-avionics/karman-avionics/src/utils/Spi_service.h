@@ -67,14 +67,18 @@ typedef struct
     uint8_t        back;
 } spi_master_t;
 
-Bool init_spi_master_service(spi_master_t *master, SPI_t *regSet, PORT_t *port, background_func_t taskName);
+Bool init_spi_master_service(spi_master_t *master,
+                             SPI_t *regSet,
+                             PORT_t *port,
+                             background_func_t taskName);
 
 Bool spi_master_enqueue(spi_master_t *spi_interface,
-                             chip_select_info_t *csInfo, 
-                             void *sendBuff,
-                             uint8_t sendLen,
-                             void *recvBuff,
-                             uint8_t recvLen);
+                        chip_select_info_t *csInfo,
+                        volatile void *sendBuff,
+                        uint8_t sendLen,
+                        volatile void *recvBuff,
+                        uint8_t recvLen,
+                        volatile Bool *complete);
 
 Bool spi_master_dequeue(spi_master_t *spi_interface);
 
