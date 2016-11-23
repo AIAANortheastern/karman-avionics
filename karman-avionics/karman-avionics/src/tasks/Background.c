@@ -13,13 +13,13 @@
 static background_func_t backgroundFuncArry[MAX_BACKGROUND_FUNCS];
 /* Holds how many background functions are currently registered.
  * Declared volatile to make sure for loop is not optimized away. */
-static volatile uint8_t num_background_func = 0;
+static volatile uint8_t numBackgroundFunc = 0;
 
 void background_task_func(void){
     /* Run everybody's background stuff here,
      * This includes polling, calculations, etc */
     static uint8_t funcArryIdx = 0;
-    for(funcArryIdx = 0; funcArryIdx < num_background_func; funcArryIdx++)
+    for(funcArryIdx = 0; funcArryIdx < numBackgroundFunc; funcArryIdx++)
     {
         if(backgroundFuncArry[funcArryIdx] == NULL)
         {
@@ -41,10 +41,10 @@ void background_task_func(void){
 uint8_t add_background_function(background_func_t function){
     uint8_t retVal = BKGND_FUNC_SUCCESS;
     
-    if(num_background_func < MAX_BACKGROUND_FUNCS)
+    if(numBackgroundFunc < MAX_BACKGROUND_FUNCS)
     {
-        backgroundFuncArry[num_background_func] = function;
-        num_background_func++;
+        backgroundFuncArry[numBackgroundFunc] = function;
+        numBackgroundFunc++;
     }
     else
     {

@@ -23,8 +23,8 @@ typedef enum task_freq_e {
 
 /* Structure to define tasks.*/
 typedef struct simple_task_s{
-    task_freq_enum_t task_freq; /* How often should this task be run? */
-    uint32_t last_count; /* The last timer count we ran at */
+    task_freq_enum_t taskFreq; /* How often should this task be run? */
+    uint32_t lastCount; /* The last timer count we ran at */
     void(*task)(void); /* Pointer to task function */
 } simple_task_t;
 

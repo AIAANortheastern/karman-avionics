@@ -18,14 +18,14 @@ simple_task_t TaskList[] =
     /* Task to check status of global sensor data to see if it's time to
     * perform Pyrotechnics activities */
     { 
-        .task_freq = TASK_FREQ_10ms,
-        .last_count = INITIAL_COUNT,
+        .taskFreq = TASK_FREQ_10ms,
+        .lastCount = INITIAL_COUNT,
         .task = check_pyro_task_func
     },
      /* ALWAYS Keep background task last! */
     { 
-        .task_freq = TASK_FREQ_BACKGROUND,
-        .last_count = INITIAL_COUNT,
+        .taskFreq = TASK_FREQ_BACKGROUND,
+        .lastCount = INITIAL_COUNT,
         .task =  background_task_func
     },
 };
