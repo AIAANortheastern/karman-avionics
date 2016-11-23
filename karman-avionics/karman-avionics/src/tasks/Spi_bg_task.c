@@ -37,7 +37,7 @@ void spi_bg_task(void)
     {
         currMaster = gSpiMasters[idx];
 
-        if(!(currMaster == NULL))
+        if(currMaster != NULL)
         {
            (void)spi_master_initate_request(currMaster);
         }

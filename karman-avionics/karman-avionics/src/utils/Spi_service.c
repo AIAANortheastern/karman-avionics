@@ -60,7 +60,7 @@ Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *por
  * back of the queue, we check if back + 1 is empty. We only want to update back
  * if we sucessfully add an entry.
  */
-Bool spi_master_push_request(spi_master_t *spi_interface,
+Bool spi_master_enqueue(spi_master_t *spi_interface,
                             chip_select_info_t *csInfo,
                             void *sendBuff,
                             uint8_t sendLen,
@@ -116,11 +116,16 @@ Bool spi_master_push_request(spi_master_t *spi_interface,
 }
 
 /* pop an item from the request queue by invalidating the entry */
-Bool spi_master_pop_request(spi_master_t *spi_interface)
+Bool spi_master_dequeue(spi_master_t *spi_interface)
 {
     Bool popStatus = true;
     uint8_t oldFront = spi_interface->front;
-    uint8_t newFront = (oldFront == SPI_MASTER_QUEUE_DEPTH) ? 0 : oldFront;
+    uint8_t newFront = (oldFront == spi_interface->back) ? (oldFront) : (oldFront + 1);
+
+    if(newFront >= SPI_MASTER_QUEUE_DEPTH)
+    {
+       newFront = 0;
+    }
 
     if(spi_interface->requestQueue[oldFront].valid == false)
     {
@@ -171,7 +176,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
     static uint8_t dataSent, dataRecv, dataToSend, dataToRecv;
     static Bool moreToDo;
 
-    /* Look at the top of the queue */
+    /* Look at the front of the queue */
     spi_request_t *currRequest = &spi_interface->requestQueue[spi_interface->front];
     dataSent = currRequest->bytesSent;
     dataRecv = currRequest->bytesRecv;
@@ -196,10 +201,13 @@ void spi_master_ISR(spi_master_t *spi_interface)
     moreToDo = (dataSent < dataToSend) ? true : false;
     moreToDo = (dataRecv < dataToRecv) ? true : false;
 
-    /* If we're done, raise chip select again*/
     if(!moreToDo)
     {
+        /* If we're done, raise chip select again*/
         spi_master_finish_request(currRequest);
+        /* Inform the owner of the task that the request has completed*/
         spi_master_request_complete(spi_interface);
+        /* Dequeue the task from the list*/
+        spi_master_dequeue(spi_interface);
     }
 }

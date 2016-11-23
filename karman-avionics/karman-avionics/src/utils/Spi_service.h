@@ -69,14 +69,14 @@ typedef struct
 
 Bool init_spi_master_service(spi_master_t *master, SPI_t *regSet, PORT_t *port, background_func_t taskName);
 
-Bool spi_master_push_request(spi_master_t *spi_interface,
+Bool spi_master_enqueue(spi_master_t *spi_interface,
                              chip_select_info_t *csInfo, 
                              void *sendBuff,
                              uint8_t sendLen,
                              void *recvBuff,
                              uint8_t recvLen);
 
-Bool spi_master_pop_request(spi_master_t *spi_interface);
+Bool spi_master_dequeue(spi_master_t *spi_interface);
 
 void spi_master_ISR(spi_master_t *spi_interface);
 
