@@ -52,3 +52,17 @@ uint8_t add_background_function(background_func_t function){
     }
     return retVal;
 }
+
+Bool is_background_function(background_func_t key)
+{
+    uint8_t idx;
+    Bool found = false;
+    for (idx = 0; idx < numBackgroundFunc; idx++)
+    {
+        if(backgroundFuncArry[idx] == key)
+        {
+            found = true;
+        }
+    }
+    return found;
+}

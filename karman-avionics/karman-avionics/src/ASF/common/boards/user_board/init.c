@@ -11,6 +11,7 @@
 #include <asf.h>
 #include <board.h>
 #include <conf_board.h>
+#include "SensorTask.h"
 
 void board_init(void)
 {
@@ -20,4 +21,7 @@ void board_init(void)
 	 */
      /* TODO Enable IO Pins */
      /* TODO Enable peripheral clocks (TWI, SPI, USART)*/
+
+     /* Initalizes SPI for sensors, and sets up CS pins for all sensors */
+     init_sensor_task();
 }

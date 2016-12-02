@@ -31,7 +31,7 @@
 /* initalizes an SPI master service */
 Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *port, background_func_t taskName)
 {
-    Bool initSuccess = false;
+    Bool initSuccess = true;
 
     masterObj->master = regSet;
     masterObj->port = port;
@@ -41,9 +41,12 @@ Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *por
     masterObj->front = 0;
     masterObj->back = 0;
 
-    if (!(add_background_function(taskName) == BKGND_FUNC_FAILURE))
+    if(!is_background_function(taskName))
     {
-        initSuccess = true;
+        if (add_background_function(taskName) == BKGND_FUNC_FAILURE)
+        {
+            initSuccess = false;
+        }
     }
 
     return initSuccess;
