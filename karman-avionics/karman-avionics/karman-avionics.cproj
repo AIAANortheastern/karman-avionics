@@ -497,6 +497,12 @@
     <Compile Include="src\tasks\Pyrotechnics.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\tasks\RadioTask.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\tasks\RadioTask.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\tasks\SensorTask.c">
       <SubType>compile</SubType>
     </Compile>

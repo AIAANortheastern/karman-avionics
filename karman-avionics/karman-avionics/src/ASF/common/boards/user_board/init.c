@@ -12,6 +12,7 @@
 #include <board.h>
 #include <conf_board.h>
 #include "SensorTask.h"
+#include "RadioTask.h"
 
 void board_init(void)
 {
@@ -24,4 +25,7 @@ void board_init(void)
 
      /* Initalizes SPI for sensors, and sets up CS pins for all sensors */
      init_sensor_task();
+
+     /* Initailizes SPI for radio module, sets up cs pin for it */
+     init_radio_task();
 }

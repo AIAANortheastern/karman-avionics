@@ -16,7 +16,7 @@
 #define SPIC_MOSI (1 << 5) /* 0x20 */
 #define SPIC_MISO (1 << 6) /* 0x40 */
 #define SPIC_SCK  (1 << 7) /* 0x80 */
-#define SENSOR_SPI (SPIC) /* Possible options are SPIC and SPIE */
+#define SENSOR_SPI (SPIC) /* Possible options are SPIC and SPID */
 #define SENSOR_SPI_PORT (PORTC)
 #define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
 
