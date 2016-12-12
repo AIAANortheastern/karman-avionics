@@ -62,9 +62,12 @@ typedef struct
     PORT_t *port; /* The port the master is on */
 
     /* The fields necessary to implement a queue. An array, and two indecies */
-    spi_request_t  requestQueue[SPI_MASTER_QUEUE_DEPTH];
-    uint8_t        front;
-    uint8_t        back;
+    volatile spi_request_t  requestQueue[SPI_MASTER_QUEUE_DEPTH];
+    volatile uint8_t        front;
+    volatile uint8_t        back;
+
+    /* Flag to indicate if the master is busy or not */
+    volatile Bool           masterBusy;
 } spi_master_t;
 
 Bool init_spi_master_service(spi_master_t *master,
@@ -85,6 +88,14 @@ Bool spi_master_dequeue(spi_master_t *spi_interface);
 void spi_master_ISR(spi_master_t *spi_interface);
 
 Bool spi_master_initate_request(spi_master_t *spi_interface);
+
+Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
+                                      chip_select_info_t *csInfo,
+                                      volatile void *sendBuff,
+                                      uint8_t sendLen,
+                                      volatile void *recvBuff,
+                                      uint8_t recvLen,
+                                      volatile Bool *complete);
 
 
 #define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTCLR = reqPtr->csInfo.pinBitMask)

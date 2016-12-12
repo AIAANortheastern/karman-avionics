@@ -24,9 +24,9 @@ spi_master_t radioSpiMaster;
 /* Initialize all things the radio task needs.*/
 void init_radio_task(void)
 {
-    /* Initialize SPI interface on port E*/
+    /* Initialize SPI interface on port D*/
     /* See XMEGA AU Manual page 146, page 276 */
-    /* ??? do we need --> sysclk_enable_peripheral_clock(SYSCLK_SPI) idek if that's right */
+    sysclk_enable_module(SYSCLK_PORT_D, SYSCLK_SPI);
     RADIO_SPI_PORT.DIRSET = SPIE_MOSI;
     RADIO_SPI_PORT.DIRSET = SPIE_SCK;
     RADIO_SPI_PORT.DIRCLR = SPIE_MISO;

@@ -2,7 +2,7 @@
  * Spi_bg_task.c
  *
  * Created: 11/19/2016 1:53:38 PM
- *  Author: Andrew
+ *  Author: Andrew Kaster
  */ 
 #include <asf.h>
 #include "Spi_bg_task.h"
@@ -28,6 +28,10 @@ Bool spi_bg_add_master(spi_master_t *master)
     return addMasterStatus;
 }
 
+
+/* This is a background task that loops over the array of SPI master modules and */
+/* attempts to initiate a request on the idle ones. If there is no request in the queue */
+/* for the currently indexed master, it should do nothing, and simply move onto the next one. */
 void spi_bg_task(void)
 {
     static uint8_t idx = 0;
@@ -39,7 +43,10 @@ void spi_bg_task(void)
 
         if(currMaster != NULL)
         {
-           (void)spi_master_initate_request(currMaster);
-        }
-    }
+            if(!currMaster->masterBusy)
+            {
+                (void)spi_master_initate_request(currMaster);
+            } /* End of check on busy */
+        } /* End of NULL check */
+    } /* End of loop over master modules */
 }

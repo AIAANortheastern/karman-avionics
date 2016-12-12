@@ -37,7 +37,7 @@ Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *por
     masterObj->port = port;
 
     /* clear out the queue, to make sure it's empty */
-    memset(masterObj->requestQueue, 0, SPI_MASTER_QUEUE_SIZE);
+    memset((void *)(masterObj->requestQueue), 0, SPI_MASTER_QUEUE_SIZE);
     masterObj->front = 0;
     masterObj->back = 0;
 
@@ -73,7 +73,7 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
 {
     Bool createStatus = true;
     uint8_t newIndex = spi_interface->back;
-    spi_request_t *newRequest = NULL;
+    volatile spi_request_t *newRequest = NULL;
 
     /* Are front and back the same? This should only be true if a) the queue
      * is empty, or b) the queue is full. If they are, don't modify the new index.
@@ -125,20 +125,25 @@ Bool spi_master_dequeue(spi_master_t *spi_interface)
 {
     Bool popStatus = true;
     uint8_t oldFront = spi_interface->front;
+    /* If front == back, there's one entry or no entries */
     uint8_t newFront = (oldFront == spi_interface->back) ? (oldFront) : (oldFront + 1);
 
+    /* Handle wrap-around */
     if(newFront >= SPI_MASTER_QUEUE_DEPTH)
     {
        newFront = 0;
     }
 
+    /* If there wasn't an entry to pop */
     if(spi_interface->requestQueue[oldFront].valid == false)
     {
         popStatus = false;
     }
     else
     {
+        /* Invalidate the old front */
         spi_interface->requestQueue[oldFront].valid = false;
+        /* Change the new front index to be one further in the queue (assuming no wrapping, else 0) */
         spi_interface->front = newFront;
     }
 
@@ -149,7 +154,7 @@ Bool spi_master_dequeue(spi_master_t *spi_interface)
 Bool spi_master_initate_request(spi_master_t *spi_interface)
 {
     Bool initiateSuccess = true;
-    spi_request_t *frontQueue = &spi_interface->requestQueue[spi_interface->front];
+    volatile spi_request_t *frontQueue = &spi_interface->requestQueue[spi_interface->front];
     
     if(frontQueue->valid == false)
     {
@@ -161,7 +166,9 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
         frontQueue->complete = false;
         frontQueue->bytesRecv = 0;
         frontQueue->bytesSent = 0;
-
+        
+        /* Mark this device as "busy" */
+        spi_interface->masterBusy = true;
         /* Enable chip select for the device in this request */
         frontQueue->csInfo.csPort->OUTSET = frontQueue->csInfo.pinBitMask;
 
@@ -178,41 +185,76 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
  */
 void spi_master_ISR(spi_master_t *spi_interface)
 {
-    static uint8_t dataSent, dataRecv, dataToSend, dataToRecv;
-    static Bool moreToDo;
+    volatile uint8_t *dataSent, *dataRecv;
+    uint8_t dataToSend, dataToRecv;
+    Bool moreToDo;
 
     /* Look at the front of the queue */
-    spi_request_t *currRequest = &spi_interface->requestQueue[spi_interface->front];
-    dataSent = currRequest->bytesSent;
-    dataRecv = currRequest->bytesRecv;
+    volatile spi_request_t *currRequest = &spi_interface->requestQueue[spi_interface->front];
+    dataSent = &(currRequest->bytesSent);
+    dataRecv = &(currRequest->bytesRecv);
     dataToSend = currRequest->sendLen;
     dataToRecv = currRequest->recvLen;
 
     /* If there's still bytes to recieve, keep recieving them. */
-    if (dataRecv < dataToRecv)
+    if ((*dataRecv) < dataToRecv)
     {
-        ((uint8_t *)(currRequest->recvBuff))[dataRecv] = spi_interface->master->DATA;
-        dataRecv++;
+        ((uint8_t *)(currRequest->recvBuff))[(*dataRecv)] = spi_interface->master->DATA;
+        (*dataRecv)++;
     }
 
     /* If there's still bytes to send, keep sending them*/
-    if(dataSent < dataToSend)
+    if((*dataSent) < dataToSend)
     {
-        spi_interface->master->DATA = ((uint8_t *)(currRequest->sendBuff))[dataSent];
-        dataSent++;
+        spi_interface->master->DATA = ((uint8_t *)(currRequest->sendBuff))[(*dataSent)];
+        (*dataSent)++;
     }
 
     /* are we done? */
-    moreToDo = (dataSent < dataToSend) ? true : false;
-    moreToDo = (dataRecv < dataToRecv) ? true : false;
+    moreToDo = (*dataSent < dataToSend) ? true : false;
+    moreToDo &= (*dataRecv < dataToRecv) ? true : false;
 
     if(!moreToDo)
     {
         /* If we're done, raise chip select again*/
         spi_master_finish_request(currRequest);
-        /* Inform the owner of the task that the request has completed*/
+        /* Inform the initiator that the request has completed*/
+        spi_interface->masterBusy = false;
         spi_master_request_complete(spi_interface);
-        /* Dequeue the task from the list*/
+        /* Dequeue the request from the list*/
         spi_master_dequeue(spi_interface);
     }
+}
+
+/*****************************************************************************/
+/*                      BEGIN BLOCKING FUNCTIONS                             */
+/*              Only use these during startup! Do NOT use after timer has    */
+/*              been started (i.e. once the scheduler has started)           */
+/*****************************************************************************/
+
+Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
+                                 chip_select_info_t *csInfo,
+                                 volatile void *sendBuff,
+                                 uint8_t sendLen,
+                                 volatile void *recvBuff,
+                                 uint8_t recvLen,
+                                 volatile Bool *complete)
+{
+    cpu_irq_enable();
+
+    Bool retVal = true;
+
+    spi_master_enqueue(spi_interface, csInfo, sendBuff, sendLen, recvBuff, recvLen, complete);
+    spi_master_initate_request(spi_interface);
+
+    while((*complete) != true)
+    {
+        ;/* do nothing */
+    }
+    
+    spi_master_dequeue(spi_interface);
+
+    cpu_irq_disable();
+
+    return retVal;
 }

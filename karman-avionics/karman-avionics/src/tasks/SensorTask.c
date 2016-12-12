@@ -31,7 +31,7 @@ void init_sensor_task(void)
 {
     /* Initialize SPI interface on port C*/
     /* See XMEGA AU Manual page 146, page 276 */
-    /* ??? do we need --> sysclk_enable_peripheral_clock(SYSCLK_SPI) idek if that's right */
+    sysclk_enable_module(SYSCLK_PORT_C, SYSCLK_SPI);
     SENSOR_SPI_PORT.DIRSET = SPIC_MOSI;
     SENSOR_SPI_PORT.DIRSET = SPIC_SCK;
     SENSOR_SPI_PORT.DIRCLR = SPIC_MISO;
@@ -60,6 +60,7 @@ void init_sensor_task(void)
 }
 
 /* This task runs all sensor getData functions and passes the updated ones to the radio*/
+/* TODO: Think about using the timer's count instead of an invoke count. It will be more accurate */
 void sensor_task_func(void)
 {
     /* This function should be called every 1.5ms */
@@ -71,6 +72,11 @@ void sensor_task_func(void)
     if(mod4Count == 3)
     {
         /* Do stuff that needs to be run every 6ms at the 4.5ms mark */
+    }
+
+    if(mod2Count == 1)
+    {
+        /* Do stuff that needs to happen every 3ms */
     }
 
     /* Do more stuff that happens every time */
