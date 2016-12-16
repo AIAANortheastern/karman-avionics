@@ -28,7 +28,7 @@
 
 #define SPI_MASTER_QUEUE_SIZE (SPI_MASTER_QUEUE_DEPTH*sizeof(spi_request_t))
 
-/* initalizes an SPI master service */
+/* initializes an SPI master service */
 Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *port, background_func_t taskName)
 {
     Bool initSuccess = true;
@@ -61,7 +61,7 @@ Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *por
  * If there are no entries, back and front are the same. If there are three entries, 
  * then back will be the index for the last entry. So to create a new entry at the
  * back of the queue, we check if back + 1 is empty. We only want to update back
- * if we sucessfully add an entry.
+ * if we successfully add an entry.
  */
 Bool spi_master_enqueue(spi_master_t *spi_interface,
                             chip_select_info_t *csInfo,
@@ -196,7 +196,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
     dataToSend = currRequest->sendLen;
     dataToRecv = currRequest->recvLen;
 
-    /* If there's still bytes to recieve, keep recieving them. */
+    /* If there's still bytes to receive, keep receiving them. */
     if ((*dataRecv) < dataToRecv)
     {
         ((uint8_t *)(currRequest->recvBuff))[(*dataRecv)] = spi_interface->master->DATA;
@@ -240,19 +240,22 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                  uint8_t recvLen,
                                  volatile Bool *complete)
 {
-    cpu_irq_enable();
-
+    /* In the future we might add a timeout..? */
     Bool retVal = true;
+
+    cpu_irq_enable();
 
     spi_master_enqueue(spi_interface, csInfo, sendBuff, sendLen, recvBuff, recvLen, complete);
     spi_master_initate_request(spi_interface);
 
     while((*complete) != true)
     {
-        ;/* do nothing */
+        asm("");/* do nothing. empty Asm here just to make sure we keep the loop as a loop.
+                 * The fact that complete is a pointer to a volatile variable should be enough though.
+                 */
     }
     
-    spi_master_dequeue(spi_interface);
+    /* The ISR routine dequeues the request */
 
     cpu_irq_disable();
 
