@@ -45,6 +45,7 @@
  */
 #ifndef UTILS_INTERRUPT_H
 #define UTILS_INTERRUPT_H
+#pragma GCC system_header
 
 #include <parts.h>
 

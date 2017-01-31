@@ -40,4 +40,10 @@ Thumbs.db
 #Above is taken from https://gist.github.com/octocat/9257657
 #Below are custom
 *.d
-/karman-avionics/karman-avionics/Debug/*
+*.elf
+*.lss
+*.hex
+*.map
+*.sym
+*.bin
+
