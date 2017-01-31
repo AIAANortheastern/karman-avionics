@@ -48,7 +48,6 @@
 
 #include <compiler.h>
 #include <board.h>
-#include "utils/interrupt.h"
 
 /**
  * \weakgroup osc_group

@@ -85,9 +85,6 @@ ASSRCS = \
 
 # Include path located from the top-level source directory
 INC_PATH =	\
-$(AVRLIB)/include \
-$(AVRLIB)/avr/include \
-$(AVRLIB)/avr/include/avr \
 src \
 src/ASF \
 src/ASF/common \

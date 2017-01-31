@@ -382,7 +382,7 @@ else
 	$(Q)test -d $(dir $@) || mkdir -p $(dir $@)
 endif
 	@echo $(MSG_COMPILING)
-	$(Q)$(CC) $(c_flags) -include 'utils/interrupt.h' -include 'sleep/sleep.h' -c $< -o $@
+	$(Q)$(CC) $(c_flags) -c $< -o $@
 
 # Create object files from C++ source files.
 $(build-dir)%.o: %.cpp $(MAKEFILE_PATH) config.mk

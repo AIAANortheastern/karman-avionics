@@ -43,7 +43,7 @@
 
 #ifndef ASF_H
 #define ASF_H
-#pragma GCC system_header
+
 /*
  * This file includes all API header files for the selected drivers from ASF.
  * Note: There might be duplicate includes required by more than one driver.
@@ -59,9 +59,6 @@
 // From module: Common build items for user board support templates
 #include <user_board.h>
 
-// From module: Interrupt management - XMEGA implementation
-#include "utils/interrupt.h"
-
 // From module: GPIO - General purpose Input/Output
 #include <gpio.h>
 
@@ -73,6 +70,9 @@
 
 // From module: IOPORT - General purpose I/O service
 #include <ioport.h>
+
+// From module: Interrupt management - XMEGA implementation
+#include <interrupt.h>
 
 // From module: NVM - Non Volatile Memory
 #include <nvm.h>
@@ -87,7 +87,7 @@
 #include <spi.h>
 
 // From module: Sleep Controller driver
-#include "sleep/sleep.h"
+#include <sleep.h>
 
 // From module: Sleep manager - XMEGA A/AU/B/D implementation
 #include <sleepmgr.h>

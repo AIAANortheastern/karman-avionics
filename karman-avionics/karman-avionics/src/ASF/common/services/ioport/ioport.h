@@ -53,7 +53,7 @@ extern "C" {
 
 #include <parts.h>
 #include <compiler.h>
-#include "utils/interrupt.h"
+
 /**
  * \defgroup ioport_group Common IOPORT API
  *
