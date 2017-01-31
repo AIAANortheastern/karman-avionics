@@ -52,13 +52,13 @@ local branch to github with its own name.
 git push origin AltimeterDriver
 ~~~
 
-And just for funsies, you can pull it back just to make sure everything is kosher
+If you want to make sure that you're always pushing and pulling from your branch without having to specify the remote and branch, you can use the command:
 
 ~~~
-git pull origin AltimeterDriver
+git branch --set-upstream-to=origin/AltimeterDriver Altimeter
 ~~~
 
-Now your local branch "Altimeter" is tracking the branch on "origin" (GitHub) named "AlitimeterDriver."
+Now your local branch "Altimeter" is tracking the branch on "origin" (GitHub) named "AlitimeterDriver." Any tim e you do a pull or push, it will be to that branch on our github repository.
 
 Once you've decided that your code is rock solid, and you've tested it extensively, you can issue a pull request, 
 where you'll be asking the other developers to reveiw your code, and if it's up to par they'll merge it either into a larger
