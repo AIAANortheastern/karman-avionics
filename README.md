@@ -9,26 +9,60 @@ Download Cygwin, Git Bash, or some other command line interface (Bash for Window
 
 Create a folder on your computer. For example,
 ~~~
-Documents/Karman
+mkdir ~/git/Karman
 ~~~
 
 Navigate to this directory in the comand line interface. If you are using Cygwin or Git Bash,
 this means typing 
 ~~~
-cd ~/Documents/Karman
+cd ~/git/Karman
 ~~~
 Where ~ means "My home directory" (C:\Users\<username>"), and cd means "change directory".
 
 Enter the command:
 ~~~~
-git clone https://github.com/AIAANortheastern/karman-avionics.git
+git init
 ~~~~
 
-This will "clone" the git repository to your computer. If you are using Git Bash, you will see a nice
-blue parenthetical next to your current directory that says "master".
+to create a new local (to your machine) git repository. Next, we want to create a new branch in your sandbox. 
+This will be a branch local to your machine. For example, if you want to make the altimeter driver:
 
-TODO
-Create a branch: Tyler pls fill this in kthx.
+~~~
+git checkout -b Altimeter
+~~~
+
+Next, you want to make it so that your local branch "tracks" the repository on github. To do this, we add a "remote."
+The remote can be called anything you want, but the convention is to call it "origin."
+
+~~~
+git remote add origin https://github.com/AIAANortheastern/karman-avionics.git
+~~~
+
+Next, you want to pull the branch you'll be working off of. If you want to do work involving the SPI Drivers, you might
+pull branch "SPI_Implementation."
+
+~~~
+git pull origin SPI_Implementation
+~~~
+
+If you want your personal information to be on its own branch (it probably should be), you can push your
+local branch to github with its own name.
+
+~~~
+git push origin AltimeterDriver
+~~~
+
+And just for funsies, you can pull it back just to make sure everything is kosher
+
+~~~
+git pull origin AltimeterDriver
+~~~
+
+Now your local branch "Altimeter" is tracking the branch on "origin" (GitHub) named "AlitimeterDriver."
+
+Once you've decided that your code is rock solid, and you've tested it extensively, you can issue a pull request, 
+where you'll be asking the other developers to reveiw your code, and if it's up to par they'll merge it either into a larger
+development branch or master.
 
 ###Using Atmel Studio
 
