@@ -78,6 +78,31 @@ To add a file:
 	
 Select "Add new item" and then choose either a .c file or a .h file. Don't add any C++ files! C++ is not fully supported by avr-gcc. Make sure that your .c and .h files have the same name, and that the names are descriptive of what the file will be. For example, "TylersGreatNewFile.c" is not a good name. If you are making the driver for the Silocon labs Si7021-A20 Temperature/humidity sensor, "Si7021_a20.c" is a very good file name.
 	
+	
+### Mac/Linux Development
+
+Download the AVR toolchain http://www.atmel.com/tools/atmelavrtoolchainforlinux.aspx
+and unzip it in your favorite directory.
+~~~
+tar -xzvf avr8-gnutoolchain-X.X.X.XXXX-linux.any.x86_64.tar.gz
+~~~
+
+Add the bin directory to your path. For example:
+~~~
+export PATH=$PATH:~/avr8-gnu-toolchain-linux_x86_64/bin
+~~~
+Be sure that the path you chose is the full path.
+If you append this to your .bashrc file, you won't have to do it every time you open a new terminal.
+
+Make sure that the branch you are tracking is based off of the branch "linux-dev" as this has the makefile in it.
+
+To build, go to the directory karman-avionics/karman-avionics/Debug, and run make.
+
+If you add any files, or any directories, make sure to modify config.mk.
+
+For new C FILES:   add the filename to the variable CSRCS
+For new DIRS:      add the directory name to the variable INC_PATH
+
 ### Good practices
 
 If you commit something that doesn't compile, I will find you, and I will make you fix it until it does.
