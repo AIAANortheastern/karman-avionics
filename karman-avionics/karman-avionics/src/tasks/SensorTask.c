@@ -12,6 +12,8 @@
 #include "Spi_bg_task.h"
 #include "Tasks.h"
 
+#include "ms5607-02ba03.h"
+
 /* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
 #define SPIC_MOSI (1 << 5) /* 0x20 */
 #define SPIC_MISO (1 << 6) /* 0x40 */
@@ -56,7 +58,7 @@ void init_sensor_task(void)
     /* init_si7021-a20() */
 
     /* altimeter */
-    /* init_ms560702ba03-50() */
+    ms5607_02ba03_init(&sensorSpiMaster);
 }
 
 /* This task runs all sensor getData functions and passes the updated ones to the radio*/
