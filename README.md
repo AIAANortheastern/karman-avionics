@@ -119,6 +119,15 @@ brew tap osx-cross/avr
 brew install avr-libc
 ```
 
+Make sure that the branch you are tracking is based off of the branch "linux-dev" as this has the makefile in it.
+
+To build, go to the directory karman-avionics/karman-avionics/Debug, and run make.
+
+If you add any files, or any directories, make sure to modify config.mk.
+
+For new C FILES:   add the filename to the variable CSRCS
+For new DIRS:      add the directory name to the variable INC_PATH
+
 ### Good practices
 
 If you commit something that doesn't compile, I will find you, and I will make you fix it until it does.
