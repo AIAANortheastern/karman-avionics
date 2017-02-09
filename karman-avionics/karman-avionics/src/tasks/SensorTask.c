@@ -57,7 +57,7 @@ void init_sensor_task(void)
     /* temp/humidity */
     /* init_si7021-a20() */
 
-    /* altimeter */
+    /* altimeter/pressure */
     ms5607_02ba03_init(&sensorSpiMaster);
 }
 
