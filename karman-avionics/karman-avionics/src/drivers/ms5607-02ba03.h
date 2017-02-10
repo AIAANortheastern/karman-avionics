@@ -54,8 +54,7 @@ typedef struct altimeter_control_s
     chip_select_info_t  cs_info;
     volatile uint8_t    spi_send_buffer[ALTIMETER_SPI_BUFF_SIZE];
     volatile uint8_t    spi_recv_buffer[ALTIMETER_SPI_BUFF_SIZE];
-    volatile Bool       send_complete_1;
-    volatile Bool       send_complete_2;
+    volatile Bool       send_complete;
     ms5607_02ba03_cal_t calibration_vals;
     ms5607_02ba03_raw_t raw_vals;
     ms5607_02ba03_data_t final_vals;

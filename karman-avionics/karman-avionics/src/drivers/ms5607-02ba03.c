@@ -37,7 +37,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     gAltimeterControl.spi_master = spi_master;
     memset((void *)gAltimeterControl.spi_recv_buffer, 0, sizeof(gAltimeterControl.spi_recv_buffer));
     memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
-    gAltimeterControl.send_complete_1 = false;
+    gAltimeterControl.send_complete = false;
 
     gAltimeterControl.cs_info.csPort->DIRSET = gAltimeterControl.cs_info.pinBitMask;
 
@@ -63,7 +63,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                        1,
                        gAltimeterControl.spi_recv_buffer,
                        0,
-                       &(gAltimeterControl.send_complete_1));
+                       &(gAltimeterControl.send_complete));
  }
 
  /* 128 bits of calibration data? No, only 6*16 bits */
@@ -86,7 +86,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                                     3 * ALTIMETER_NUM_CAL,
                                     gAltimeterControl.spi_recv_buffer,
                                     3 * ALTIMETER_NUM_CAL,
-                                    &(gAltimeterControl.send_complete_1));
+                                    &(gAltimeterControl.send_complete));
 
     gAltimeterControl.calibration_vals.sens = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[1]));
     gAltimeterControl.calibration_vals.offset = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[4]));
@@ -109,7 +109,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     1,
     gAltimeterControl.spi_recv_buffer,
     0,
-    &gAltimeterControl.send_complete_1);
+    &gAltimeterControl.send_complete);
  }
 
  void ms5607_02ba03_d2_convert(void)
@@ -124,7 +124,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
      1,
      gAltimeterControl.spi_recv_buffer,
      0,
-     &gAltimeterControl.send_complete_1);
+     &gAltimeterControl.send_complete);
  }
 
  /* 24 bits pressure/temperature NOTE: Always convert d1 and d2 first */
@@ -140,7 +140,12 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         1,
         gAltimeterControl.spi_recv_buffer,
         4,
-        &gAltimeterControl.send_complete_1);
+        &gAltimeterControl.send_complete);
+ }
+
+ static inline uint32_t get_data_from_buffer24(volatile uint8_t *buff)
+ {
+    return (uint32_t)(((uint32_t)buff[1] << 16) | ((uint32_t)buff[2] << 8) | (uint32_t)buff[3]);
  }
 
 
@@ -155,6 +160,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     /* 7. Wait additional 8.2ms for conversion */
     /* 8. Do adc read to get D2 */
 
+    //sensor_status_t returnStatus = SENSOR_BUSY;
+
     switch(gAltimeterControl.get_data_state)
     {
         case ENQUEUE_D1_CONVERT:
@@ -162,7 +169,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             gAltimeterControl.get_data_state = WAIT_D1_CONVERT;
             break;        
         case WAIT_D1_CONVERT:
-            if(true == gAltimeterControl.send_complete_1)
+            if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.get_data_state = WAIT_8ms_D1;
             }
@@ -174,9 +181,9 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             gAltimeterControl.get_data_state = WAIT_D1_READ;
             break;
         case WAIT_D1_READ:
-            if(true == gAltimeterControl.send_complete_1)
+            if(true == gAltimeterControl.send_complete)
             {
-                gAltimeterControl.raw_vals.dig_press = *(uint32_t *)(&gAltimeterControl.spi_recv_buffer[1]);
+                gAltimeterControl.raw_vals.dig_press = get_data_from_buffer24(gAltimeterControl.spi_recv_buffer);
                 gAltimeterControl.get_data_state = ENQUEUE_D2_CONVERT;
             }
         case ENQUEUE_D2_CONVERT:
@@ -184,7 +191,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             gAltimeterControl.get_data_state = WAIT_D2_CONVERT;
             break;
         case WAIT_D2_CONVERT:
-            if(true == gAltimeterControl.send_complete_1)
+            if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.get_data_state = WAIT_8ms_D2;
             }
@@ -196,13 +203,15 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             gAltimeterControl.get_data_state = WAIT_D2_READ;
             break;
         case WAIT_D2_READ:
-            if(true == gAltimeterControl.send_complete_1)
+            if(true == gAltimeterControl.send_complete)
             {
-                gAltimeterControl.raw_vals.dig_temp = *(uint32_t *)(&gAltimeterControl.spi_recv_buffer[1]);
+                gAltimeterControl.raw_vals.dig_temp = get_data_from_buffer24(gAltimeterControl.spi_recv_buffer);
                 /* Do math */
+                //returnStatus = SENSOR_DONE;
                 gAltimeterControl.get_data_state = ENQUEUE_D1_CONVERT;
             }
     }
+    //return returnStatus;
  }
 
  void ms5607_02ba03_calculate_temp(void)
