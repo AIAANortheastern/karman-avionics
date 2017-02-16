@@ -27,4 +27,6 @@ void background_task_func(void);
 /* background functions should be registered inside some init function*/
 uint8_t add_background_function(background_func_t function);
 
+Bool is_background_function(background_func_t key);
+
 #endif /* BACKGROUND_H_ */

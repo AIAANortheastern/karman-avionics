@@ -16,6 +16,7 @@
 /* 10ms tasks run every 10ms, etc. Task priority/order is determined by ordering in the task list.*/
 typedef enum task_freq_e {
     TASK_FREQ_BACKGROUND = 0,   /* Run every loop */
+    TASK_FREQ_1500us = 3,       /* Run every 1.5ms */
     TASK_FREQ_10ms = 20,        /* Run every 10ms */
     TASK_FREQ_100ms = 200,      /* Run every 100ms */
     TASK_FREQ_1s = 2000,        /* Run every second */
@@ -23,8 +24,8 @@ typedef enum task_freq_e {
 
 /* Structure to define tasks.*/
 typedef struct simple_task_s{
-    task_freq_enum_t task_freq; /* How often should this task be run? */
-    uint32_t last_count; /* The last timer count we ran at */
+    task_freq_enum_t taskFreq; /* How often should this task be run? */
+    uint32_t lastCount; /* The last timer count we ran at */
     void(*task)(void); /* Pointer to task function */
 } simple_task_t;
 

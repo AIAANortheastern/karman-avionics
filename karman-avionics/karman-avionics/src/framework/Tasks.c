@@ -8,6 +8,8 @@
 #include "Tasks.h"
 #include "Background.h"
 #include "Pyrotechnics.h"
+#include "SensorTask.h"
+#include "RadioTask.h"
 
 #define INITIAL_COUNT (0)
 
@@ -18,15 +20,27 @@ simple_task_t TaskList[] =
     /* Task to check status of global sensor data to see if it's time to
     * perform Pyrotechnics activities */
     { 
-        .task_freq = TASK_FREQ_10ms,
-        .last_count = INITIAL_COUNT,
-        .task = check_pyro_task_func
+        .taskFreq = TASK_FREQ_10ms,
+        .lastCount = INITIAL_COUNT,
+        .task = check_pyro_task_func,
+    },
+    /* Radio task to manage reciept and transfer of messages to and from the RF modules */
+    {
+        .taskFreq = TASK_FREQ_10ms,
+        .lastCount = INITIAL_COUNT,
+        .task = radio_task_func,
+    },
+    /* Sensor task to keep track of timings for all sensors and when they need called */
+    {
+        .taskFreq = TASK_FREQ_1500us,
+        .lastCount = INITIAL_COUNT,
+        .task = sensor_task_func,
     },
      /* ALWAYS Keep background task last! */
     { 
-        .task_freq = TASK_FREQ_BACKGROUND,
-        .last_count = INITIAL_COUNT,
-        .task =  background_task_func
+        .taskFreq = TASK_FREQ_BACKGROUND,
+        .lastCount = INITIAL_COUNT,
+        .task =  background_task_func,
     },
 };
 

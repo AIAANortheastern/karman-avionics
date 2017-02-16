@@ -21,7 +21,7 @@ __attribute__((OS_main)) int main(void)
 {
     /* Insert system clock initialization code here (sysclk_init()). */
     pmic_init(); /* Enable the Programmable Multiple Interrupt Controller */
-    sysclk_init(); /* Enable the system clock (2MHz) */
+    sysclk_init(); /* Enable the system clock (32MHz). See conf_clock.h */
 
     /* TODO x a million. Need to put code in this function*/
     board_init(); /* Do board initialization steps. */
