@@ -10,6 +10,7 @@
 #define MS5607_02BA03_H_
 
 #include "Spi_service.h"
+#include "SensorTask.h"
 
 #define ALTIMETER_SPI_BUFF_SIZE (18)
 
@@ -64,7 +65,7 @@ typedef struct altimeter_control_s
 
 void ms5607_02ba03_init(spi_master_t *spi_master);
 
-void ms5607_02ba03_get_data(void);
+sensor_status_t ms5607_02ba03_get_data(void);
 
 void ms5607_02ba03_reset(void);
 

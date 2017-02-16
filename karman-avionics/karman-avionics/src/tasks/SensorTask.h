@@ -10,6 +10,12 @@
 #define SENSORTASK_H_
 
 #include "Spi_service.h"
+typedef enum
+{
+    SENSOR_WAITING,
+    SENSOR_BUSY,
+    SENSOR_COMPLETE,
+} sensor_status_t;
 
 void sensor_task_func(void);
 

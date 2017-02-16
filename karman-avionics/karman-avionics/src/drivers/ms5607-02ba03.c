@@ -149,7 +149,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  }
 
 
- void ms5607_02ba03_get_data(void)
+ sensor_status_t ms5607_02ba03_get_data(void)
  {
     /* 1. Enqueue D1 convert command */
     /* 2. Wait for that to finish */
@@ -160,7 +160,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     /* 7. Wait additional 8.2ms for conversion */
     /* 8. Do adc read to get D2 */
 
-    //sensor_status_t returnStatus = SENSOR_BUSY;
+    sensor_status_t returnStatus = SENSOR_BUSY;
 
     switch(gAltimeterControl.get_data_state)
     {
@@ -179,6 +179,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             /* if 8ms done */
             ms5607_02ba03_get_data();
             gAltimeterControl.get_data_state = WAIT_D1_READ;
+            returnStatus = SENSOR_WAITING;
             break;
         case WAIT_D1_READ:
             if(true == gAltimeterControl.send_complete)
@@ -201,17 +202,18 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             /* if 8ms done */
             ms5607_02ba03_get_data();
             gAltimeterControl.get_data_state = WAIT_D2_READ;
+            returnStatus = SENSOR_WAITING;
             break;
         case WAIT_D2_READ:
             if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.raw_vals.dig_temp = get_data_from_buffer24(gAltimeterControl.spi_recv_buffer);
                 /* Do math */
-                //returnStatus = SENSOR_DONE;
                 gAltimeterControl.get_data_state = ENQUEUE_D1_CONVERT;
+                returnStatus = SENSOR_COMPLETE;
             }
     }
-    //return returnStatus;
+    return returnStatus;
  }
 
  void ms5607_02ba03_calculate_temp(void)

@@ -19,7 +19,7 @@ void timer_init(void){
     tc_enable(&TCC0);
     tc_set_overflow_interrupt_callback(&TCC0, timer0_callback);
     tc_set_wgm(&TCC0, TC_WG_NORMAL);
-    tc_write_period(&TCC0, 1000); /* Trigger interrupt when timer hits 1000 */
+    tc_write_period(&TCC0, 16000); /* Trigger interrupt when timer hits 16000 */
     tc_set_overflow_interrupt_level(&TCC0, TC_INT_LVL_LO);
 }
 

@@ -22,9 +22,6 @@
 #define SENSOR_SPI_PORT (PORTC)
 #define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
 
-
-uint32_t gSensorInvokeCount = 0;
-
 spi_master_t sensorSpiMaster;
 
 
@@ -65,27 +62,9 @@ void init_sensor_task(void)
 /* TODO: Think about using the timer's count instead of an invoke count. It will be more accurate */
 void sensor_task_func(void)
 {
-    /* This function should be called every 1.5ms */
-    /* check mod counts of invokeCount */
-    /* Mod counts are a way to ensure that each sensor gets polled when it needs to be. */
-    uint8_t mod2Count = gSensorInvokeCount & 1;
-    uint8_t mod4Count = gSensorInvokeCount & 3;
 
-    if(mod4Count == 3)
-    {
-        /* Do stuff that needs to be run every 6ms at the 4.5ms mark */
-    }
+    ms5607_02ba03_get_data();
 
-    if(mod2Count == 1)
-    {
-        /* Do stuff that needs to happen every 3ms */
-    }
-
-    /* Do more stuff that happens every time */
-
-    /* Do radio pzaz */
-
-    gSensorInvokeCount++;
 }
 
 /* Interrupt service routine for the SPI interrupt on port C. */
