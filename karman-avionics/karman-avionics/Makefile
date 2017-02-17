@@ -319,9 +319,6 @@ clean-files             += $(dep-files)
 
 clean-dirs              += $(call reverse,$(sort $(wildcard $(dir $(obj-y)))))
 
-$(warning Hello I am a test message)
-$(warning $(c_flags))
-$(warning $(cflags-gnu-y))
 
 # Default target.
 .PHONY: all

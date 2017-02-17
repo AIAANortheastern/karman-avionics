@@ -36,21 +36,18 @@
 # \asf_license_stop
 #
 
-#Avr libraries
-AVRLIB = ../../../../../avr8-gnu-toolchain-linux_x86_64
-
 #Build Directory
-BUILD_DIR =
+BUILD_DIR = Debug/
 
 # Path to top level ASF directory relative to this project directory.
-PRJ_PATH = ../
+PRJ_PATH =
 
 # Microcontroller: atxmega128a1, atmega128, attiny261, etc.
 MCU = atxmega128a3u
 
 # Application target name. Given with suffix .a for library and .elf for a
 # standalone application.
-TARGET = karman-avionics.elf
+TARGET = Debug/karman-avionics.elf
 
 # C source files located from the top-level source directory
 CSRCS = \
@@ -169,7 +166,8 @@ CPPFLAGS = \
        -DBOARD=USER_BOARD \
        -DIOPORT_XMEGA_COMPAT \
        -DTEST_SUITE_DEFINE_ASSERT_MACRO \
-       -D_ASSERT_ENABLE_
+       -D_ASSERT_ENABLE_ \
+       -DLINUX_DEV
 
 # Extra flags to use when linking
 LDFLAGS =  \
