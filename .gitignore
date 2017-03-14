@@ -41,3 +41,4 @@ Thumbs.db
 #Below are custom
 *.d
 *Debug*
+*.atsuo
