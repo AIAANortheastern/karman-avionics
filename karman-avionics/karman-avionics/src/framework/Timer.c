@@ -26,3 +26,16 @@ void timer_init(void){
 inline uint32_t get_timer_count(void){
     return timerCount;
 }
+
+inline void timer_delay_ms(uint8_t millis)
+{
+    cpu_irq_disable();
+    uint32_t timer_begin = get_timer_count();
+    cpu_irq_enable();
+    uint32_t timer_end = timer_begin + 2*millis;
+    while(get_timer_count() != timer_end)
+    {
+        asm("");
+    }
+}
+

@@ -6,6 +6,7 @@
  */ 
 
  #include "ms5607-02ba03.h"
+ #include "Timer.h"
  #include <string.h>
 
  #define ALTIMETER_RESET            (0x1E)
@@ -46,7 +47,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
 
     /* Call initial functions to prepare altimeter. */
     ms5607_02ba03_reset();
-    /* TODO wait 2.8ms */
+    timer_delay_ms(3); /* Delay 3 ms to allow for reset */
     ms5607_02ba03_read_prom();
 }
 
@@ -159,6 +160,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     /* 6. Wait for that to finish */
     /* 7. Wait additional 8.2ms for conversion */
     /* 8. Do adc read to get D2 */
+    /* 9. Calculate new temperature and pressure */
 
     sensor_status_t returnStatus = SENSOR_BUSY;
 
@@ -171,15 +173,20 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         case WAIT_D1_CONVERT:
             if(true == gAltimeterControl.send_complete)
             {
+                /* Record time when we started conversion */
+                gAltimeterControl.time_start = get_timer_count();
                 gAltimeterControl.get_data_state = WAIT_8ms_D1;
             }
             break;
         case WAIT_8ms_D1:
             /* wait 8ms */
             /* if 8ms done */
-            ms5607_02ba03_get_data();
-            gAltimeterControl.get_data_state = WAIT_D1_READ;
-            returnStatus = SENSOR_WAITING;
+            if(get_timer_count() - gAltimeterControl.time_start >= EIGHT_MS)
+            {
+                ms5607_02ba03_get_data();
+                gAltimeterControl.get_data_state = WAIT_D1_READ;
+                returnStatus = SENSOR_WAITING;
+            }
             break;
         case WAIT_D1_READ:
             if(true == gAltimeterControl.send_complete)
@@ -194,31 +201,59 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         case WAIT_D2_CONVERT:
             if(true == gAltimeterControl.send_complete)
             {
+                /* Record time when we started conversion */
+                gAltimeterControl.time_start = get_timer_count();
                 gAltimeterControl.get_data_state = WAIT_8ms_D2;
             }
             break;
         case WAIT_8ms_D2:
             /* wait 8ms */
             /* if 8ms done */
-            ms5607_02ba03_get_data();
-            gAltimeterControl.get_data_state = WAIT_D2_READ;
-            returnStatus = SENSOR_WAITING;
+            if(get_timer_count() - gAltimeterControl.time_start >= EIGHT_MS)
+            {
+                ms5607_02ba03_get_data();
+                gAltimeterControl.get_data_state = WAIT_D2_READ;
+                returnStatus = SENSOR_WAITING;
+            }
             break;
         case WAIT_D2_READ:
             if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.raw_vals.dig_temp = get_data_from_buffer24(gAltimeterControl.spi_recv_buffer);
                 /* Do math */
+                ms5607_02ba03_calculate_temp();
+                ms5607_02ba03_calculate_press();
                 gAltimeterControl.get_data_state = ENQUEUE_D1_CONVERT;
                 returnStatus = SENSOR_COMPLETE;
             }
+            break;
     }
     return returnStatus;
  }
 
- void ms5607_02ba03_calculate_temp(void)
- {
+void ms5607_02ba03_calculate_temp(void)
+{    
     /* dT = D2 - TREF = D2 - C5 * 2^8 */
+    gAltimeterControl.raw_vals.t_diff = (int32_t)(gAltimeterControl.raw_vals.dig_temp - ((uint32_t)gAltimeterControl.calibration_vals.t_ref << 8));
+
     /* TEMP =20°C +dT* TEMPSENS =2000 + dT * C6 / 2^23 */
- }
+    gAltimeterControl.final_vals.temp = (int32_t)(2000 + ((gAltimeterControl.raw_vals.t_diff * (uint32_t)gAltimeterControl.calibration_vals.temp_sens) >> 23));
+}
+
+void ms5607_02ba03_calculate_press(void)
+{
+    int64_t press_offs, press_sens;
+
+    /* OFF = OFFT1 +TCO* dT = C2 * 2^17 +(C4 *dT )/2^6 */
+    press_offs = (int64_t)(((int64_t)gAltimeterControl.calibration_vals.offset << 17) +
+               (((int64_t)gAltimeterControl.calibration_vals.tco * (int64_t)gAltimeterControl.raw_vals.t_diff) >> 6));
+
+    /* SENS = SENST1 + TCS* dT= C1 * 2^16 + (C3 * dT ) / 2^7 */
+    press_sens = (int64_t)(((int64_t)gAltimeterControl.calibration_vals.sens << 16) + 
+                (((int64_t)gAltimeterControl.calibration_vals.tcs * (int64_t)gAltimeterControl.raw_vals.t_diff) >> 7));
+
+    /* P = D1 * SENS - OFF = (D1 * SENS / 2^21 - OFF) / 2^15  */
+    gAltimeterControl.final_vals.pressure = (int32_t)( ( ( ((int64_t)gAltimeterControl.raw_vals.dig_press * press_sens) >> 21) - press_offs) >> 15 );
+
+}
 
