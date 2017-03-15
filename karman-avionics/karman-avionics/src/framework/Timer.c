@@ -34,7 +34,7 @@ inline void timer_delay_ms(uint8_t millis)
 {
     uint32_t timer_begin = get_timer_count();
     uint32_t timer_end = timer_begin + 2*millis;
-    while(get_timer_count() != timer_end)
+    while(get_timer_count() < timer_end)
     {
         asm("");
     }
