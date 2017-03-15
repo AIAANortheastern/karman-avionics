@@ -24,5 +24,8 @@ void timer_init(void){
 }
 
 inline uint32_t get_timer_count(void){
-    return timerCount;
+    irqflags_t flags = cpu_irq_save();
+    uint32_t timerVal = timerCount;
+    cpu_irq_restore(flags);
+    return timerVal;
 }

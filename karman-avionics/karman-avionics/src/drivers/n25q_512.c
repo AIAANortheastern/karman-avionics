@@ -78,7 +78,7 @@ extflash_hdrstatus_t extflash_verify_header(flash_data_hdr_t *header)
     extflash_hdrstatus_t retVal = HDR_INVALID;
     Bool block = true;
 
-    /* read sizeof(datahdr) bytes from flash memory starting at byte 0x000...0 */
+    /* read sizeof(data_hdr) bytes from flash memory starting at byte 0x000...0 */
     if(extflash_read( 0x0L,  sizeof(flash_data_hdr_t), (uint8_t *)&header, block))
     {
         retVal = HDR_READFAIL;
@@ -108,6 +108,8 @@ extflash_hdrstatus_t extflash_verify_header(flash_data_hdr_t *header)
 */
 Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 {
+    /* READ Command is 0x03 for normal read. Format: CMD ADDR[3 - 0] {DUMMY BYTES} */
+
     return false;
 } 
 
@@ -133,8 +135,8 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
      *      Send Page program + 4 byte address (DON'T RAISE CS)
      *      Send up to 64 bytes of data (RAISE CS)
      *      Send Read Status Register Command (CLK OUT 1 READ BYTE)
-     *
      */
+
     return false;
 }
 
