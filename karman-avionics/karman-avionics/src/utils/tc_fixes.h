@@ -9,9 +9,9 @@
 #ifndef TC_FIXES_H_
 #define TC_FIXES_H_
 
-#include <compiler.h>
+/* #include <compiler.h> */
 
-#ifndef LINUX_DEV
+/*#ifndef LINUX_DEV
 
 #define TC_WGMODE_NORMAL_gc     TC_TC0_WGMODE_NORMAL_gc
 #define TC_WGMODE_FRQ_gc        TC_TC0_WGMODE_NORMAL_gc
@@ -33,7 +33,7 @@
 #define TC_CMD_UPDATE_gc        TC_TC0_CMD_UPDATE_gc
 #define TC_EVSEL_t              TC_TC0_EVSEL_t
 #define TC_EVACT_t              TC_TC0_EVACT_t
-
-#endif /* LINUX_DEV */
+*/
+/* #endif LINUX_DEV */
 
 #endif /* TC_FIXES_H_ */

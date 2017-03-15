@@ -13,6 +13,7 @@
 #include <conf_board.h>
 #include "SensorTask.h"
 #include "RadioTask.h"
+#include "n25q_512.h"
 
 void board_init(void)
 {
@@ -28,4 +29,7 @@ void board_init(void)
 
      /* Initailizes SPI for radio module, sets up cs pin for it */
      init_radio_task();
+
+     /* Initializes SPI for External Flash Memory, sets up CS pin for it */
+     init_extflash();
 }

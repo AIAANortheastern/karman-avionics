@@ -25,7 +25,7 @@
 spi_master_t sensorSpiMaster;
 
 
-/* Initialize all things the sensor task needs. TODO add TWI to this. */
+/* Initialize all things the sensor task needs.*/
 void init_sensor_task(void)
 {
     /* Initialize SPI interface on port C*/
