@@ -15,7 +15,6 @@
 #include <asf.h>
 #include "Scheduler.h"
 #include "Timer.h"
-#include "tc_fixes.h"
 
 __attribute__((OS_main)) int main(void)
 {

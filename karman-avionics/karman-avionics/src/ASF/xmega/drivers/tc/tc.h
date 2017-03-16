@@ -52,7 +52,6 @@
 #include "pmic.h"
 #include <sleepmgr.h>
 #include <sysclk.h>
-#include "tc_fixes.h"
 
 
 #ifdef __cplusplus

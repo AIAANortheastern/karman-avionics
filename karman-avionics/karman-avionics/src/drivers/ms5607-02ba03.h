@@ -28,7 +28,7 @@ typedef struct altimeter_raw_s
 {
     uint32_t dig_press;     /* d1 */
     uint32_t dig_temp;      /* d2 */
-    uint32_t t_diff;        /* dt */
+    int32_t t_diff;        /* dt */
 } ms5607_02ba03_raw_t;
 
 typedef struct altimeter_data_s
@@ -60,6 +60,7 @@ typedef struct altimeter_control_s
     ms5607_02ba03_raw_t raw_vals;
     ms5607_02ba03_data_t final_vals;
     ms5607_02ba03_state_t get_data_state;
+    uint32_t            time_start;
 } ms5607_02ba03_control_t;
 
 
@@ -79,6 +80,8 @@ void ms5607_02ba03_d2_convert(void);
 /* 24 bits pressure/temperature */
 void ms5607_02ba03_read_data(void);
 
- void ms5607_02ba03_calculate_temp(void);
+void ms5607_02ba03_calculate_temp(void);
+
+void ms5607_02ba03_calculate_press(void);
 
 #endif /* MS5607-02BA03_H_ */
