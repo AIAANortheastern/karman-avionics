@@ -21,7 +21,7 @@
 #define EXTFLASH_SPI_PORT (PORTE)
 #define EXTFLASH_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
 
-#define EXTFLASH_MAX_TRANS_SIZE (256) /* Transfers larger than 256 bytes at a time are undefined (page size) */
+#define EXTFLASH_MAX_TRANS_SIZE (64) /* Transfers larger than 64 bytes at a time are undefined (page size) */
 
  #define EXTFLASH_CS_PORT (PORTA)
  #define EXTFLASH_CS_BM   (1 << 5)
