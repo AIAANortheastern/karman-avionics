@@ -54,7 +54,7 @@ Once you've decided that your code is rock solid, and you've tested it extensive
 where you'll be asking the other developers to reveiw your code, and if it's up to par they'll merge it either into a larger
 development branch or master.
 
-###Using Atmel Studio
+### Using Atmel Studio
 
 This project uses the free software Atmel Studio, created by the Atmel Corporation for use with AVR microcontrollers. This software is based off of Microsoft Visual Studio. To get it, go to
 [Atmel's website](http://www.atmel.com/tools/atmelstudio.aspx) And click the disk next to the web installer entry at the bottom of the page. This will install atmel studio. Be prepared to wait a while!
@@ -84,13 +84,18 @@ export PATH=$PATH:~/avr8-gnu-toolchain-linux_x86_64/bin
 Be sure that the path you chose is the full path.
 If you append this to your .bashrc file, you won't have to do it every time you open a new terminal.
 
-Make sure that the branch you are tracking is based off of the branch "linux-dev" as this has the makefile in it.
+Alternatively, you could try
+~~~
+sudo apt-get install avr-gcc
+~~~
+or a similar package manager, if your distribution supports it.
 
 To build, go to the directory karman-avionics/karman-avionics/Debug, and run make.
 
 If you add any files, or any directories, make sure to modify config.mk.
 
 For new C FILES:   add the filename to the variable CSRCS
+
 For new DIRS:      add the directory name to the variable INC_PATH
 
 ### Mac Development
@@ -108,14 +113,12 @@ Install the avr-gcc compiler with:
 brew tap osx-cross/avr
 brew install avr-libc
 ```
-
-Make sure that the branch you are tracking is based off of the branch "linux-dev" as this has the makefile in it.
-
 To build, go to the directory karman-avionics/karman-avionics/Debug, and run make.
 
 If you add any files, or any directories, make sure to modify config.mk.
 
 For new C FILES:   add the filename to the variable CSRCS
+
 For new DIRS:      add the directory name to the variable INC_PATH
 
 ### Good practices
