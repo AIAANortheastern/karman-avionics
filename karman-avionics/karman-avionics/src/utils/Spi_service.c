@@ -228,8 +228,8 @@ void spi_master_ISR(spi_master_t *spi_interface)
 
 /*****************************************************************************/
 /*                      BEGIN BLOCKING FUNCTIONS                             */
-/*              Only use these during startup! Do NOT use after timer has    */
-/*              been started (i.e. once the scheduler has started)           */
+/*              Only use these during startup! Do NOT use after              */
+/*              the scheduler has started.                                   */
 /*****************************************************************************/
 
 Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
@@ -243,8 +243,6 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
     /* In the future we might add a timeout..? */
     Bool retVal = true;
 
-    cpu_irq_enable();
-
     spi_master_enqueue(spi_interface, csInfo, sendBuff, sendLen, recvBuff, recvLen, complete);
     spi_master_initate_request(spi_interface);
 
@@ -256,8 +254,6 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
     }
     
     /* The ISR routine dequeues the request */
-
-    cpu_irq_disable();
 
     return retVal;
 }
