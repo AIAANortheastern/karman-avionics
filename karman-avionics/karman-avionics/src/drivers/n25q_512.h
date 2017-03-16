@@ -30,16 +30,6 @@ void init_extflash(void);
 
 void extflash_initialize_regs(void);
 
-typedef enum
-{
-    HDR_INVALID,
-    HDR_ZERO,
-    HDR_VALID,
-    HDR_READFAIL,
-} extflash_hdrstatus_t;
-
-extflash_hdrstatus_t extflash_verify_header(flash_data_hdr_t *header);
-
 Bool extflash_get_status(void);
 
 Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block);

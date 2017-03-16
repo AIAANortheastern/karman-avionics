@@ -91,37 +91,7 @@ void extflash_initialize_regs(void)
                                            &(gExtflashControl.send_complete));
 }
 
-
-extflash_hdrstatus_t extflash_verify_header(flash_data_hdr_t *header)
-{
-    extflash_hdrstatus_t retVal = HDR_INVALID;
-    Bool block = true;
-
-    /* read sizeof(data_hdr) bytes from flash memory starting at byte 0x000...0 */
-    if(extflash_read( 0x0L,  sizeof(flash_data_hdr_t), (uint8_t *)&header, block))
-    {
-        retVal = HDR_READFAIL;
-    }
-    
-    if(retVal != HDR_READFAIL)
-    {
-        switch(header->magic)
-        {
-            case 0:
-                retVal = HDR_ZERO;
-                break;
-            case MAGIC_NUMBER:
-                retVal = HDR_VALID;
-                break;
-            default:
-                break;
-        }
-    }
-    return retVal;
-}
-
-
-/* NOTE: Using 4 byte address mode. Caller MUST add 5 dummy bytes to beginning of recieve buffer.
+/* NOTE: Using 4 byte address mode
          http://www.micron.com/~/media/Documents/Products/Data%20Sheet/NOR%20Flash/Serial%20NOR/N25Q/n25q_512mb_1ce_3v_65nm.pdf
 */
 Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
@@ -150,9 +120,11 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
                                                       &(gExtflashControl.cs_info),
                                                       (void *)(gExtflashControl.spi_send_buffer),
                                                       EXTFLASH_CMDADDR_SIZE,
-                                                      (void *)buf,
-                                                      num_bytes,
+                                                      (void *)(gExtflashControl.spi_recv_buffer),
+                                                      EXTFLASH_CMDADDR_SIZE + num_bytes,
                                                       &(gExtflashControl.send_complete));
+            /* Copy data into caller's buffer, ignoring garbage data from sending command */
+            memcpy((void *)buf, (void *)(&(gExtflashControl.spi_recv_buffer[5])), num_bytes);
         }
         else
         {
@@ -270,7 +242,7 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
      *  For each write:
      *      Send Write Enable command (RAISE CS)
      *      Send Page program + 4 byte address (DON'T RAISE CS)
-     *      Send up to 256 bytes of data (RAISE CS)
+     *      Send up to ***256*** bytes of data (RAISE CS)
      *      Send Read Status Register Command (CLK OUT 1 READ BYTE)
      */
 
