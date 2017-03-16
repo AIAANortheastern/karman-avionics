@@ -12,53 +12,43 @@ Create a folder on your computer. For example,
 mkdir ~/git/Karman
 ~~~
 
-Navigate to this directory in the comand line interface. If you are using Cygwin or Git Bash,
+Navigate to this directory in the comand line interface. If you are using Cygwin or Bash,
 this means typing
 ~~~
 cd ~/git/Karman
 ~~~
 Where ~ means "My home directory" (C:\Users\<username>"), and cd means "change directory".
 
-Enter the command:
-~~~~
-git init
-~~~~
 
-to create a new local (to your machine) git repository. Next, we want to create a new branch in your sandbox.
-This will be a branch local to your machine. For example, if you want to make the altimeter driver:
-
+Clone the repository by using the command:
 ~~~
-git checkout -b Altimeter
+git clone https://github.com/AIAANortheastern/karman-avionics.git
 ~~~
+This creates a folder called "karman-avionics" in the current directory. You can change the name of this if you would like.
 
-Next, you want to make it so that your local branch "tracks" the repository on github. To do this, we add a "remote."
-The remote can be called anything you want, but the convention is to call it "origin."
-
+Go into the karman-avionics folder (using cd) and type 
 ~~~
-git remote add origin https://github.com/AIAANortheastern/karman-avionics.git
+git branch
 ~~~
+You should see that there is one branch called "master".
 
-Next, you want to pull the branch you'll be working off of. If you want to do work involving the SPI Drivers, you might
-pull branch "SPI_Implementation."
-
+Create and switch to a new branch by typing 
 ~~~
-git pull origin SPI_Implementation
+git checkout -b my_fancy_branch_name
 ~~~
+But call it something descriptive for the task you are working on.
 
-If you want your personal information to be on its own branch (it probably should be), you can push your
-local branch to github with its own name.
-
+Now if you want to commit your changes, you can do the following:
 ~~~
-git push origin AltimeterDriver
+git add .
+git commit -m "add xyz, change foo to do bar"
 ~~~
 
-If you want to make sure that you're always pushing and pulling from your branch without having to specify the remote and branch, you can use the command:
-
+Pushing your changes to your brand new branch is as easy as typing
 ~~~
-git branch --set-upstream-to=origin/AltimeterDriver Altimeter
+git push -u origin my_fancy_branch_name
 ~~~
-
-Now your local branch "Altimeter" is tracking the branch on "origin" (GitHub) named "AlitimeterDriver." Any tim e you do a pull or push, it will be to that branch on our github repository.
+If you are working on a branch with other people, always do a git pull before a git push. After the first push all you need to do is type "git push" to push to github.
 
 Once you've decided that your code is rock solid, and you've tested it extensively, you can issue a pull request,
 where you'll be asking the other developers to reveiw your code, and if it's up to par they'll merge it either into a larger
