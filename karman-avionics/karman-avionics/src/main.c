@@ -25,8 +25,8 @@ __attribute__((OS_main)) int main(void)
 
     /* Enable global interrupts and enable timer */
     cpu_irq_enable();
-    tc_write_clock_source(&TCC0, TC_CLKSEL_DIV1_gc);
     timer_init(); /* Initialize timer. DO NO REMOVE*/
+    tc_write_clock_source(&TCC0, TC_CLKSEL_DIV1_gc);
 
     /* TODO x a million. Need to put code in this function*/
     board_init(); /* Do board initialization steps. */
