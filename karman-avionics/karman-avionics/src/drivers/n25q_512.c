@@ -14,6 +14,7 @@
 #include "FlashMem.h"
 #include "Spi_service.h"
 #include "Spi_bg_task.h"
+#include "ISRUtils.h"
 
 #define EXTFLASH_MOSI (1 << 5) /* 0x20 */
 #define EXTFLASH_MISO (1 << 6) /* 0x40 */
