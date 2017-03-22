@@ -63,6 +63,7 @@ src/ASF/xmega/drivers/spi/spi.c \
 src/ASF/xmega/drivers/tc/tc.c \
 src/ASF/xmega/drivers/twi/twim.c \
 src/ASF/xmega/drivers/usart/usart.c \
+src/drivers/ms5607-02ba03.c \
 src/framework/Scheduler.c \
 src/framework/Tasks.c \
 src/framework/Timer.c \
