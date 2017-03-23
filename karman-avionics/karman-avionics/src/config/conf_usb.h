@@ -90,8 +90,8 @@
  * USB Device Callbacks definitions (Optional)
  * @{
  */
-// #define  UDC_VBUS_EVENT(b_vbus_high)      user_callback_vbus_action(b_vbus_high)
-// extern void user_callback_vbus_action(bool b_vbus_high);
+#define  UDC_VBUS_EVENT(b_vbus_high)      user_callback_vbus_action(b_vbus_high) //TODO check if usb is plugged in
+extern void user_callback_vbus_action(bool b_vbus_high);
 // #define  UDC_SOF_EVENT()                  user_callback_sof_action()
 // extern void user_callback_sof_action(void);
 // #define  UDC_SUSPEND_EVENT()              user_callback_suspend_action()
