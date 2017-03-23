@@ -58,7 +58,7 @@ src/ASF/common/services/sleepmgr/xmega/sleepmgr.c \
 src/ASF/common/utils/stdio/read.c \
 src/ASF/common/utils/stdio/write.c \
 src/ASF/common/utils/unit_test/suite.c \
-src/ASF/common/services/hugemem/avr8_hugemem.c \
+src/ASF/common/services/hugemem/avr8/avr8_hugemem.c \
 src/ASF/common/services/usb/class/cdc/device/udi_cdc_desc.c \
 src/ASF/common/services/usb/class/cdc/device/udi_cdc.c \
 src/ASF/common/services/usb/udc/udc.c \
