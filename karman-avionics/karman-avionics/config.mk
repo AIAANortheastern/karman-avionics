@@ -58,6 +58,10 @@ src/ASF/common/services/sleepmgr/xmega/sleepmgr.c \
 src/ASF/common/utils/stdio/read.c \
 src/ASF/common/utils/stdio/write.c \
 src/ASF/common/utils/unit_test/suite.c \
+src/ASF/common/services/hugemem/avr8_hugemem.c \
+src/ASF/common/services/usb/class/cdc/device/udi_cdc_desc.c \
+src/ASF/common/services/usb/class/cdc/device/udi_cdc.c \
+src/ASF/common/services/usb/udc/udc.c \
 src/ASF/xmega/drivers/nvm/nvm.c \
 src/ASF/xmega/drivers/spi/spi.c \
 src/ASF/xmega/drivers/tc/tc.c \
@@ -96,6 +100,13 @@ src/ASF/common/services/ioport \
 src/ASF/common/services/ioport/xmega \
 src/ASF/common/services/sleepmgr \
 src/ASF/common/services/sleepmgr/xmega \
+src/ASF/common/services/hugemem \
+src/ASF/common/services/hugemem/avr8 \
+src/ASF/common/services/hugemem/generic \
+src/ASF/common/services/usb \
+src/ASF/common/services/usb/class/cdc \
+src/ASF/common/services/usb/class/cdc/device \
+src/ASF/common/services/usb/udc \
 src/ASF/common/utils \
 src/ASF/common/utils/interrupt \
 src/ASF/common/utils/make \
@@ -122,14 +133,14 @@ src/utils    \
 src/tasks
 
 # Library paths from the top-level source directory
-LIB_PATH = 
+LIB_PATH =
 
 # Libraries to link with the project
-LIBS = 
+LIBS =
 
 # Additional options for debugging. By default the common Makefile.in will
 # add -gdwarf-2.
-DBGFLAGS = 
+DBGFLAGS =
 
 # Optimization settings
 OPTIMIZATION = -Os
@@ -137,14 +148,14 @@ OPTIMIZATION = -Os
 # Extra flags used when creating an EEPROM Intel HEX file. By default the
 # common Makefile.in will add -j .eeprom
 # --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0.
-EEPROMFLAGS = 
+EEPROMFLAGS =
 
 # Extra flags used when creating an Intel HEX file. By default the common
 # Makefile.in will add -R .eeprom -R .usb_descriptor_table.
-FLASHFLAGS = 
+FLASHFLAGS =
 
 # Extra flags to use when archiving.
-ARFLAGS = 
+ARFLAGS =
 
 # Extra flags to use when assembling.
 ASFLAGS = -DBOARD=USER_BOARD
@@ -171,8 +182,8 @@ CPPFLAGS = \
 
 # Extra flags to use when linking
 LDFLAGS =  \
-       -Wl,--section-start=.BOOT=0x20000                 
+       -Wl,--section-start=.BOOT=0x20000
 
 # Pre- and post-build commands
-PREBUILD_CMD = 
-POSTBUILD_CMD = 
+PREBUILD_CMD =
+POSTBUILD_CMD =
