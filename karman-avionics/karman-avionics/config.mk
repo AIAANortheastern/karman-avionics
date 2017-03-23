@@ -71,6 +71,7 @@ src/ASF/xmega/drivers/twi/twim.c \
 src/ASF/xmega/drivers/usart/usart.c \
 src/drivers/ms5607-02ba03.c \
 src/drivers/n25q_512.c \
+src/ASF/xmega/drivers/usb/usb_device.c \
 src/framework/Scheduler.c \
 src/framework/Tasks.c \
 src/framework/Timer.c \
@@ -131,6 +132,8 @@ src/ASF/xmega/drivers/spi \
 src/ASF/xmega/drivers/tc \
 src/ASF/xmega/drivers/twi \
 src/ASF/xmega/drivers/usart \
+src/ASF/xmega/drivers/usb \
+src/ASF/xmega/drivers/dma \
 src/ASF/xmega/utils \
 src/ASF/xmega/utils/assembler \
 src/ASF/xmega/utils/bit_handling \
