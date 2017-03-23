@@ -69,6 +69,8 @@ src/ASF/xmega/drivers/twi/twim.c \
 src/ASF/xmega/drivers/usart/usart.c \
 src/ASF/xmega/drivers/usb/usb_device.c \
 src/ASF/xmega/drivers/dma/dma.c \
+src/drivers/ms5607-02ba03.c \
+src/drivers/n25q_512.c \
 src/framework/Scheduler.c \
 src/framework/Tasks.c \
 src/framework/Timer.c \
@@ -79,6 +81,7 @@ src/tasks/RadioTask.c \
 src/tasks/SensorTask.c \
 src/tasks/Spi_bg_task.c \
 src/utils/CC2500_regvalues.c \
+src/utils/FlashMem.c \
 src/utils/Spi_service.c
 
 # Assembler source files located from the top-level source directory
