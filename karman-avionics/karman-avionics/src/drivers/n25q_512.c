@@ -29,10 +29,10 @@
 #define EXTFLASH_WRITE_ENABLE   (0x06)
 #define EXTFLASH_4BYTEMODE      (0xB7)
 
- #define EXTFLASH_CS_PORT (PORTA)
- #define EXTFLASH_CS_BM   (1 << 5)
+#define EXTFLASH_CS_PORT (PORTA)
+#define EXTFLASH_CS_BM   (1 << 5)
 
- #define EXTFLASH_WREN_LATCH  (1 << 1)
+#define EXTFLASH_WREN_LATCH  (1 << 1)
 
 spi_master_t extflashSpiMaster;
 
@@ -217,7 +217,9 @@ Bool extflash_write_enable(Bool block)
 
         do 
         {
-            extflash_read_status_reg(&statusreg, block);
+            /* Read status register to confirm that write has been enabled. */
+            retVal = extflash_read_status_reg(&statusreg, block);
+
         } while (~((statusreg & 0xFF00) >> 8) & EXTFLASH_WREN_LATCH); /* This do while ensures the write enable is completed */
      }
      else

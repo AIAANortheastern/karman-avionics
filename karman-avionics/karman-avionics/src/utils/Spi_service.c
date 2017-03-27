@@ -186,7 +186,7 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
 void spi_master_ISR(spi_master_t *spi_interface)
 {
     volatile uint8_t *dataSent, *dataRecv;
-    uint8_t dataToSend, dataToRecv;
+    uint8_t dataToSend, dataToRecv, dummyByte;
     Bool moreToDo;
 
     /* Look at the front of the queue */
@@ -202,12 +202,24 @@ void spi_master_ISR(spi_master_t *spi_interface)
         ((uint8_t *)(currRequest->recvBuff))[(*dataRecv)] = spi_interface->master->DATA;
         (*dataRecv)++;
     }
+    /* If we don't care what's in the buffer, read the register then ignore the value. */
+    else
+    {
+        dummyByte = spi_interface->master->DATA;
+    }
 
     /* If there's still bytes to send, keep sending them*/
     if((*dataSent) < dataToSend)
     {
         spi_interface->master->DATA = ((uint8_t *)(currRequest->sendBuff))[(*dataSent)];
         (*dataSent)++;
+    }
+    /* We want to recieve more data but we don't have any more to send */
+    else if((*dataRecv) < dataToRecv)
+    {
+        dummyByte = 0x00;
+        /* Send a dummy byte to clock out the next bits of data. */
+        spi_interface->master->DATA = dummyByte;
     }
 
     /* are we done? */

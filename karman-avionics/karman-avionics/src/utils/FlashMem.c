@@ -10,12 +10,15 @@
 
 #include <string.h>
 
+#define INITIAL_DATA_ADDR (0x00000010L)
+
+
 /* This variable is truly global */
 flashmem_ctrl_t gFlashmemCtrl;
 
 void init_flashmem(void)
 {
-    gFlashmemCtrl.data_addr = 0x00000010L;
+    gFlashmemCtrl.data_addr = INITIAL_DATA_ADDR;
     gFlashmemCtrl.header.entry_size = sizeof(flash_data_entry_t);
     gFlashmemCtrl.header.magic = MAGIC_NUMBER;
     gFlashmemCtrl.header.num_entries = 0;
@@ -50,13 +53,13 @@ flashmem_hdrstatus_t flashmem_verify_header(flash_data_hdr_t *header)
         switch(header->magic)
         {
             case 0:
-            retVal = HDR_ZERO;
-            break;
+                retVal = HDR_ZERO;
+                break;
             case MAGIC_NUMBER:
-            retVal = HDR_VALID;
-            break;
+                retVal = HDR_VALID;
+                break;
             default:
-            break;
+                break;
         }
     }
     return retVal;
