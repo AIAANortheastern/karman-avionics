@@ -11,9 +11,9 @@
 
 #include <asf.h>
 
-static inline Bool isrutils_check_shared_boolean( volatile Bool *var)
+static inline uint32_t isrutils_check_shared_u32( volatile uint32_t *var)
 {
-    Bool varVal;
+    uint32_t varVal;
     irqflags_t flags = cpu_irq_save();
     varVal = *var;
     cpu_irq_restore(flags);
