@@ -73,7 +73,7 @@ Bool flashmem_write_entry(flash_data_entry_t *entry)
     gFlashmemCtrl.header.num_entries++;
     retVal = extflash_write(FLASHMEM_ENTRIES_ADDR, 2, (uint8_t *)(gFlashmemCtrl.header.num_entries), block);
 
-    if(!retVal)
+    if(retVal == false)
     {
         retVal = extflash_write(gFlashmemCtrl.data_addr, sizeof(flash_data_entry_t), (uint8_t *)entry, block);
         gFlashmemCtrl.data_addr+= sizeof(flash_data_entry_t);

@@ -23,11 +23,12 @@
 #define EXTFLASH_SPI_PORT (PORTE)
 #define EXTFLASH_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
 
-#define EXTFLASH_PAGE_SIZE      (0x100) /* Writes that cross page boundary cause unwanted behavior */
+#define EXTFLASH_PAGE_MASK      (0x000000FF)
 #define EXTFLASH_READ_DATA_CMD  (0x03)
 #define EXTFLASH_READ_SR_CMD    (0x05)
 #define EXTFLASH_WRITE_ENABLE   (0x06)
 #define EXTFLASH_4BYTEMODE      (0xB7)
+#define EXTFLASH_PAGE_PROGRAM   (0x02)
 
 #define EXTFLASH_CS_PORT (PORTA)
 #define EXTFLASH_CS_BM   (1 << 5)
@@ -166,7 +167,7 @@ Bool extflash_get_status(void)
 /* Before writing to any register or any memory, the write enable command must be sent.
    After writing, the read status register command must be sent.
    That means 3 separate SPI transactions with CS being driven high after each one.
-   Maximum number of bytes per write operation is 64 bytes. Therefore, 
+   Maximum number of bytes per write operation is 256 bytes. Therefore, 
 */
 
 /* NOTE: Result will be in most significant byte of buf. i.e. to access you need to look at ((buf & 0xFF00) >> 8) */
@@ -230,6 +231,39 @@ Bool extflash_write_enable(Bool block)
      return retVal;
 }
 
+/* Send a valid number of bytes to the flash memeory */
+Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_size, Bool block)
+{
+    Bool retVal = false; /* no issues */
+
+    memset((void *)(gExtflashControl.spi_send_buffer), 0, sizeof(gExtflashControl.spi_send_buffer)/sizeof(gExtflashControl.spi_send_buffer[0]));
+
+    if(block)
+    {
+        gExtflashControl.spi_send_buffer[0] = EXTFLASH_PAGE_PROGRAM;
+        gExtflashControl.spi_send_buffer[1] = (uint8_t)((addr & 0xFF000000) >> 24);
+        gExtflashControl.spi_send_buffer[2] = (uint8_t)((addr & 0x00FF0000) >> 16);
+        gExtflashControl.spi_send_buffer[3] = (uint8_t)((addr & 0x0000FF00) >> 8);
+        gExtflashControl.spi_send_buffer[4] = (uint8_t)((addr & 0x000000FF));
+
+        memcpy((void *)&(gExtflashControl.spi_send_buffer[5]), (void *)buf, buff_size);
+
+        retVal = spi_master_blocking_send_request(&(extflashSpiMaster),
+                                                   &(gExtflashControl.cs_info),
+                                                   (void *)(gExtflashControl.spi_send_buffer),
+                                                   num_bytes + EXTFLASH_CMDADDR_SIZE,
+                                                   (void *)(gExtflashControl.spi_recv_buffer),
+                                                   0,
+                                                   &(gExtflashControl.send_complete));
+    }
+    else
+    {
+         retVal = true;
+    }
+
+    return retVal;
+}
+
 Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 {
     /* ALL WRITES MUST BE 256 BYTE ALIGNED
@@ -250,31 +284,71 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
      */
 
     Bool retVal = false; /* no issues. */
-    uint16_t dummy;
+    uint16_t dummy = 0;
+    uint32_t curr_addr = addr;
+    size_t rem_bytes = num_bytes;
+    uint16_t num_bytes_to_send = num_bytes;
+    uint16_t buffer_offset = 0;
 
     /* Validate address */
-    if(addr > 0x4000000)
+    if((addr > 0x4000000) || (addr + num_bytes > 0x4000000))
     {
         return true;
     }
 
     if(block)
     {
-
-        retVal = extflash_write_enable(block);
-
-        if(!(addr & 0xFF)) /* not page aligned */
+        if(curr_addr & EXTFLASH_PAGE_MASK) /* not page aligned */
         {
-            
+            if((EXTFLASH_PAGE_MASK - (curr_addr & EXTFLASH_PAGE_MASK)) < rem_bytes) /* write would overflow page boundary */
+            {
+                retVal = extflash_write_enable(block);
+
+                num_bytes_to_send = EXTFLASH_PAGE_MASK - (curr_addr & EXTFLASH_PAGE_MASK);
+                rem_bytes -= num_bytes_to_send;
+                /* Send that many bytes over SPI */
+                retVal &= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
+                /* Page align curr_addr. If the lsb is not 0x00 we have a problem. */
+                curr_addr = curr_addr + num_bytes_to_send + 1;
+                buffer_offset += num_bytes_to_send;
+
+                retVal &= extflash_read_status_reg(&dummy, block);
+            }
+        }
+        
+        while((rem_bytes > EXTFLASH_PAGE_SIZE) && (retVal == false)) /* Write full pages */
+        {
+            retVal &= extflash_write_enable(block);
+
+            num_bytes_to_send = EXTFLASH_PAGE_SIZE;
+            rem_bytes -= num_bytes_to_send;
+            /* Send 256 bytes over SPI */
+            retVal &= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
+
+            curr_addr += num_bytes_to_send;
+            buffer_offset += num_bytes_to_send;
+
+            retVal &= extflash_read_status_reg(&dummy, block);
         }
 
-        retVal += extflash_read_status_reg(&dummy, block);
+        if((rem_bytes > 0) && (retVal == false)) /* Write remaining bytes to new page*/
+        {
+            retVal &= extflash_write_enable(block);
+
+            num_bytes_to_send = rem_bytes;
+            /* Send that many bytes over SPI */
+            retVal &= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
+
+            retVal &= extflash_read_status_reg(&dummy, block);
+        }
     }
-    else
+    else /* non-blocking flash memory code not implemented! */
     {
         retVal = true;
     }
+
     return retVal;
+
 }
 
 
