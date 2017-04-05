@@ -64,6 +64,7 @@ void init_extflash(void)
 
     /* Set CS pin high */
     gExtflashControl.cs_info.csPort->DIRSET = gExtflashControl.cs_info.pinBitMask;
+    gExtflashControl.cs_info.csPort->OUTSET = gExtflashControl.cs_info.pinBitMask;
 
     extflash_initialize_regs();
 }

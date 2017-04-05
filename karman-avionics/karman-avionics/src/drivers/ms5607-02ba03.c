@@ -42,6 +42,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
 
     /* Set chip select pin high. */
     gAltimeterControl.cs_info.csPort->DIRSET = gAltimeterControl.cs_info.pinBitMask;
+    gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask;
 
     memset((void *)(&(gAltimeterControl.raw_vals)), 0, sizeof(gAltimeterControl.raw_vals));
     memset((void *)(&(gAltimeterControl.final_vals)), 0, sizeof(gAltimeterControl.final_vals));
