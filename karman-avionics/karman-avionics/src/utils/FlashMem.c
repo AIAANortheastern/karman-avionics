@@ -27,7 +27,7 @@ void init_flashmem(void)
     init_extflash();
 
     /* Parse flash memory header */
-    flashmem_hdr_status_t headerStatus;
+    flashmem_hdrstatus_t headerStatus;
     flash_data_hdr_t header;
     headerStatus = flashmem_verify_header(&header);
 
@@ -81,9 +81,9 @@ flashmem_hdrstatus_t flashmem_verify_header(flash_data_hdr_t *header)
                 retVal = HDR_ZERO;
                 break;
             case MAGIC_NUMBER:
-                if((header->entry_size == sizeof(flash_data_entry_t)) && (0 == strcmp(header->version_str, gFlashmemCtrl.header.vesrion_str)))
+                if((header->entry_size == sizeof(flash_data_entry_t)) && (0 == strcmp(header->version_str, gFlashmemCtrl.header.version_str)))
                 {
-                    gFlashMemCtrl.dataAddr += (header->num_entries * sizeof(flash_data_entry_t));
+                    gFlashmemCtrl.data_addr += (header->num_entries * sizeof(flash_data_entry_t));
                     retVal = HDR_VALID;
                 }
                 break;
