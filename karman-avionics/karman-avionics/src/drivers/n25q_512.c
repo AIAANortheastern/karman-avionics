@@ -75,16 +75,20 @@ ISR(SPIE_INT_vect)
     spi_master_ISR(&extflashSpiMaster);
 }
 
+/* Initialize non-volatile control registers */
 void extflash_initialize_regs(void)
 {
     /* Enable 4 byte addressing */
     /* WRITE ENABLE 06h --> ENTER 4-BYTE ADDRESS MODE B7h  */
     Bool block = true;
 
+    /* Send write enable command to allow writing to registers */
     extflash_write_enable(block);
 
+    /* We just want to enable 4 byte address mode */
     gExtflashControl.spi_send_buffer[0] = EXTFLASH_4BYTEMODE;
 
+    /* Send a blocking request to the flash memory to enable this mode */
     (void)spi_master_blocking_send_request(&(extflashSpiMaster),
                                            &(gExtflashControl.cs_info),
                                            (void *)(gExtflashControl.spi_send_buffer),
@@ -97,6 +101,8 @@ void extflash_initialize_regs(void)
 /* NOTE: Using 4 byte address mode
          http://www.micron.com/~/media/Documents/Products/Data%20Sheet/NOR%20Flash/Serial%20NOR/N25Q/n25q_512mb_1ce_3v_65nm.pdf
 */
+
+/* Read num_bytes from the flash memory starting at address addr and store them in buf */
 Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 {
     Bool retVal = false; /* False means no error! */
@@ -108,10 +114,12 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     else
     {
         /* READ Command is 0x03 for normal read. Format: CMD ADDR[3 - 0] {DUMMY BYTES} */
+        /* We're not using any dummy clock cycles in standard SPI mode. */
         memset((void *)(gExtflashControl.spi_send_buffer), 0, sizeof(gExtflashControl.spi_send_buffer)/sizeof(gExtflashControl.spi_send_buffer[0]));
 
         /* SPI is MSB FIRST in mode 0. AVR-GCC treats larger integers as little endian. */
         gExtflashControl.spi_send_buffer[0] = EXTFLASH_READ_DATA_CMD;
+        /* Ensure that our bytes are sent MSB first. */
         gExtflashControl.spi_send_buffer[1] = (uint8_t)((num_bytes & 0xFF000000) >> 24);
         gExtflashControl.spi_send_buffer[2] = (uint8_t)((num_bytes & 0x00FF0000) >> 16);
         gExtflashControl.spi_send_buffer[3] = (uint8_t)((num_bytes & 0x0000FF00) >> 8);
@@ -119,6 +127,7 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 
         if(block)
         {
+            /* We want to send 5 bytes and recieive as many as the caller asked for. */
             retVal = spi_master_blocking_send_request(&(extflashSpiMaster),
                                                       &(gExtflashControl.cs_info),
                                                       (void *)(gExtflashControl.spi_send_buffer),
@@ -131,6 +140,7 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
         }
         else
         {
+            /* NOTE: It is the responsiblity of the CALLER to discard the first 5 bytes of this buffer!!! */
             retVal = spi_master_enqueue(&(extflashSpiMaster),
                                     &(gExtflashControl.cs_info),
                                     (void *)(gExtflashControl.spi_send_buffer),
@@ -145,18 +155,24 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     return retVal;
 } 
 
+/* Get the status of the module in non-blocking mode. */
+/* NOTE: In non-blocking mode there are a lot more responsiblities on the CALLER's buffer! */
 Bool extflash_get_status(void)
 {
     Bool retVal = false; /* False means NOT busy! */
 
+    /* If we were doing something before.. */
     if(gExtflashControl.task_inprog)
     {
+        /* If we finished what we were doing... */
         if(gExtflashControl.send_complete == true)
         {
+            /* We're not doing anything anymore */
             gExtflashControl.task_inprog = false;
         }
         else
         {
+            /* We're still busy! */
             retVal = true;
         }
     }
@@ -171,17 +187,21 @@ Bool extflash_get_status(void)
    Maximum number of bytes per write operation is 256 bytes. Therefore, 
 */
 
+/* Read the status register of the flash memory. Required before writing to a lot of places is considered "done" */
 /* NOTE: Result will be in most significant byte of buf. i.e. to access you need to look at ((buf & 0xFF00) >> 8) */
 Bool extflash_read_status_reg(uint16_t *buf, Bool block)
 {
     Bool retVal = false;
 
+    /* Clear the send buffer */
     memset((void *)(gExtflashControl.spi_send_buffer), 0, sizeof(gExtflashControl.spi_send_buffer)/sizeof(gExtflashControl.spi_send_buffer[0]));
 
+    /* All we want to send is the read status register command. */
     gExtflashControl.spi_send_buffer[0] = EXTFLASH_READ_SR_CMD;
 
     if(block)
     {
+        /* Send a blocking request. NOTE: In order to finish the request, the status register needs to be clocked out. */
         retVal = spi_master_blocking_send_request(&(extflashSpiMaster),
                                                   &(gExtflashControl.cs_info),
                                                   (void *)(gExtflashControl.spi_send_buffer),
@@ -192,23 +212,29 @@ Bool extflash_read_status_reg(uint16_t *buf, Bool block)
     }
     else
     {
+        /* Non-blocking read of status regsiter not implemented...*/
         retVal = true;
     }
 
     return retVal;
 }
 
+/* Enable writing to the flash memory module. This is finished when a read of the status regsiter shows that the write enable latch */
+/* Is clear */
 Bool extflash_write_enable(Bool block)
 {
      Bool retVal = false;
      uint16_t statusreg;
 
+     /* Clear the send buffer. */
      memset((void *)(gExtflashControl.spi_send_buffer), 0, sizeof(gExtflashControl.spi_send_buffer)/sizeof(gExtflashControl.spi_send_buffer[0]));
 
      if(block)
      {
+        /* All we're sending is the write enable command. */
         gExtflashControl.spi_send_buffer[0] = EXTFLASH_WRITE_ENABLE;
 
+        /* Send that one byte to the peripheral */
         retVal = spi_master_blocking_send_request(&(extflashSpiMaster),
                                                    &(gExtflashControl.cs_info),
                                                    (void *)(gExtflashControl.spi_send_buffer),
@@ -217,6 +243,7 @@ Bool extflash_write_enable(Bool block)
                                                    0,
                                                    &(gExtflashControl.send_complete));
 
+        /* Keep reading the status regsiter until the write enable is confirmed. No timeout. this is pretty dangerous tbh. */
         do 
         {
             /* Read status register to confirm that write has been enabled. */
@@ -226,29 +253,36 @@ Bool extflash_write_enable(Bool block)
      }
      else
      {
+        /* Non-blocking not implemented yet... */
          retVal = true;
      }
 
      return retVal;
 }
 
-/* Send a valid number of bytes to the flash memeory */
+/* Send a valid number of bytes to the flash memeory. The caller is responsible for write enable and for read status register */
+/* For internal use only! use extflash_write instead! It has the proper error checking*/
 Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_offset, Bool block)
 {
     Bool retVal = false; /* no issues */
 
+    /* Clear the send buffer. */
     memset((void *)(gExtflashControl.spi_send_buffer), 0, sizeof(gExtflashControl.spi_send_buffer)/sizeof(gExtflashControl.spi_send_buffer[0]));
 
     if(block)
     {
+        /* We want a page program at the address the caller gave us. */
         gExtflashControl.spi_send_buffer[0] = EXTFLASH_PAGE_PROGRAM;
+        /* Ensure that the address is MSB first */
         gExtflashControl.spi_send_buffer[1] = (uint8_t)((addr & 0xFF000000) >> 24);
         gExtflashControl.spi_send_buffer[2] = (uint8_t)((addr & 0x00FF0000) >> 16);
         gExtflashControl.spi_send_buffer[3] = (uint8_t)((addr & 0x0000FF00) >> 8);
         gExtflashControl.spi_send_buffer[4] = (uint8_t)((addr & 0x000000FF));
 
+        /* Copy the request into the send buffer. The request can be up to 256 bytes. */
         memcpy((void *)(&(gExtflashControl.spi_send_buffer[5])), (void *)(&(buf[buff_offset])), num_bytes);
 
+        /* Send up to 256 + 5 bytes, expecting none in return. */
         retVal = spi_master_blocking_send_request(&(extflashSpiMaster),
                                                    &(gExtflashControl.cs_info),
                                                    (void *)(gExtflashControl.spi_send_buffer),
@@ -259,12 +293,14 @@ Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_
     }
     else
     {
+        /* non-blocking not implemented... */
          retVal = true;
     }
 
     return retVal;
 }
 
+/* write any number of bytes to the flash memory. Cannot write more than 65536 bytes. Why we would ever need to write that many is a mystery.*/
 Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 {
     /* ALL WRITES MUST BE 256 BYTE ALIGNED
@@ -291,56 +327,69 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     uint16_t num_bytes_to_send = num_bytes;
     uint16_t buffer_offset = 0;
 
-    /* Validate address */
-    if((addr > 0x4000000) || (addr + num_bytes > 0x4000000))
+    /* Validate address. Not too big and won't overflow the max number of bytes. */
+    if((addr > 0x4000000) || ((addr + num_bytes) > 0x4000000))
     {
         return true;
     }
 
     if(block)
     {
+        /* If we're not page aligned, we need to write up to a page boundary in one write cycle. */
         if(curr_addr & EXTFLASH_PAGE_MASK) /* not page aligned */
         {
+            /* If we have enough bytes that we would overflow the page, and need a new one. */
             if((EXTFLASH_PAGE_MASK - (curr_addr & EXTFLASH_PAGE_MASK)) < rem_bytes) /* write would overflow page boundary */
             {
+                /* Enable writing. */
                 retVal = extflash_write_enable(block);
 
+                /* Send 0xFF - address & 0xff bytes. This will fill up the rest of the page. */
                 num_bytes_to_send = EXTFLASH_PAGE_MASK - (curr_addr & EXTFLASH_PAGE_MASK);
                 rem_bytes -= num_bytes_to_send;
                 /* Send that many bytes over SPI */
-                retVal &= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
+                retVal |= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
                 /* Page align curr_addr. If the lsb is not 0x00 we have a problem. */
+                /* (Num bytes to send + curr_addr) & 0xff is 0xFF by design.*/
                 curr_addr = curr_addr + num_bytes_to_send + 1;
                 buffer_offset += num_bytes_to_send;
 
-                retVal &= extflash_read_status_reg(&dummy, block);
+                /* Read the status register to finish the transaction. true means there is something wrong. */
+                retVal |= extflash_read_status_reg(&dummy, block);
             }
         }
 
+        /* Write full pages while we have more than 256 bytes left. */
         while((rem_bytes > EXTFLASH_PAGE_SIZE) && (retVal == false)) /* Write full pages */
         {
-            retVal &= extflash_write_enable(block);
+            /* Enable writing. */
+            retVal |= extflash_write_enable(block);
 
+            /* Send 256 bytes */
             num_bytes_to_send = EXTFLASH_PAGE_SIZE;
             rem_bytes -= num_bytes_to_send;
             /* Send 256 bytes over SPI */
-            retVal &= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
+            retVal |= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
 
+            /* Add 256 to how many bytes we've sent. */
             curr_addr += num_bytes_to_send;
             buffer_offset += num_bytes_to_send;
 
-            retVal &= extflash_read_status_reg(&dummy, block);
+            /* Read the status register to finish the transaction. */
+            retVal |= extflash_read_status_reg(&dummy, block);
         }
 
+        /* If we still have bytes to write, write the rest to a new page. Because of the checks above, */
+        /* this is guaranteed not to overflow the page. */
         if((rem_bytes > 0) && (retVal == false)) /* Write remaining bytes to new page*/
         {
-            retVal &= extflash_write_enable(block);
+            retVal |= extflash_write_enable(block);
 
             num_bytes_to_send = rem_bytes;
             /* Send that many bytes over SPI */
-            retVal &= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
+            retVal |= extflash_write_one(num_bytes_to_send, curr_addr, buf, buffer_offset, block);
 
-            retVal &= extflash_read_status_reg(&dummy, block);
+            retVal |= extflash_read_status_reg(&dummy, block);
         }
     }
     else /* non-blocking flash memory code not implemented! */
