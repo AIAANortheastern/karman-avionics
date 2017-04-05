@@ -25,6 +25,31 @@ void init_flashmem(void)
     sprintf(gFlashmemCtrl.header.version_str, VERSION_STRING);
 
     init_extflash();
+
+    /* Parse flash memory header */
+    flashmem_hdr_status_t headerStatus;
+    flash_data_hdr_t header;
+    headerStatus = flashmem_verify_header(&header);
+
+    /* try once again on read failure */
+    if(headerStatus == HDR_READFAIL)
+    {
+        headerStatus = flashmem_verify_header(&header);
+        if(headerStatus == HDR_READFAIL)
+        {
+            headerStatus = HDR_INVALID;
+        }
+    }
+
+    if(headerStatus != HDR_VALID)
+    {
+        /* Try to write twice */
+        if(true == flashmem_write_header())
+        {
+            /* If this fails we're kinda screwed as far as flash memory goes. */
+            flashmem_write_header();
+        }
+    }
 }
 
 Bool flashmem_write_header(void)
@@ -56,7 +81,11 @@ flashmem_hdrstatus_t flashmem_verify_header(flash_data_hdr_t *header)
                 retVal = HDR_ZERO;
                 break;
             case MAGIC_NUMBER:
-                retVal = HDR_VALID;
+                if((header->entry_size == sizeof(flash_data_entry_t)) && (0 == strcmp(header->version_str, gFlashmemCtrl.header.vesrion_str)))
+                {
+                    gFlashMemCtrl.dataAddr += (header->num_entries * sizeof(flash_data_entry_t));
+                    retVal = HDR_VALID;
+                }
                 break;
             default:
                 break;
