@@ -224,7 +224,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
 
     /* are we done? */
     moreToDo = (*dataSent < dataToSend) ? true : false;
-    moreToDo &= (*dataRecv < dataToRecv) ? true : false;
+    moreToDo |= (*dataRecv < dataToRecv) ? true : false;
 
     if(!moreToDo)
     {
