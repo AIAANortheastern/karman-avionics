@@ -232,7 +232,7 @@ Bool extflash_write_enable(Bool block)
 }
 
 /* Send a valid number of bytes to the flash memeory */
-Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_size, Bool block)
+Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_offset, Bool block)
 {
     Bool retVal = false; /* no issues */
 
@@ -246,7 +246,7 @@ Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_
         gExtflashControl.spi_send_buffer[3] = (uint8_t)((addr & 0x0000FF00) >> 8);
         gExtflashControl.spi_send_buffer[4] = (uint8_t)((addr & 0x000000FF));
 
-        memcpy((void *)&(gExtflashControl.spi_send_buffer[5]), (void *)buf, buff_size);
+        memcpy((void *)(&(gExtflashControl.spi_send_buffer[5])), (void *)(&(buf[buff_offset])), num_bytes);
 
         retVal = spi_master_blocking_send_request(&(extflashSpiMaster),
                                                    &(gExtflashControl.cs_info),
@@ -315,7 +315,7 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
                 retVal &= extflash_read_status_reg(&dummy, block);
             }
         }
-        
+
         while((rem_bytes > EXTFLASH_PAGE_SIZE) && (retVal == false)) /* Write full pages */
         {
             retVal &= extflash_write_enable(block);

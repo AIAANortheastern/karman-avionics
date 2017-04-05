@@ -42,6 +42,6 @@ Bool extflash_write_enable(Bool block);
 
 Bool extflash_read_status_reg(uint16_t *buf, Bool block);
 
-Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_size, Bool block);
+Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_offset, Bool block);
 
 #endif /* N25Q_512_H_ */
