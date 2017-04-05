@@ -170,7 +170,7 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
         /* Mark this device as "busy" */
         spi_interface->masterBusy = true;
         /* Enable chip select for the device in this request */
-        frontQueue->csInfo.csPort->OUTSET = frontQueue->csInfo.pinBitMask;
+        frontQueue->csInfo.csPort->OUTCLR = frontQueue->csInfo.pinBitMask;
 
         /* Write to the spi master data. this will send the first byte. */
         spi_interface->master->DATA = ((uint8_t *)(frontQueue->sendBuff))[0];

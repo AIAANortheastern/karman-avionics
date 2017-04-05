@@ -98,7 +98,7 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                       volatile Bool *complete);
 
 
-#define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTCLR = reqPtr->csInfo.pinBitMask)
+#define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTSET = reqPtr->csInfo.pinBitMask)
 #define spi_master_request_complete(master)     (*(master->requestQueue[master->front].complete) = true)
 
 #endif /* SPI_SERVICE_H_ */
