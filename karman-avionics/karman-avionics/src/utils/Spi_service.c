@@ -66,9 +66,9 @@ Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *por
 Bool spi_master_enqueue(spi_master_t *spi_interface,
                             chip_select_info_t *csInfo,
                             volatile void *sendBuff,
-                            uint8_t sendLen,
+                            uint16_t sendLen,
                             volatile void *recvBuff,
-                            uint8_t recvLen,
+                            uint16_t recvLen,
                             volatile Bool *complete)
 {
     Bool createStatus = true;
@@ -186,7 +186,7 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
 void spi_master_ISR(spi_master_t *spi_interface)
 {
     volatile uint8_t *dataSent, *dataRecv;
-    uint8_t dataToSend, dataToRecv, dummyByte;
+    uint16_t dataToSend, dataToRecv, dummyByte;
     Bool moreToDo;
 
     /* Look at the front of the queue */
@@ -247,9 +247,9 @@ void spi_master_ISR(spi_master_t *spi_interface)
 Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                  chip_select_info_t *csInfo,
                                  volatile void *sendBuff,
-                                 uint8_t sendLen,
+                                 uint16_t sendLen,
                                  volatile void *recvBuff,
-                                 uint8_t recvLen,
+                                 uint16_t recvLen,
                                  volatile Bool *complete)
 {
     /* In the future we might add a timeout..? */
