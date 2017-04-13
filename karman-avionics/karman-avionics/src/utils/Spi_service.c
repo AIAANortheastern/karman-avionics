@@ -66,9 +66,9 @@ Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *por
 Bool spi_master_enqueue(spi_master_t *spi_interface,
                             chip_select_info_t *csInfo,
                             volatile void *sendBuff,
-                            uint8_t sendLen,
+                            uint16_t sendLen,
                             volatile void *recvBuff,
-                            uint8_t recvLen,
+                            uint16_t recvLen,
                             volatile Bool *complete)
 {
     Bool createStatus = true;
@@ -170,7 +170,7 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
         /* Mark this device as "busy" */
         spi_interface->masterBusy = true;
         /* Enable chip select for the device in this request */
-        frontQueue->csInfo.csPort->OUTSET = frontQueue->csInfo.pinBitMask;
+        frontQueue->csInfo.csPort->OUTCLR = frontQueue->csInfo.pinBitMask;
 
         /* Write to the spi master data. this will send the first byte. */
         spi_interface->master->DATA = ((uint8_t *)(frontQueue->sendBuff))[0];
@@ -186,7 +186,7 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
 void spi_master_ISR(spi_master_t *spi_interface)
 {
     volatile uint8_t *dataSent, *dataRecv;
-    uint8_t dataToSend, dataToRecv;
+    uint16_t dataToSend, dataToRecv, dummyByte;
     Bool moreToDo;
 
     /* Look at the front of the queue */
@@ -202,6 +202,11 @@ void spi_master_ISR(spi_master_t *spi_interface)
         ((uint8_t *)(currRequest->recvBuff))[(*dataRecv)] = spi_interface->master->DATA;
         (*dataRecv)++;
     }
+    /* If we don't care what's in the buffer, read the register then ignore the value. */
+    else
+    {
+        dummyByte = spi_interface->master->DATA;
+    }
 
     /* If there's still bytes to send, keep sending them*/
     if((*dataSent) < dataToSend)
@@ -209,10 +214,17 @@ void spi_master_ISR(spi_master_t *spi_interface)
         spi_interface->master->DATA = ((uint8_t *)(currRequest->sendBuff))[(*dataSent)];
         (*dataSent)++;
     }
+    /* We want to recieve more data but we don't have any more to send */
+    else if((*dataRecv) < dataToRecv)
+    {
+        dummyByte = 0x00;
+        /* Send a dummy byte to clock out the next bits of data. */
+        spi_interface->master->DATA = dummyByte;
+    }
 
     /* are we done? */
     moreToDo = (*dataSent < dataToSend) ? true : false;
-    moreToDo &= (*dataRecv < dataToRecv) ? true : false;
+    moreToDo |= (*dataRecv < dataToRecv) ? true : false;
 
     if(!moreToDo)
     {
@@ -235,9 +247,9 @@ void spi_master_ISR(spi_master_t *spi_interface)
 Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                  chip_select_info_t *csInfo,
                                  volatile void *sendBuff,
-                                 uint8_t sendLen,
+                                 uint16_t sendLen,
                                  volatile void *recvBuff,
-                                 uint8_t recvLen,
+                                 uint16_t recvLen,
                                  volatile Bool *complete)
 {
     /* In the future we might add a timeout..? */

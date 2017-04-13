@@ -42,6 +42,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
 
     /* Set chip select pin high. */
     gAltimeterControl.cs_info.csPort->DIRSET = gAltimeterControl.cs_info.pinBitMask;
+    gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask;
 
     memset((void *)(&(gAltimeterControl.raw_vals)), 0, sizeof(gAltimeterControl.raw_vals));
     memset((void *)(&(gAltimeterControl.final_vals)), 0, sizeof(gAltimeterControl.final_vals));
@@ -171,7 +172,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             gAltimeterControl.get_data_state = WAIT_D1_CONVERT;
             break;        
         case WAIT_D1_CONVERT:
-            if(true == isrutils_check_shared_boolean(&(gAltimeterControl.send_complete)))
+            if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.get_data_state = WAIT_8ms_D1;
             }
@@ -184,7 +185,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             returnStatus = SENSOR_WAITING;
             break;
         case WAIT_D1_READ:
-            if(true == isrutils_check_shared_boolean(&(gAltimeterControl.send_complete)))
+            if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.raw_vals.dig_press = get_data_from_buffer24(gAltimeterControl.spi_recv_buffer);
                 gAltimeterControl.get_data_state = ENQUEUE_D2_CONVERT;
@@ -194,7 +195,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             gAltimeterControl.get_data_state = WAIT_D2_CONVERT;
             break;
         case WAIT_D2_CONVERT:
-            if(true == isrutils_check_shared_boolean(&(gAltimeterControl.send_complete)))
+            if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.get_data_state = WAIT_8ms_D2;
             }
@@ -207,7 +208,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             returnStatus = SENSOR_WAITING;
             break;
         case WAIT_D2_READ:
-            if(true == isrutils_check_shared_boolean(&(gAltimeterControl.send_complete)))
+            if(true == gAltimeterControl.send_complete)
             {
                 gAltimeterControl.raw_vals.dig_temp = get_data_from_buffer24(gAltimeterControl.spi_recv_buffer);
                 /* Do math */

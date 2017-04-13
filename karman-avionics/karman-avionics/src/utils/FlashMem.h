@@ -49,6 +49,7 @@ typedef enum
 
 flashmem_hdrstatus_t flashmem_verify_header(flash_data_hdr_t *header);
 Bool flashmem_write_entry(flash_data_entry_t *entry);
+Bool flashmem_read_entry(flash_data_entry_t *entry, uint32_t index);
 Bool flashmem_write_header(void);
 void init_flashmem(void);
 
