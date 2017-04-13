@@ -194,6 +194,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                 gAltimeterControl.raw_vals.dig_press = get_data_from_buffer24(gAltimeterControl.spi_recv_buffer);
                 gAltimeterControl.get_data_state = ENQUEUE_D2_CONVERT;
             }
+            break;
         case ENQUEUE_D2_CONVERT:
             ms5607_02ba03_d2_convert();
             gAltimeterControl.get_data_state = WAIT_D2_CONVERT;
@@ -236,7 +237,7 @@ void ms5607_02ba03_calculate_temp(void)
     /* dT = D2 - TREF = D2 - C5 * 2^8 */
     gAltimeterControl.raw_vals.t_diff = (int32_t)(gAltimeterControl.raw_vals.dig_temp - ((uint32_t)gAltimeterControl.calibration_vals.t_ref << 8));
 
-    /* TEMP =20°C +dT* TEMPSENS =2000 + dT * C6 / 2^23 */
+    /* TEMP =20Â°C +dT* TEMPSENS =2000 + dT * C6 / 2^23 */
     gAltimeterControl.final_vals.temp = (int32_t)(2000 + ((gAltimeterControl.raw_vals.t_diff * (uint32_t)gAltimeterControl.calibration_vals.temp_sens) >> 23));
 }
 
