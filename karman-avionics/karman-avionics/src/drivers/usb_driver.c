@@ -4,7 +4,7 @@
 
 void user_callback_vbus_action(bool b_vbus_high){}
 
-void dump_to_usb() {
+void dump_to_usb(void) {
 
   flash_data_hdr_t header;
   flashmem_hdrstatus_t hdr_status = flashmem_verify_header(&header);

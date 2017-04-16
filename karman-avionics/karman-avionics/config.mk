@@ -84,7 +84,8 @@ src/tasks/SensorTask.c \
 src/tasks/Spi_bg_task.c \
 src/utils/CC2500_regvalues.c \
 src/utils/FlashMem.c \
-src/utils/Spi_service.c
+src/utils/Spi_service.c \
+src/utils/USBUtils.c
 
 # Assembler source files located from the top-level source directory
 ASSRCS = \
