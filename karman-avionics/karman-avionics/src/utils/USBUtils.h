@@ -3,7 +3,7 @@
  *
  * Created: 4/13/2017 6:23:00 PM
  *  Author: Andrew Kaster
- */ 
+ */
 
 
 #ifndef USBUTILS_H_
@@ -31,7 +31,7 @@ typedef struct
 /* a packet is recieved in an unexpected order, or with anything invalid */
 /* in the message (checksum, id, payload value, etc) */
 
-typedef enum 
+typedef enum
 {
     USB_ID_INIT = 0,
     USB_ID_INIT_ACK,
@@ -50,7 +50,7 @@ typedef enum
 #define USB_INIT_STR_SIZE (16)
 #define USB_INIT_STR ("The quick brown")
 
-typedef struct 
+typedef struct
 {
     char init_str[USB_INIT_STR_SIZE];
 } usb_msg_init_t;
@@ -67,7 +67,7 @@ typedef struct
 
 /* Instructs host to display CLI prompt that asks the user to select a mode */
 #define USB_REQ_MODE_SIZE (2)
-#define USB_REQ_MODE_MAGIC (0xCAFE) 
+#define USB_REQ_MODE_MAGIC (0xCAFE)
 
 typedef struct
 {
@@ -97,5 +97,6 @@ Bool usb_utils_create_packet(uint16_t id, uint16_t len, uint8_t *message, usb_pa
 /* Takes in message and computes checksum */
 Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t len);
 
+void dump_to_usb(void);
 
 #endif /* USBUTILS_H_ */

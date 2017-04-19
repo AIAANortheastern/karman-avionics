@@ -3,9 +3,11 @@
  *
  * Created: 4/16/2017 12:51:00 AM
  *  Author: Andrew Kaster
- */ 
+ */
 
 #include "USBUtils.h"
+#include "conf_usb.h"
+#include "FlashMem.h"
 
 /* Computes checksum for message and fills packet pointer */
 Bool usb_utils_create_packet(uint16_t id, uint16_t len, uint8_t *message, usb_packet_t *packet)
@@ -53,10 +55,36 @@ Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t
         if(len & 1) /* if(len%2 == 1) */
         {
             byte_idx = len - 1;
-            *checksum+= (((uint16_t)(message[byte_idx])) << 8); 
+            *checksum+= (((uint16_t)(message[byte_idx])) << 8);
         }
     }
 
     return retVal;
 }
 
+void user_callback_vbus_action(bool b_vbus_high){}
+
+void dump_to_usb(void) {
+
+  flash_data_hdr_t header;
+  flashmem_hdrstatus_t hdr_status = flashmem_verify_header(&header);
+  flash_data_entry_t entry;
+  switch(hdr_status) {
+    case HDR_VALID:
+      for (int i = 0; i < header.num_entries; i++) {
+        flashmem_read_entry(&entry, i);
+        while (!udi_cdc_is_tx_ready()) {
+          asm volatile ("nop \n\t");
+        }
+        udi_cdc_write_buf(&entry, sizeof(entry));
+        //udi_cdc_putc, getc, write_buff, read_buff
+      }
+    break;
+    case HDR_INVALID:
+    break;
+    case HDR_ZERO:
+    break;
+    case HDR_READFAIL:
+    break;
+  }
+}
