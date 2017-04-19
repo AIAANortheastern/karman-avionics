@@ -75,7 +75,7 @@ typedef struct
 } usb_msg_req_mode_t;
 
 /* Message from host to MCU containing the requested mode */
-#define USB_RECV_MODE_SIZE (2)
+#define USB_MODE_MSG_SIZE (2)
 
 typedef enum
 {
@@ -84,10 +84,29 @@ typedef enum
     USB_EXEC_MODE_EJTEST = 0x999,
 } usb_execution_mode_t;
 
+/* Host message with initial mode for handshake */
 typedef struct
 {
     uint16_t execution_mode;
 } usb_msg_recv_mode;
+
+#define USB_MODE_ACK_NUM (0xF00D)
+
+/* Message from MCU to host to acknwoledge the mode */
+typedef struct
+{
+    uint16_t ack_num;
+    uint16_t execution_mode;
+} usb_msg_ack_mode;
+
+#define USB_MODE_ACKRESP_NUM (0xBEEF)
+
+/* Final mode handshake message with confirmed mode */
+typedef struct
+{
+    uint16_t ackresp_num;
+    uint16_t execution_mode;
+} usb_msg_ack_mode_resp;
 
 /* TODO The rest of the message definitions */
 
