@@ -15,11 +15,6 @@
 #include "ms5607-02ba03.h"
 
 /* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
-#define SPIC_MOSI (1 << 5) /* 0x20 */
-#define SPIC_MISO (1 << 6) /* 0x40 */
-#define SPIC_SCK  (1 << 7) /* 0x80 */
-#define SENSOR_SPI (SPIC) /* Possible options are SPIC and SPID */
-#define SENSOR_SPI_PORT (PORTC)
 #define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
 
 spi_master_t sensorSpiMaster;
@@ -28,12 +23,12 @@ spi_master_t sensorSpiMaster;
 /* Initialize all things the sensor task needs.*/
 void init_sensor_task(void)
 {
-    /* Initialize SPI interface on port C*/
+    /* Initialize SPI interface on port D*/
     /* See XMEGA AU Manual page 146, page 276 */
-    sysclk_enable_module(SYSCLK_PORT_C, SYSCLK_SPI);
-    SENSOR_SPI_PORT.DIRSET = SPIC_MOSI;
-    SENSOR_SPI_PORT.DIRSET = SPIC_SCK;
-    SENSOR_SPI_PORT.DIRCLR = SPIC_MISO;
+    sysclk_enable_module(SYSCLK_PORT_D, SYSCLK_SPI);
+    SENSOR_SPI_PORT.DIRSET = SENSOR_MOSI;
+    SENSOR_SPI_PORT.DIRSET = SENSOR_SCLK;
+    SENSOR_SPI_PORT.DIRCLR = SENSOR_MISO;
     SENSOR_SPI.CTRL = SENSOR_SPI_CTRL_VALUE;
     SENSOR_SPI.INTCTRL = SPI_INTLVL_LO_gc;
 
