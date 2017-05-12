@@ -14,7 +14,7 @@
 /*** RADIO ***/
 #define RADIO_GPIO_PORT (PORTF)
 #define RADIO_CTS   (1 << 7) /* Input */
-#define RADIO_RTS   (1 << 6) /* Input */
+#define RADIO_RTS   (1 << 6) /* Output */ /* https://www.digi.com/support/forum/3314/hardware-flow-control-of-xbee-module */
 #define RADIO_CS    (1 << 5) /* Output */
 #define RADIO_ATTEN (1 << 4) /* Input */
 
