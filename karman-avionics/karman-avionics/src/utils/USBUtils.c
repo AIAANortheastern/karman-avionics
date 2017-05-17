@@ -65,18 +65,27 @@ Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t
 void user_callback_vbus_action(bool b_vbus_high){}
 
 void dump_to_usb(void) {
+  usb_packet_t packet;
+  usb_msg_flashentry_t payload;
+  flash_data_entry_t *entry = &(payload.entry);
 
   flash_data_hdr_t header;
   flashmem_hdrstatus_t hdr_status = flashmem_verify_header(&header);
-  flash_data_entry_t entry;
+
   switch(hdr_status) {
     case HDR_VALID:
+      payload.num_entries = header.num_entries;
       for (int i = 0; i < header.num_entries; i++) {
-        flashmem_read_entry(&entry, i);
+        flashmem_read_entry(entry, i);
+        payload.entry_num = i;
+        usb_utils_create_packet(USB_ID_FLASHENTRY,
+                                sizeof(usb_msg_flashentry_t),
+                                (uint8_t *)&payload,
+                                &packet);
         while (!udi_cdc_is_tx_ready()) {
           asm volatile ("nop \n\t");
         }
-        udi_cdc_write_buf(&entry, sizeof(entry));
+        udi_cdc_write_buf(&packet, sizeof(entry));
         //udi_cdc_putc, getc, write_buff, read_buff
       }
     break;

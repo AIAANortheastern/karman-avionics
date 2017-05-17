@@ -10,6 +10,7 @@
 #define USBUTILS_H_
 
 #include <asf.h>
+#include "FlashMem.h"
 
 typedef struct
 {
@@ -39,12 +40,21 @@ typedef enum
     USB_ID_RECV_MODE,
     USB_ID_ACK_MODE,
     USB_ID_ACK_MODE_RESP,
+    USB_ID_FLASHENTRY,
     USB_ID_EJTEST_MAIN,
     USB_ID_EJTEST_DROG,
     USB_ID_EJTEST_END,
     USB_ID_MSG_NACK,
     NUM_USB_MSG_ID,
 } usb_id_t;
+
+typedef enum
+{
+    NACK_UNEXP_HOST_MSG,
+    NACK_TIMEOUT,
+    NACK_INVALID_PAYLD,
+    NACK_FLASH_HDR_ERR,
+} nack_error_t;
 
 /* Initialization string to confirm with host that usb serial is working */
 #define USB_INIT_STR_SIZE (16)
@@ -88,7 +98,7 @@ typedef enum
 typedef struct
 {
     uint16_t execution_mode;
-} usb_msg_recv_mode;
+} usb_msg_recv_mode_t;
 
 #define USB_MODE_ACK_NUM (0xF00D)
 
@@ -97,7 +107,7 @@ typedef struct
 {
     uint16_t ack_num;
     uint16_t execution_mode;
-} usb_msg_ack_mode;
+} usb_msg_ack_mode_t;
 
 #define USB_MODE_ACKRESP_NUM (0xBEEF)
 
@@ -106,7 +116,21 @@ typedef struct
 {
     uint16_t ackresp_num;
     uint16_t execution_mode;
-} usb_msg_ack_mode_resp;
+} usb_msg_ack_mode_resp_t;
+
+/* Data packet for download mode */
+typedef struct
+{
+    uint32_t num_entries;
+    uint32_t entry_num;
+    flash_data_entry_t entry;
+} usb_msg_flashentry_t;
+
+/* Not-Acknowlege */
+typedef struct
+{
+    nack_error_t error_code;
+} usb_msg_nack_t;
 
 /* TODO The rest of the message definitions */
 
