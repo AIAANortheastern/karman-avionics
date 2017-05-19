@@ -5,9 +5,70 @@
  *  Author: Andrew Kaster
  */
 
+/* http://www.atmel.com/Images/Atmel-42336-ASF-USB-Stack-Manual_ApplicationNote_AT09331.pdf */
+
 #include "USBUtils.h"
 #include "conf_usb.h"
 #include "FlashMem.h"
+#include "Timer.h"
+#include <compiler.h>
+
+Bool gIsUSBActive;
+volatile Bool gIsUSBConnected = false;
+volatile uint32_t gUSBConnectTime; /* For debounce */
+
+usb_utils_state_t gUsbUtilsState;
+
+void init_usb(void)
+{
+    gIsUSBActive = false;
+    gUsbUtilsState = USB_STATE_INITIAL;
+
+    /* setup both edges interrupt on USB_SENSE pin (see conf_board.h) */
+    /* setup USB_SENSE with both direction interrupt, totem configuration (external pullup and pulldown)
+     * No slew rate enable, and no invert Input/output 
+     */
+    USB_PORT.USB_SENSE_PINCTRL = 0x00;
+    /* Enable INT0 with LOW priority, disable INT1 */
+    USB_PORT.INTCTRL = 0x01;
+    /* Setup USB_SENSE as interrupt pin */
+    USB_PORT.INT0MASK = USB_SENSE;
+
+    /* Start the USB device stack */
+    udc_start();
+}
+
+/* Custom VBUS monitoring */
+/* http://www.microchip.com/forums/m616629.aspx */
+ISR(PORTD_INT0_vect)
+{
+    uint8_t pinval = USB_PORT.IN & USB_SENSE;
+    /* pinval will be 0x20 if bit 5 is set or 0 if it is not. */
+
+    if(pinval)
+    {
+        gIsUSBConnected = true;
+        gUSBConnectTime = get_timer_count();
+    }
+    else
+    {
+        gIsUSBConnected = false;
+    }
+}
+
+/* Called once udc_attach is finished */
+bool usb_utils_cdc_enabled(void)
+{
+    gIsUSBActive= true;
+    gUsbUtilsState = USB_STATE_INITIAL;
+    return true;
+}
+
+/* called once udc_detach is finsihed */
+void usb_utils_cdc_disabled(void)
+{
+    gIsUSBActive = false;
+}
 
 /* Computes checksum for message and fills packet pointer */
 Bool usb_utils_create_packet(uint16_t id, uint16_t len, uint8_t *message, usb_packet_t *packet)
@@ -62,8 +123,6 @@ Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t
     return retVal;
 }
 
-void user_callback_vbus_action(bool b_vbus_high){}
-
 void dump_to_usb(void) {
   usb_packet_t packet;
   usb_msg_flashentry_t payload;
@@ -88,12 +147,62 @@ void dump_to_usb(void) {
         udi_cdc_write_buf(&packet, sizeof(entry));
         //udi_cdc_putc, getc, write_buff, read_buff
       }
-    break;
+      break;
     case HDR_INVALID:
-    break;
+      break;
     case HDR_ZERO:
-    break;
+      break;
     case HDR_READFAIL:
-    break;
+      break;
   }
+}
+
+/* this function is run as a task in Tasks.c !!!!!! */
+void usb_utils_state_mach(void)
+{
+    nack_error_t error_code = NACK_UNKNOWN;
+    Bool is_nack_required = false;
+
+    if(false == gIsUSBConnected) {
+        if(true == gIsUSBActive)
+        {
+            udc_detach();
+        }
+        return;
+    }
+    /* USB cable is connected, but UDC is not attached */
+    else if(false == gIsUSBActive)
+    {
+        /* Debounce conenctions by requiring power to be connected for 8 ms */
+        if(get_timer_count() > (gUSBConnectTime + EIGHT_MS))
+        {
+            udc_attach();
+        }
+        return;
+    }
+
+    /* USB must be connected and active in order to send messages */
+    switch(gUsbUtilsState)
+    {
+        case USB_STATE_INITIAL:
+            /* Send usb_msg_init */
+            break;
+        case USB_STATE_WAIT_INIT_ACK:
+            /* wait for usb_msg_init_ack */
+            /* on success, send usb_req_mode */
+            /* on timeout/failure, send usb_msg_nack */
+            error_code = NACK_TIMEOUT; /* for example */
+            break;
+        case USB_STATE_WAIT_ACK_MODE:
+            /* wait for message usb_msg_recv_mode */
+            /* on success, send usb_msg_ack_mode */
+            /* on timeout/failure, send usb_msg_nack */
+            break;
+
+    }
+
+    if(is_nack_required)
+    {
+        /* send nack with error code error_code */
+    }
 }

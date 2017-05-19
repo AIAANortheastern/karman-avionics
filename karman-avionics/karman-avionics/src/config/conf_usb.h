@@ -69,9 +69,9 @@
 // (USB_CONFIG_ATTR_REMOTE_WAKEUP|USB_CONFIG_ATTR_BUS_POWERED)
 
 //! USB Device string definitions (Optional)
-// #define  USB_DEVICE_MANUFACTURE_NAME      "Manufacture name"
-// #define  USB_DEVICE_PRODUCT_NAME          "Product name"
-// #define  USB_DEVICE_SERIAL_NAME           "12...EF"
+#define  USB_DEVICE_MANUFACTURE_NAME      "AIAA Northeastern"
+#define  USB_DEVICE_PRODUCT_NAME          "KarmanDevBoard"
+#define  USB_DEVICE_SERIAL_NAME           "12...EF"
 
 
 /**
@@ -90,8 +90,8 @@
  * USB Device Callbacks definitions (Optional)
  * @{
  */
-#define  UDC_VBUS_EVENT(b_vbus_high)      user_callback_vbus_action(b_vbus_high) //TODO check if usb is plugged in
-extern void user_callback_vbus_action(bool b_vbus_high);
+//#define  UDC_VBUS_EVENT(b_vbus_high)      user_callback_vbus_action(b_vbus_high)
+//extern void user_callback_vbus_action(bool b_vbus_high);
 // #define  UDC_SOF_EVENT()                  user_callback_sof_action()
 // extern void user_callback_sof_action(void);
 // #define  UDC_SUSPEND_EVENT()              user_callback_suspend_action()
@@ -124,13 +124,16 @@ extern void user_callback_vbus_action(bool b_vbus_high);
 #define  UDI_CDC_PORT_NB 1
 
 //! Interface callback definition
-#define  UDI_CDC_ENABLE_EXT(port)          true
-#define  UDI_CDC_DISABLE_EXT(port)
+#define  UDI_CDC_ENABLE_EXT(port)          usb_utils_cdc_enabled()
+#define  UDI_CDC_DISABLE_EXT(port)         usb_utils_cdc_disabled()
 #define  UDI_CDC_RX_NOTIFY(port)
 #define  UDI_CDC_TX_EMPTY_NOTIFY(port)
 #define  UDI_CDC_SET_CODING_EXT(port,cfg)
 #define  UDI_CDC_SET_DTR_EXT(port,set)
 #define  UDI_CDC_SET_RTS_EXT(port,set)
+
+extern bool usb_utils_cdc_enabled(void);
+extern void usb_utils_cdc_disabled(void);
 
 // #define UDI_CDC_ENABLE_EXT(port) my_callback_cdc_enable()
 // extern bool my_callback_cdc_enable(void);

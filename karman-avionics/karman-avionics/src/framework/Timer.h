@@ -11,6 +11,8 @@
 #include <compiler.h>
 #include <asf.h>
 
+#define EIGHT_MS (16) /* timer is a 500us interrupt */
+
 void timer0_callback(void);
 
 void timer_init(void);

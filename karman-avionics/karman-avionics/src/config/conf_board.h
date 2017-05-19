@@ -39,14 +39,21 @@
 #define SENSOR_MISO (1 << 2) /* Input  */
 #define SENSOR_SCLK (1 << 1) /* Output */
 
+/* USB */
+#define USB_PORT (PORTD)
+#define USB_SENSE (1 << 5) /* Input  */
+#define USB_SENSE_PINCTRL PIN5CTRL
+
 /*** HIGH-G ACCELEROMTERS ***/
 #define HIGHG_ACC1_PORT (PORTC)
 #define HIGHG_ACC1_CS  (1 << 4) /* Output */
 #define HIGHG_ACC1_INT (1 << 3) /* Input  */
+#define HIGHG_ACC1_INT_PINCTRL PIN3CTRL
 
 #define HIGHG_ACC2_PORT (PORTE)
 #define HIGHG_ACC2_CS  (1 << 3) /* Output */
 #define HIGHG_ACC2_INT (1 << 2) /* Input  */
+#define HIGHG_ACC2_INT_PINCTRL PIN2CTRL /* DO NOT add parentheses! */
 
 /*** GPS ***/
 #define GPS_PORT (PORTC)
@@ -58,9 +65,11 @@
 #define IMU_ACC1_CS   (1 << 4) /* Output */
 #define IMU_ACC1_INT_PORT (PORTE)
 #define IMU_ACC1_INT (1 << 0) /* Input  */
+#define IMU_ACC1_INT_PINCTRL PIN0CTRL
 
 #define IMU_ACC2_PORT (PORTF)
 #define IMU_ACC2_INT  (1 << 2) /* Input  */
+#define IMU_ACC2_INT_PINCTRL PIN2CTRL
 #define IMU_ACC2_CS   (1 << 1) /* Output */
 
 #define IMU_GYRO1_PORT (PORTD)

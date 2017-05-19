@@ -14,6 +14,7 @@
 #include "SensorTask.h"
 #include "RadioTask.h"
 #include "FlashMem.h"
+#include "USBUtils.h"
 
 void board_init(void)
 {
@@ -35,6 +36,8 @@ void board_init(void)
 
      SENSOR_SPI_PORT.DIRCLR = SENSOR_MISO;
      SENSOR_SPI_PORT.DIRSET = SENSOR_MOSI | SENSOR_SCLK;
+
+     USB_PORT.DIRCLR = USB_SENSE;
 
      HIGHG_ACC1_PORT.DIRCLR = HIGHG_ACC1_INT;
      HIGHG_ACC1_PORT.DIRSET = HIGHG_ACC1_CS;
@@ -67,8 +70,6 @@ void board_init(void)
      PYRO_34_PORT.DIRCLR = PYRO_SENSE4B | PYRO_SENSE4A | PYRO_SENSE3B | PYRO_SENSE3A;
      PYRO_34_PORT.DIRSET = PYRO_4A | PYRO_4B | PYRO_3A | PYRO_3B;
 
-     /* TODO Enable peripheral clocks (TWI, SPI, USART)*/
-
      /* Initializes SPI for sensors, and sets up CS pins for all sensors */
      init_sensor_task();
 
@@ -77,4 +78,7 @@ void board_init(void)
 
      /* Initializes SPI for External Flash Memory, sets up CS pin for it */
      init_flashmem();
+
+     /* Initializes the USB CDC interface */
+     init_usb();
 }

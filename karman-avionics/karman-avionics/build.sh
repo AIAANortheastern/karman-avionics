@@ -21,17 +21,17 @@ fi
 if [ $BUILD == "all" ] || [ $BUILD == "remake" ]; then
     VALID=1
     echo "Building all ..."
-    make 2>&1 | tee build.out
+    make 2>&1 | tee Debug/build.out
     echo -e "########################################\n"
     echo "Checking for errors ..."
-    if grep -q error build.out ; then
-        grep error build.out
+    if grep -q error: Debug/build.out ; then
+        grep error: Debug/build.out
     else
         echo "No errors"
     fi
     echo -e "\nChecking for warnings ..."
-    if grep -q warning build.out ; then
-        grep warning build.out
+    if grep -q warning: Debug/build.out ; then
+        grep warning: Debug/build.out
     else
         echo "No warnings"
     fi

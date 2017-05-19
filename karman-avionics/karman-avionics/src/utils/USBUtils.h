@@ -19,6 +19,13 @@ typedef struct
     uint16_t message_len;
 } usb_packet_header_t;
 
+typedef enum
+{
+    USB_STATE_INITIAL,
+    USB_STATE_WAIT_INIT_ACK,
+    USB_STATE_WAIT_ACK_MODE,
+} usb_utils_state_t;
+
 #define USB_PACKET_HDR_SIZE (8)
 
 typedef struct
@@ -54,6 +61,7 @@ typedef enum
     NACK_TIMEOUT,
     NACK_INVALID_PAYLD,
     NACK_FLASH_HDR_ERR,
+    NACK_UNKNOWN,
 } nack_error_t;
 
 /* Initialization string to confirm with host that usb serial is working */
@@ -141,5 +149,13 @@ Bool usb_utils_create_packet(uint16_t id, uint16_t len, uint8_t *message, usb_pa
 Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t len);
 
 void dump_to_usb(void);
+
+bool usb_utils_cdc_enabled(void);
+
+void usb_utils_cdc_disabled(void);
+
+void usb_utils_state_mach(void);
+
+void init_usb(void);
 
 #endif /* USBUTILS_H_ */
