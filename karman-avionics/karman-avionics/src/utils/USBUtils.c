@@ -157,31 +157,12 @@ void dump_to_usb(void) {
   }
 }
 
-/* this function is run as a task in Tasks.c !!!!!! */
+/* this function runs a state machine */
 void usb_utils_state_mach(void)
 {
     nack_error_t error_code = NACK_UNKNOWN;
     Bool is_nack_required = false;
 
-    if(false == gIsUSBConnected) {
-        if(true == gIsUSBActive)
-        {
-            udc_detach();
-        }
-        return;
-    }
-    /* USB cable is connected, but UDC is not attached */
-    else if(false == gIsUSBActive)
-    {
-        /* Debounce conenctions by requiring power to be connected for 8 ms */
-        if(get_timer_count() > (gUSBConnectTime + EIGHT_MS))
-        {
-            udc_attach();
-        }
-        return;
-    }
-
-    /* USB must be connected and active in order to send messages */
     switch(gUsbUtilsState)
     {
         case USB_STATE_INITIAL:
@@ -198,7 +179,9 @@ void usb_utils_state_mach(void)
             /* on success, send usb_msg_ack_mode */
             /* on timeout/failure, send usb_msg_nack */
             break;
-
+        default:
+            /* ERROR */
+            break;
     }
 
     if(is_nack_required)

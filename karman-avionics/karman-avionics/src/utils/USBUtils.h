@@ -158,4 +158,8 @@ void usb_utils_state_mach(void);
 
 void init_usb(void);
 
+extern Bool gIsUSBActive;
+extern volatile Bool gIsUSBConnected;
+extern volatile uint32_t gUSBConnectTime; /* For debounce */
+
 #endif /* USBUTILS_H_ */
