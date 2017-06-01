@@ -19,9 +19,9 @@ spi_master_t radioSpiMaster;
 /* Initialize all things the radio task needs.*/
 void init_radio_task(void)
 {
-    /* Initialize SPI interface on port D*/
+    /* Initialize SPI interface on port E*/
     /* See XMEGA AU Manual page 146, page 276 */
-    sysclk_enable_module(SYSCLK_PORT_D, SYSCLK_SPI);
+    sysclk_enable_module(SYSCLK_PORT_E, SYSCLK_SPI);
     RADIO_SPI_PORT.DIRSET = RADIO_MOSI;
     RADIO_SPI_PORT.DIRSET = RADIO_SCLK;
     RADIO_SPI_PORT.DIRCLR = RADIO_MISO;
@@ -44,7 +44,7 @@ void radio_task_func(void)
 }
 
 /* Interrupt service routine for the SPI interrupt on port E. */
-ISR(SPID_INT_vect)
+ISR(SPIE_INT_vect)
 {
     spi_master_ISR(&radioSpiMaster);
 }

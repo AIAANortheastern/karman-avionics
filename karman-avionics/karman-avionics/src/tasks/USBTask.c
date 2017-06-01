@@ -12,7 +12,7 @@
 /* Manages the usb UDC connection and runs the state machine if the device is attached properly. */
 void USB_task_func(void)
 {
-	if(false == gIsUSBConnected) {
+    if(false == gIsUSBConnected) {
         if(true == gIsUSBActive)
         {
             udc_detach();
@@ -31,7 +31,7 @@ void USB_task_func(void)
     /* USB must be connected and active in order to send messages */
     if((true == gIsUSBConnected) && (true == gIsUSBActive))
     {
-    	usb_utils_state_mach();
+        usb_utils_state_mach();
     }
 }
 

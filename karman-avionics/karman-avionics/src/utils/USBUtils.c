@@ -13,11 +13,16 @@
 #include "Timer.h"
 #include <compiler.h>
 
+#define USB_MSG_BUF_SIZE (200)
+
+/* Global Variables */
 Bool gIsUSBActive;
 volatile Bool gIsUSBConnected = false;
 volatile uint32_t gUSBConnectTime; /* For debounce */
+uint8_t gUSBMsgBuf[USB_MSG_BUF_SIZE];
 
 usb_utils_state_t gUsbUtilsState;
+usb_utils_messageparse_state_t gUSBUtilsMessageState;
 
 void init_usb(void)
 {
@@ -57,7 +62,7 @@ ISR(PORTD_INT0_vect)
 }
 
 /* Called once udc_attach is finished */
-bool usb_utils_cdc_enabled(void)
+bool usb_utils_cdc_enabled(uint8_t port)
 {
     gIsUSBActive= true;
     gUsbUtilsState = USB_STATE_INITIAL;
@@ -65,7 +70,7 @@ bool usb_utils_cdc_enabled(void)
 }
 
 /* called once udc_detach is finsihed */
-void usb_utils_cdc_disabled(void)
+void usb_utils_cdc_disabled(uint8_t port)
 {
     gIsUSBActive = false;
 }
@@ -174,10 +179,26 @@ void usb_utils_state_mach(void)
             /* on timeout/failure, send usb_msg_nack */
             error_code = NACK_TIMEOUT; /* for example */
             break;
-        case USB_STATE_WAIT_ACK_MODE:
+        case USB_STATE_WAIT_RECV_MODE:
             /* wait for message usb_msg_recv_mode */
             /* on success, send usb_msg_ack_mode */
             /* on timeout/failure, send usb_msg_nack */
+            break;
+        case USB_STATE_WAIT_ACK_MODE_RESP:
+            /* wait for message ack_mode_resp */
+            /* on success, set next mode based on message */
+            /* on timeout/failure, send usb_msg_nack */
+            break;
+        case USB_STATE_TRANSMIT_FLASH:
+            /* call dump_to_usb */
+            /* on failure, send usb_msg_nack */
+            break;
+        case USB_STATE_EJECTIONTEST:
+            /* wait for ejection test messages */
+            /* trigger pyrotechnics when requested */
+            break;
+        case USB_STATE_DO_ACQ:
+            /*  */
             break;
         default:
             /* ERROR */
@@ -187,5 +208,56 @@ void usb_utils_state_mach(void)
     if(is_nack_required)
     {
         /* send nack with error code error_code */
+        usb_utils_send_nack(error_code);
     }
+}
+
+void usb_utils_send_nack(nack_error_t error_code)
+{
+    /* Send nack message over usb */
+}
+
+/* uses global variable gUSBMsgBuf. Think about buffer of packets */
+bool usb_utils_check_for_message(usb_packet_t *packet_out)
+{
+    /* Check how much data is ready to be processed */
+    iram_size_t num_bytes_recv = udi_cdc_get_nb_received_data();
+    iram_size_t num_rem_bytes;
+
+    switch(gUSBUtilsMessageState)
+    {
+        case MSG_STATE_READ_HEADER:
+            if(num_bytes_recv >= USB_PACKET_HDR_SIZE)
+            {
+                num_rem_bytes = udi_cdc_read_buf((uint8_t *)&(packet_out->hdr), USB_PACKET_HDR_SIZE);
+                if(num_rem_bytes >= packet_out->hdr.packet_id)
+                {
+                    num_rem_bytes = udi_cdc_read_buf(&(packet_out->message), (packet_out->hdr.message_len + USB_PACKET_CHKSUM_SIZE));
+                }
+                else
+                {
+                    gUSBUtilsMessageState = MSG_STATE_WAIT_MSG;
+                }
+            }
+            break;
+        case MSG_STATE_WAIT_MSG:
+            break;
+        default:
+            break;
+    }
+    // state: read header
+    //      If there are USB_PACKET_HDR_SIZE bytes to read
+    //          Read USB_PACKET_HDR_SIZE bytes
+    //          If there are message_len bytes to read
+    //              Read message_len bytes
+    //              parse message
+    //          else
+    //              Next state = wait message          
+    //
+    // state: wait message
+    //      If there are message_len bytes
+    //          Read mesage_len bytes
+    //          parse message
+
+    return false;
 }

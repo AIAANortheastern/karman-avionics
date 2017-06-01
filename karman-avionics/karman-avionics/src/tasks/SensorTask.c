@@ -63,7 +63,7 @@ void sensor_task_func(void)
 }
 
 /* Interrupt service routine for the SPI interrupt on port C. */
-ISR(SPIC_INT_vect)
+ISR(SPID_INT_vect)
 {
     spi_master_ISR(&sensorSpiMaster);   
 }

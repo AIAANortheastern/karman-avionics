@@ -69,8 +69,8 @@ void init_extflash(void)
     extflash_initialize_regs();
 }
 
-/* Interrupt service routine for the SPI interrupt on port E. */
-ISR(SPIE_INT_vect)
+/* Interrupt service routine for the SPI interrupt on port C. */
+ISR(SPIC_INT_vect)
 {
     spi_master_ISR(&extflashSpiMaster);
 }

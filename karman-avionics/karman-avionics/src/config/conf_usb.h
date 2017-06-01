@@ -124,16 +124,16 @@
 #define  UDI_CDC_PORT_NB 1
 
 //! Interface callback definition
-#define  UDI_CDC_ENABLE_EXT(port)          usb_utils_cdc_enabled()
-#define  UDI_CDC_DISABLE_EXT(port)         usb_utils_cdc_disabled()
+#define  UDI_CDC_ENABLE_EXT(port)          usb_utils_cdc_enabled(port)
+#define  UDI_CDC_DISABLE_EXT(port)         usb_utils_cdc_disabled(port)
 #define  UDI_CDC_RX_NOTIFY(port)
 #define  UDI_CDC_TX_EMPTY_NOTIFY(port)
 #define  UDI_CDC_SET_CODING_EXT(port,cfg)
 #define  UDI_CDC_SET_DTR_EXT(port,set)
 #define  UDI_CDC_SET_RTS_EXT(port,set)
 
-extern bool usb_utils_cdc_enabled(void);
-extern void usb_utils_cdc_disabled(void);
+extern bool usb_utils_cdc_enabled(uint8_t port);
+extern void usb_utils_cdc_disabled(uint8_t port);
 
 // #define UDI_CDC_ENABLE_EXT(port) my_callback_cdc_enable()
 // extern bool my_callback_cdc_enable(void);

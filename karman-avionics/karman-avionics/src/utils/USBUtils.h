@@ -19,14 +19,8 @@ typedef struct
     uint16_t message_len;
 } usb_packet_header_t;
 
-typedef enum
-{
-    USB_STATE_INITIAL,
-    USB_STATE_WAIT_INIT_ACK,
-    USB_STATE_WAIT_ACK_MODE,
-} usb_utils_state_t;
-
 #define USB_PACKET_HDR_SIZE (8)
+#define USB_PACKET_CHKSUM_SIZE (2)
 
 typedef struct
 {
@@ -38,6 +32,23 @@ typedef struct
 /* A nack message will be sent to the host in the event that */
 /* a packet is recieved in an unexpected order, or with anything invalid */
 /* in the message (checksum, id, payload value, etc) */
+
+typedef enum
+{
+    USB_STATE_INITIAL,
+    USB_STATE_WAIT_INIT_ACK,
+    USB_STATE_WAIT_RECV_MODE,
+    USB_STATE_WAIT_ACK_MODE_RESP,
+    USB_STATE_TRANSMIT_FLASH,
+    USB_STATE_EJECTIONTEST,
+    USB_STATE_DO_ACQ,
+} usb_utils_state_t;
+
+typedef enum
+{
+    MSG_STATE_READ_HEADER,
+    MSG_STATE_WAIT_MSG,
+} usb_utils_messageparse_state_t;
 
 typedef enum
 {
@@ -150,13 +161,17 @@ Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t
 
 void dump_to_usb(void);
 
-bool usb_utils_cdc_enabled(void);
+bool usb_utils_cdc_enabled(uint8_t port);
 
-void usb_utils_cdc_disabled(void);
+void usb_utils_cdc_disabled(uint8_t port);
 
 void usb_utils_state_mach(void);
 
 void init_usb(void);
+
+bool usb_utils_check_for_message(usb_packet_t *packet_out); 
+
+void usb_utils_send_nack(nack_error_t error_code);
 
 extern Bool gIsUSBActive;
 extern volatile Bool gIsUSBConnected;
