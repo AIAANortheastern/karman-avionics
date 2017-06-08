@@ -19,25 +19,28 @@
 #define RADIO_ATTEN (1 << 4) /* Input */
 
 #define RADIO_SPI_PORT (PORTE)
-#define RADIO_SPI (SPIE) // USARTE1
+#define RADIO_SPI (USARTE1) /* USARTE1 */
 #define RADIO_MOSI (1 << 7) /* Output */
 #define RADIO_MISO (1 << 6) /* Input  */
 #define RADIO_SCLK (1 << 5) /* Output */ 
+#define RADIO_SPI_INT (USARTE1_RXC_vect)
 
 /*** FLASH MEMORY ***/
 #define FLASH_PORT (PORTC)
-#define FLASH_SPI (SPIC) // USARTC1
+#define FLASH_SPI (USARTC1) /* USARTC1 */
 #define FLASH_MOSI (1 << 7) /* Output */
 #define FLASH_MISO (1 << 6) /* Input  */
 #define FLASH_SCLK (1 << 5) /* Output */
 #define FLASH_CS   (1 << 0) /* Output */
+#define FLASH_SPI_INT (USARTC1_RXC_vect)
 
 /*** SENSORS ***/
 #define SENSOR_SPI_PORT (PORTD)
-#define SENSOR_SPI (SPID) //USARTD0
+#define SENSOR_SPI (USARTD0) /*USARTD0 */
 #define SENSOR_MOSI (1 << 3) /* Output */
 #define SENSOR_MISO (1 << 2) /* Input  */
 #define SENSOR_SCLK (1 << 1) /* Output */
+#define SENSOR_SPI_INT (USARTD0_RXC_vect)
 
 /* USB */
 #define USB_PORT (PORTD)

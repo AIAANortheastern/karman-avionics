@@ -58,7 +58,7 @@ typedef struct
  */
 typedef struct
 {
-    SPI_t *master; /* The SPI module associated with this struct */
+    USART_t *master; /* The SPI module associated with this struct */
     PORT_t *port; /* The port the master is on */
 
     /* The fields necessary to implement a queue. An array, and two indecies */
@@ -71,7 +71,7 @@ typedef struct
 } spi_master_t;
 
 Bool init_spi_master_service(spi_master_t *master,
-                             SPI_t *regSet,
+                             USART_t *regSet,
                              PORT_t *port,
                              background_func_t taskName);
 

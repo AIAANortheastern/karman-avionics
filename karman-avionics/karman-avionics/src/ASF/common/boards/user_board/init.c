@@ -87,6 +87,11 @@ void board_init(void)
     IMU_MAG2_PORT.OUTSET = IMU_MAG2_CS;
     ALTIMETER_PORT.OUTSET = ALTIMETER_CS;
 
+    /* Pull all txd pins high */
+    RADIO_SPI_PORT.OUTSET = RADIO_MOSI;
+    SENSOR_SPI_PORT.OUTSET = SENSOR_MOSI;
+    FLASH_PORT.OUTSET = FLASH_MOSI;
+
 
     /* Initializes SPI for sensors, and sets up CS pins for all sensors */
     init_sensor_task();

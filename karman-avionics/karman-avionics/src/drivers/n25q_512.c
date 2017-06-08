@@ -21,7 +21,6 @@
 #define EXTFLASH_SCK  (FLASH_SCLK) /* 0x80 */
 #define EXTFLASH_SPI (FLASH_SPI)
 #define EXTFLASH_SPI_PORT (FLASH_PORT)
-#define EXTFLASH_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
 
 #define EXTFLASH_PAGE_MASK      (0x000000FF)
 #define EXTFLASH_READ_DATA_CMD  (0x03)
@@ -35,6 +34,15 @@
 
 #define EXTFLASH_WREN_LATCH  (1 << 1)
 
+#define SPI_BAUD_RATE (1000000) /* 1MHz */
+
+#ifndef F_CPU
+#define F_CPU (sysclk_get_per_hz())
+#endif
+
+/* https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h */
+#define SPI_BAUDCTRLVAL(Baud)       ((Baud < (F_CPU / 2)) ? ((F_CPU / (2 * Baud)) - 1) : 0)
+
 spi_master_t extflashSpiMaster;
 
 extflash_ctrl_t gExtflashControl;
@@ -43,13 +51,17 @@ extflash_ctrl_t gExtflashControl;
 void init_extflash(void)
 {
     /* Initialize SPI interface on port C */
-    /* See XMEGA AU Manual page 146, page 276 */
-    sysclk_enable_module(SYSCLK_PORT_C, SYSCLK_SPI);
-    EXTFLASH_SPI_PORT.DIRSET = EXTFLASH_MOSI;
-    EXTFLASH_SPI_PORT.DIRSET = EXTFLASH_SCK;
-    EXTFLASH_SPI_PORT.DIRCLR = EXTFLASH_MOSI;
-    EXTFLASH_SPI.CTRL = EXTFLASH_SPI_CTRL_VALUE;
-    EXTFLASH_SPI.INTCTRL = SPI_INTLVL_LO_gc;
+    /* See XMEGA AU Manual page 146, page 280 */
+    /* NOTE PINS ARE SETUP TO USE USART IN SPI MASTER MODE! */
+
+    uint16_t baudrate = SPI_BAUDCTRLVAL(SPI_BAUD_RATE);
+
+    sysclk_enable_peripheral_clock(&EXTFLASH_SPI);
+    EXTFLASH_SPI.BAUDCTRLB = (uint8_t)((baudrate) >> 8); /* MSBs of Baud rate value. */
+    EXTFLASH_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
+    EXTFLASH_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
+    EXTFLASH_SPI.CTRLB = 0x18; /* Enable RX and TX */
+    EXTFLASH_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&extflashSpiMaster, &EXTFLASH_SPI, &EXTFLASH_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&extflashSpiMaster);
@@ -62,15 +74,11 @@ void init_extflash(void)
     gExtflashControl.send_complete = false;
     gExtflashControl.task_inprog = false;
 
-    /* Set CS pin high */
-    gExtflashControl.cs_info.csPort->DIRSET = gExtflashControl.cs_info.pinBitMask;
-    gExtflashControl.cs_info.csPort->OUTSET = gExtflashControl.cs_info.pinBitMask;
-
     extflash_initialize_regs();
 }
 
 /* Interrupt service routine for the SPI interrupt on port C. */
-ISR(SPIC_INT_vect)
+ISR(FLASH_SPI_INT)
 {
     spi_master_ISR(&extflashSpiMaster);
 }
