@@ -13,6 +13,7 @@
 #include <conf_board.h>
 #include "SensorTask.h"
 #include "RadioTask.h"
+#include "FlashMem.h"
 
 void board_init(void)
 {
@@ -23,9 +24,12 @@ void board_init(void)
      /* TODO Enable IO Pins */
      /* TODO Enable peripheral clocks (TWI, SPI, USART)*/
 
-     /* Initalizes SPI for sensors, and sets up CS pins for all sensors */
+     /* Initializes SPI for sensors, and sets up CS pins for all sensors */
      init_sensor_task();
 
-     /* Initailizes SPI for radio module, sets up cs pin for it */
+     /* Initializes SPI for radio module, sets up cs pin for it */
      init_radio_task();
+
+     /* Initializes SPI for External Flash Memory, sets up CS pin for it */
+     init_flashmem();
 }

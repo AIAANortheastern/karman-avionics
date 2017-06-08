@@ -43,10 +43,10 @@ typedef struct
 {
   chip_select_info_t    csInfo;     /* Information about chip select pin */
   volatile void         *sendBuff;  /* Buffer to send data from */
-  uint8_t               sendLen;    /* How many bytes to send */
+  uint16_t               sendLen;    /* How many bytes to send */
   volatile uint8_t      bytesSent;  /* How many bytes have already been sent */
   volatile void         *recvBuff;  /* Buffer to store the result in */
-  uint8_t               recvLen;    /* How many bytes to expect from the device */
+  uint16_t               recvLen;    /* How many bytes to expect from the device */
   volatile uint8_t      bytesRecv;  /* How many bytes have actually been recieved */
   volatile Bool         *complete;   /* Complete flag */
   Bool                  valid;      /* Valid flag. Is this a valid request? */
@@ -78,9 +78,9 @@ Bool init_spi_master_service(spi_master_t *master,
 Bool spi_master_enqueue(spi_master_t *spi_interface,
                         chip_select_info_t *csInfo,
                         volatile void *sendBuff,
-                        uint8_t sendLen,
+                        uint16_t sendLen,
                         volatile void *recvBuff,
-                        uint8_t recvLen,
+                        uint16_t recvLen,
                         volatile Bool *complete);
 
 Bool spi_master_dequeue(spi_master_t *spi_interface);
@@ -92,13 +92,13 @@ Bool spi_master_initate_request(spi_master_t *spi_interface);
 Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                       chip_select_info_t *csInfo,
                                       volatile void *sendBuff,
-                                      uint8_t sendLen,
+                                      uint16_t sendLen,
                                       volatile void *recvBuff,
-                                      uint8_t recvLen,
+                                      uint16_t recvLen,
                                       volatile Bool *complete);
 
 
-#define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTCLR = reqPtr->csInfo.pinBitMask)
+#define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTSET = reqPtr->csInfo.pinBitMask)
 #define spi_master_request_complete(master)     (*(master->requestQueue[master->front].complete) = true)
 
 #endif /* SPI_SERVICE_H_ */

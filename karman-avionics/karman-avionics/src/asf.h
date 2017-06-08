@@ -59,6 +59,9 @@
 // From module: Common build items for user board support templates
 #include <user_board.h>
 
+// From module: DMA - Direct Memory Access
+#include <dma.h>
+
 // From module: GPIO - General purpose Input/Output
 #include <gpio.h>
 
@@ -67,6 +70,9 @@
 
 // From module: Generic components of unit test framework
 #include <unit_test/suite.h>
+
+// From module: Huge Memory Interface
+#include <hugemem.h>
 
 // From module: IOPORT - General purpose I/O service
 #include <ioport.h>

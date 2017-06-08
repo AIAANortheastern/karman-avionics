@@ -46,3 +46,4 @@ karman-avionics/doxygen/latex/
 #Below are custom
 *.d
 *Debug*
+*.atsuo
