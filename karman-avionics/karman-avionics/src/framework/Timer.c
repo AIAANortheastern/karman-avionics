@@ -29,3 +29,14 @@ inline uint32_t get_timer_count(void){
     cpu_irq_restore(flags);
     return timerVal;
 }
+
+inline void timer_delay_ms(uint8_t millis)
+{
+    uint32_t timer_begin = get_timer_count();
+    uint32_t timer_end = timer_begin + 2*millis;
+    while(get_timer_count() < timer_end)
+    {
+        asm("");
+    }
+}
+

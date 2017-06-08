@@ -59,11 +59,25 @@ void init_sensor_task(void)
 }
 
 /* This task runs all sensor getData functions and passes the updated ones to the radio*/
-/* TODO: Think about using the timer's count instead of an invoke count. It will be more accurate */
 void sensor_task_func(void)
 {
+    sensor_status_t curr_status;
 
-    ms5607_02ba03_get_data();
+    curr_status = ms5607_02ba03_get_data();
+
+    if (curr_status == SENSOR_COMPLETE)
+    {
+        /* Do fancy things with current temp/pressure data */
+    }
+
+    /* ----TEMPLATE----
+     * curr_status = <foo>_get_data();
+     * if (curr_status == SENSOR_COMPLETE)
+     * {
+     *    Do fancy things with current sensor's data
+     * }
+     *
+     */
 
 }
 

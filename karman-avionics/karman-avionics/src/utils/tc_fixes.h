@@ -34,6 +34,7 @@
 #define TC_EVSEL_t              TC_TC0_EVSEL_t
 #define TC_EVACT_t              TC_TC0_EVACT_t
 */
+
 /* #endif LINUX_DEV */
 
 #endif /* TC_FIXES_H_ */
