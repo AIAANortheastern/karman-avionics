@@ -56,17 +56,17 @@ src/ASF/common/services/clock/xmega/sysclk.c \
 src/ASF/common/services/hugemem/avr8/avr8_hugemem.c \
 src/ASF/common/services/ioport/xmega/ioport_compat.c \
 src/ASF/common/services/sleepmgr/xmega/sleepmgr.c \
-src/ASF/common/utils/stdio/read.c \
-src/ASF/common/utils/stdio/write.c \
-src/ASF/common/utils/unit_test/suite.c \
 src/ASF/xmega/drivers/dma/dma.c \
+src/ASF/common/services/usb/class/cdc/device/udi_cdc_desc.c \
+src/ASF/common/services/usb/class/cdc/device/udi_cdc.c \
+src/ASF/common/services/usb/udc/udc.c \
 src/ASF/xmega/drivers/nvm/nvm.c \
 src/ASF/xmega/drivers/spi/spi.c \
 src/ASF/xmega/drivers/tc/tc.c \
-src/ASF/xmega/drivers/twi/twim.c \
 src/ASF/xmega/drivers/usart/usart.c \
 src/drivers/ms5607-02ba03.c \
 src/drivers/n25q_512.c \
+src/ASF/xmega/drivers/usb/usb_device.c \
 src/framework/Scheduler.c \
 src/framework/Tasks.c \
 src/framework/Timer.c \
@@ -78,7 +78,16 @@ src/tasks/SensorTask.c \
 src/tasks/Spi_bg_task.c \
 src/utils/CC2500_regvalues.c \
 src/utils/FlashMem.c \
-src/utils/Spi_service.c
+src/utils/Spi_service.c \
+src/utils/USBUtils.c \
+src/tasks/USBTask.c
+
+UNUSED_CSRCS = \
+src/ASF/common/utils/stdio/read.c \
+src/ASF/common/utils/stdio/write.c \
+src/ASF/common/utils/unit_test/suite.c \
+src/ASF/xmega/drivers/twi/twim.c \
+
 
 # Assembler source files located from the top-level source directory
 ASSRCS = \
@@ -104,6 +113,13 @@ src/ASF/common/services/ioport \
 src/ASF/common/services/ioport/xmega \
 src/ASF/common/services/sleepmgr \
 src/ASF/common/services/sleepmgr/xmega \
+src/ASF/common/services/hugemem \
+src/ASF/common/services/hugemem/avr8 \
+src/ASF/common/services/hugemem/generic \
+src/ASF/common/services/usb \
+src/ASF/common/services/usb/class/cdc \
+src/ASF/common/services/usb/class/cdc/device \
+src/ASF/common/services/usb/udc \
 src/ASF/common/utils \
 src/ASF/common/utils/interrupt \
 src/ASF/common/utils/make \
@@ -120,6 +136,8 @@ src/ASF/xmega/drivers/spi \
 src/ASF/xmega/drivers/tc \
 src/ASF/xmega/drivers/twi \
 src/ASF/xmega/drivers/usart \
+src/ASF/xmega/drivers/usb \
+src/ASF/xmega/drivers/dma \
 src/ASF/xmega/utils \
 src/ASF/xmega/utils/assembler \
 src/ASF/xmega/utils/bit_handling \
@@ -131,14 +149,14 @@ src/utils    \
 src/tasks
 
 # Library paths from the top-level source directory
-LIB_PATH = 
+LIB_PATH =
 
 # Libraries to link with the project
-LIBS = 
+LIBS =
 
 # Additional options for debugging. By default the common Makefile.in will
 # add -gdwarf-2.
-DBGFLAGS = 
+DBGFLAGS =
 
 # Optimization settings
 OPTIMIZATION = -Os
@@ -146,14 +164,14 @@ OPTIMIZATION = -Os
 # Extra flags used when creating an EEPROM Intel HEX file. By default the
 # common Makefile.in will add -j .eeprom
 # --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0.
-EEPROMFLAGS = 
+EEPROMFLAGS =
 
 # Extra flags used when creating an Intel HEX file. By default the common
 # Makefile.in will add -R .eeprom -R .usb_descriptor_table.
-FLASHFLAGS = 
+FLASHFLAGS =
 
 # Extra flags to use when archiving.
-ARFLAGS = 
+ARFLAGS =
 
 # Extra flags to use when assembling.
 ASFLAGS = -DBOARD=USER_BOARD
@@ -173,15 +191,17 @@ CFLAGS =
 CPPFLAGS = \
        -DDEBUG \
        -DBOARD=USER_BOARD \
-       -DIOPORT_XMEGA_COMPAT \
+       -DIOPORT_XMEGA_COMPAT
+
+UNUSED_CPPFLAGS = \
        -DTEST_SUITE_DEFINE_ASSERT_MACRO \
        -D_ASSERT_ENABLE_ \
        -DLINUX_DEV
 
 # Extra flags to use when linking
 LDFLAGS =  \
-       -Wl,--section-start=.BOOT=0x20000                 
+       -Wl,--section-start=.BOOT=0x20000
 
 # Pre- and post-build commands
-PREBUILD_CMD = 
-POSTBUILD_CMD = 
+PREBUILD_CMD =
+POSTBUILD_CMD =

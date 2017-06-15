@@ -29,7 +29,7 @@
 #define SPI_MASTER_QUEUE_SIZE (SPI_MASTER_QUEUE_DEPTH*sizeof(spi_request_t))
 
 /* initializes an SPI master service */
-Bool init_spi_master_service(spi_master_t *masterObj, SPI_t *regSet, PORT_t *port, background_func_t taskName)
+Bool init_spi_master_service(spi_master_t *masterObj, USART_t *regSet, PORT_t *port, background_func_t taskName)
 {
     Bool initSuccess = true;
 
@@ -203,6 +203,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
         (*dataRecv)++;
     }
     /* If we don't care what's in the buffer, read the register then ignore the value. */
+    /* NOTE AS WE ARE USING THE RXC INTERRUPT DATA MUST BE READ TO CLEAR THE INTERRUPT */
     else
     {
         dummyByte = spi_interface->master->DATA;
@@ -241,7 +242,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
 /*****************************************************************************/
 /*                      BEGIN BLOCKING FUNCTIONS                             */
 /*              Only use these during startup! Do NOT use after              */
-/*              the scheduler has started.                                   */
+/*              the scheduler has started...unless you know what you're doing*/
 /*****************************************************************************/
 
 Bool spi_master_blocking_send_request(spi_master_t *spi_interface,

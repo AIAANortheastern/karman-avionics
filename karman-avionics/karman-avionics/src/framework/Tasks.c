@@ -10,6 +10,7 @@
 #include "Pyrotechnics.h"
 #include "SensorTask.h"
 #include "RadioTask.h"
+#include "USBTask.h"
 
 #define INITIAL_COUNT (0)
 
@@ -17,6 +18,12 @@
  * field, and a task function. */
 simple_task_t TaskList[] =
 {
+    /* Task to maintain connection with USB host */
+    {
+        .taskFreq = TASK_FREQ_1500us,
+        .lastCount = INITIAL_COUNT,
+        .task = USB_task_func,
+    },
     /* Task to check status of global sensor data to see if it's time to
     * perform Pyrotechnics activities */
     { 

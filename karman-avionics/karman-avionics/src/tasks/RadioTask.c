@@ -11,12 +11,17 @@
 #include "Spi_bg_task.h"
 
 /* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
-#define SPIE_MOSI (1 << 5) /* 0x20 */
-#define SPIE_MISO (1 << 6) /* 0x40 */
-#define SPIE_SCK  (1 << 7) /* 0x80 */
-#define RADIO_SPI (SPID) /* Possible options are SPIC and SPID */
-#define RADIO_SPI_PORT (PORTD)
-#define RADIO_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
+/*#define RADIO_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
+ Using USART in SPI master mode instead */
+
+#define SPI_BAUD_RATE (1000000) /* 1MHz */
+
+#ifndef F_CPU
+#define F_CPU (sysclk_get_per_hz())
+#endif
+
+/* https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h */
+#define SPI_BAUDCTRLVAL(Baud)       ((Baud < (F_CPU / 2)) ? ((F_CPU / (2 * Baud)) - 1) : 0)
 
 spi_master_t radioSpiMaster;
 
@@ -24,14 +29,18 @@ spi_master_t radioSpiMaster;
 /* Initialize all things the radio task needs.*/
 void init_radio_task(void)
 {
-    /* Initialize SPI interface on port D*/
-    /* See XMEGA AU Manual page 146, page 276 */
-    sysclk_enable_module(SYSCLK_PORT_D, SYSCLK_SPI);
-    RADIO_SPI_PORT.DIRSET = SPIE_MOSI;
-    RADIO_SPI_PORT.DIRSET = SPIE_SCK;
-    RADIO_SPI_PORT.DIRCLR = SPIE_MISO;
-    RADIO_SPI.CTRL = RADIO_SPI_CTRL_VALUE;
-    RADIO_SPI.INTCTRL = SPI_INTLVL_LO_gc;
+    /* Initialize SPI interface on port E*/
+    /* See XMEGA AU Manual page 146, page 280 */
+    /* NOTE PINS ARE SETUP TO USE USART IN SPI MASTER MODE! */
+
+    uint16_t baudrate = SPI_BAUDCTRLVAL(SPI_BAUD_RATE);
+
+    sysclk_enable_peripheral_clock(&RADIO_SPI);
+    RADIO_SPI.BAUDCTRLB = (uint8_t)((baudrate) >> 8); /* MSBs of Baud rate value. */
+    RADIO_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
+    RADIO_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
+    RADIO_SPI.CTRLB = 0x18; /* Enable RX and TX */
+    RADIO_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&radioSpiMaster, &RADIO_SPI, &RADIO_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&radioSpiMaster);
@@ -49,7 +58,7 @@ void radio_task_func(void)
 }
 
 /* Interrupt service routine for the SPI interrupt on port E. */
-ISR(SPID_INT_vect)
+ISR(RADIO_SPI_INT)
 {
     spi_master_ISR(&radioSpiMaster);
 }

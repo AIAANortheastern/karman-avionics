@@ -15,12 +15,17 @@
 #include "ms5607-02ba03.h"
 
 /* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
-#define SPIC_MOSI (1 << 5) /* 0x20 */
-#define SPIC_MISO (1 << 6) /* 0x40 */
-#define SPIC_SCK  (1 << 7) /* 0x80 */
-#define SENSOR_SPI (SPIC) /* Possible options are SPIC and SPID */
-#define SENSOR_SPI_PORT (PORTC)
-#define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
+/*#define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
+ Using USART in SPI master mode instead */
+
+#define SPI_BAUD_RATE (1000000) /* 1MHz */
+
+#ifndef F_CPU
+#define F_CPU (sysclk_get_per_hz())
+#endif
+
+/* https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h */
+#define SPI_BAUDCTRLVAL(Baud)       ((Baud < (F_CPU / 2)) ? ((F_CPU / (2 * Baud)) - 1) : 0)
 
 spi_master_t sensorSpiMaster;
 
@@ -28,14 +33,18 @@ spi_master_t sensorSpiMaster;
 /* Initialize all things the sensor task needs.*/
 void init_sensor_task(void)
 {
-    /* Initialize SPI interface on port C*/
-    /* See XMEGA AU Manual page 146, page 276 */
-    sysclk_enable_module(SYSCLK_PORT_C, SYSCLK_SPI);
-    SENSOR_SPI_PORT.DIRSET = SPIC_MOSI;
-    SENSOR_SPI_PORT.DIRSET = SPIC_SCK;
-    SENSOR_SPI_PORT.DIRCLR = SPIC_MISO;
-    SENSOR_SPI.CTRL = SENSOR_SPI_CTRL_VALUE;
-    SENSOR_SPI.INTCTRL = SPI_INTLVL_LO_gc;
+    /* Initialize SPI interface on port D*/
+    /* See XMEGA AU Manual page 146, page 280 */
+    /* NOTE PINS ARE SETUP TO USE USART IN SPI MASTER MODE! */
+
+    uint16_t baudrate = SPI_BAUDCTRLVAL(SPI_BAUD_RATE);
+
+    sysclk_enable_peripheral_clock(&SENSOR_SPI);
+    SENSOR_SPI.BAUDCTRLB = (uint8_t)((baudrate) >> 8); /* MSBs of Baud rate value. */
+    SENSOR_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
+    SENSOR_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
+    SENSOR_SPI.CTRLB = 0x18; /* Enable RX and TX */
+    SENSOR_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&sensorSpiMaster, &SENSOR_SPI, &SENSOR_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&sensorSpiMaster);
@@ -81,8 +90,14 @@ void sensor_task_func(void)
 
 }
 
-/* Interrupt service routine for the SPI interrupt on port C. */
-ISR(SPIC_INT_vect)
+/* Interrupt service routine for the SPI interrupt on port D. */
+// USARTD0_RXC_vect
+// CTRLA = 0x10; // RXCINTLVL = 1
+// CTRLB = 0x18; 
+// CTRLC = 0xC6; // MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI
+// BAUDB = (1000000 >> 8); //use SPI_BAUD_RATE instead ie #define SPI_BAUD_RATE (1000000)
+// BAUDA = (1000000 & 0xFF);
+ISR(SENSOR_SPI_INT)
 {
     spi_master_ISR(&sensorSpiMaster);   
 }

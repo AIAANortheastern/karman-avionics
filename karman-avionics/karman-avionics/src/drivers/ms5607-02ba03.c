@@ -4,7 +4,7 @@
  * Created: 2/1/2017 7:50:33 PM
  *  Author: Andrew Kaster
  */ 
-
+ #include "conf_board.h"
  #include "ms5607-02ba03.h"
  #include "Timer.h"
  #include <string.h>
@@ -26,15 +26,13 @@
  #define ALTIMETER_ADC_READ         (0x00)
  #define ALTIMETER_NUM_CAL          (6)
 
- #define ALTIMETER_CS_PORT (PORTA)
- #define ALTIMETER_CS_BM   (1 << 6)
  /* File scope global variable */
  ms5607_02ba03_control_t gAltimeterControl;
 
 void ms5607_02ba03_init(spi_master_t *spi_master)
 {
-    gAltimeterControl.cs_info.csPort = &ALTIMETER_CS_PORT;
-    gAltimeterControl.cs_info.pinBitMask = ALTIMETER_CS_BM;
+    gAltimeterControl.cs_info.csPort = &ALTIMETER_PORT;
+    gAltimeterControl.cs_info.pinBitMask = ALTIMETER_CS;
     gAltimeterControl.spi_master = spi_master;
     memset((void *)gAltimeterControl.spi_recv_buffer, 0, sizeof(gAltimeterControl.spi_recv_buffer));
     memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
