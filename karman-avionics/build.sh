@@ -21,6 +21,8 @@ fi
 if [ $BUILD == "all" ] || [ $BUILD == "remake" ]; then
     VALID=1
     echo "Building all ..."
+    mkdir -p Debug
+    touch Debug/build.out
     make 2>&1 | tee Debug/build.out
     echo -e "########################################\n"
     echo "Checking for errors ..."
