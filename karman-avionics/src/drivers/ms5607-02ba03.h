@@ -60,7 +60,7 @@ typedef struct altimeter_control_s
     ms5607_02ba03_raw_t raw_vals;
     ms5607_02ba03_data_t final_vals;
     ms5607_02ba03_state_t get_data_state;
-    uint32_t            time_start;
+    uint16_t            time_start;
 } ms5607_02ba03_control_t;
 
 

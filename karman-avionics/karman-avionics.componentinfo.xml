@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Store xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns="AtmelPackComponentManagement">
 	<ProjectComponents>
 		<ProjectComponent z:Id="i1" xmlns:z="http://schemas.microsoft.com/2003/10/Serialization/">
@@ -26,13 +26,13 @@
 					<SourcePath></SourcePath>
 				</d4p1:anyType>
 				<d4p1:anyType i:type="FileInfo">
-					<AbsolutePath>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.68\include\avr\iox128a3u.h</AbsolutePath>
+					<AbsolutePath>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.68\include\avr\iox256a3u.h</AbsolutePath>
 					<Attribute></Attribute>
 					<Category>header</Category>
 					<Condition>C</Condition>
-					<FileContentHash>0152/skxVDz6uwMVK5NPuw==</FileContentHash>
+					<FileContentHash>Ogej+KWLQ2y+wOiUkMjAUg==</FileContentHash>
 					<FileVersion></FileVersion>
-					<Name>include/avr/iox128a3u.h</Name>
+					<Name>include/avr/iox256a3u.h</Name>
 					<SelectString></SelectString>
 					<SourcePath></SourcePath>
 				</d4p1:anyType>
@@ -59,13 +59,13 @@
 					<SourcePath></SourcePath>
 				</d4p1:anyType>
 				<d4p1:anyType i:type="FileInfo">
-					<AbsolutePath>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u</AbsolutePath>
+					<AbsolutePath>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega256a3u</AbsolutePath>
 					<Attribute></Attribute>
 					<Category>libraryPrefix</Category>
 					<Condition>GCC</Condition>
 					<FileContentHash i:nil="true" />
 					<FileVersion></FileVersion>
-					<Name>gcc/dev/atxmega128a3u</Name>
+					<Name>gcc/dev/atxmega256a3u</Name>
 					<SelectString></SelectString>
 					<SourcePath></SourcePath>
 				</d4p1:anyType>
@@ -74,12 +74,12 @@
 			<PackPath>C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/XMEGAA_DFP/1.1.68/Atmel.XMEGAA_DFP.pdsc</PackPath>
 			<PackVersion>1.1.68</PackVersion>
 			<PresentInProject>true</PresentInProject>
-			<ReferenceConditionId>ATxmega128A3U</ReferenceConditionId>
+			<ReferenceConditionId>ATxmega256A3U</ReferenceConditionId>
 			<RteComponents xmlns:d4p1="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
 				<d4p1:string></d4p1:string>
 			</RteComponents>
 			<Status>Resolved</Status>
-			<VersionMode>Latest</VersionMode>
+			<VersionMode>Fixed</VersionMode>
 			<IsComponentInAtProject>true</IsComponentInAtProject>
 		</ProjectComponent>
 	</ProjectComponents>

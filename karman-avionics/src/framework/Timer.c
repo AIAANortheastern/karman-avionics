@@ -9,7 +9,7 @@
 #include <asf.h>
 
 
-static volatile uint32_t timerCount = 0;
+static volatile uint16_t timerCount = 0;
 
 void timer0_callback(void){
     timerCount++;
@@ -23,17 +23,17 @@ void timer_init(void){
     tc_set_overflow_interrupt_level(&TCC0, TC_INT_LVL_LO);
 }
 
-inline uint32_t get_timer_count(void){
+uint16_t get_timer_count(void){
     irqflags_t flags = cpu_irq_save();
-    uint32_t timerVal = timerCount;
+    uint16_t timerVal = timerCount;
     cpu_irq_restore(flags);
     return timerVal;
 }
 
 inline void timer_delay_ms(uint8_t millis)
 {
-    uint32_t timer_begin = get_timer_count();
-    uint32_t timer_end = timer_begin + 2*millis;
+    uint16_t timer_begin = get_timer_count();
+    uint16_t timer_end = timer_begin + 2*millis;
     while(get_timer_count() < timer_end)
     {
         asm("");

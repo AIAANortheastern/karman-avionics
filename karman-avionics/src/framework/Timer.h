@@ -17,7 +17,7 @@ void timer0_callback(void);
 
 void timer_init(void);
 
-uint32_t get_timer_count(void);
+uint16_t get_timer_count(void);
 
 void timer_delay_ms(uint8_t millis);
 

@@ -20,8 +20,8 @@ void init_scheduler(void){
 /* Run the task loop forever */
 void run_scheduler(void){
     static uint8_t i = 0;
-    static volatile uint32_t timeCount = 0;
-    static volatile uint32_t prevTimeCount = 0;
+    static volatile uint16_t timeCount = 0;
+    static volatile uint16_t prevTimeCount = 0;
     /* Loop infinitely, comparing every task's last time to the current time */
     for (;;){
         /* Wait for 500us interrupt */
