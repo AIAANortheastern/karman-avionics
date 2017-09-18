@@ -1,5 +1,5 @@
 /*
- * SensorTask.c
+ * @file SensorTask.c
  *
  * Created: 12/1/2016 7:19:19 PM
  *  Author: Andrew Kaster

@@ -1,5 +1,5 @@
-/*
- * Filename: Spi_service.h
+/**
+ * @file Spi_service.h
  *
  * Created: 11/18/2016 7:33:16 PM
  * Author: Andrew Kaster
@@ -28,7 +28,15 @@
 
 #define SPI_MASTER_QUEUE_SIZE (SPI_MASTER_QUEUE_DEPTH*sizeof(spi_request_t))
 
-/* initializes an SPI master service */
+/** 
+ * init_spi_master_service
+ * @return bool - Whether or not it initialized successfully.
+ * 
+ * @param masterObj - This is the spi master control for the entire program
+ * @param regSet - The register to set?
+ * @param port - The port this is being initialized on.
+ * @param taskName - A function to be run in the background that will actually do the init
+ * initializes an SPI master service */
 Bool init_spi_master_service(spi_master_t *masterObj, USART_t *regSet, PORT_t *port, background_func_t taskName)
 {
     Bool initSuccess = true;

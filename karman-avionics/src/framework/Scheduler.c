@@ -3,6 +3,12 @@
  *
  * Created: 11/5/2016 4:42:56 PM
  *  Author: Andrew Kaster
+ *  
+ *  This is the master of the program that kicks 
+ *  everything off. This is called by the main function
+ *  and this just loops through tasks such that each task
+ *  does its duty or at least part of it and waits for 
+ *  the next call.
  */ 
 #include "Scheduler.h"
 #include "Tasks.h"

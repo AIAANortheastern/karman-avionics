@@ -1,5 +1,5 @@
-/*
- * ms5607_02ba03.h
+/**
+ * @file ms5607_02ba03.h
  *
  * Created: 2/1/2017 7:24:32 PM
  *  Author: Andrew Kaster

@@ -1,5 +1,5 @@
 /*
- * main.c
+ * @file main.c
  *
  * Created: 11/5/2016 9:49:00 PM
  *  Author: Andrew Kaster

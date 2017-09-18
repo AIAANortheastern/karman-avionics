@@ -1,6 +1,6 @@
-/*
- * USBTask.c
- *
+/**
+ * @file USBTask.c
+ * /brief Manages the usb UDC connection and runs the state machine if the device is attached properly.
  * Created: 5/19/2017 4:53:00 PM
  *  Author: Andrew Kaster
  */
