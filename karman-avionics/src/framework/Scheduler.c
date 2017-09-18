@@ -1,5 +1,7 @@
-/*
- * Scheduler.c
+/**
+ * @file Scheduler.c
+ *
+ * @brief Cooperative Scheduler
  *
  * Created: 11/5/2016 4:42:56 PM
  *  Author: Andrew Kaster

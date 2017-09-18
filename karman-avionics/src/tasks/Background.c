@@ -1,7 +1,9 @@
-/*
- * Background.c
+/**
+ * @file Background.c
  *
- * Created: 11/5/2016 6:15:29 PM
+ * @brief Background Function API
+ *
+ *  Created: 11/5/2016 6:15:29 PM
  *  Author: Andrew Kaster 
  *  
  *  This is used to run various functions in the background.

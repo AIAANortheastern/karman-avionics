@@ -1,5 +1,7 @@
-/*
- * Pyrotechnics.h
+/**
+ * @file Pyrotechnics.h
+ *
+ * @brief Pyrotechnics API
  *
  * Created: 11/5/2016 6:17:12 PM
  *  Author: Andrew Kaster

@@ -1,5 +1,7 @@
-/*
- * FlashMem.h
+/**
+ * @file FlashMem.h
+ *
+ * @brief Flash Memory API
  *
  * Created: 3/15/2017 2:56:07 PM
  *  Author: Andrew Kaster

@@ -1,5 +1,7 @@
-/*
- * Tasks.h
+/**
+ * @file Tasks.h
+ *
+ * @brief Task Defintions
  *
  * Created: 11/5/2016 4:50:45 PM
  *  Author: Andrew Kaster

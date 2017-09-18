@@ -1,8 +1,10 @@
-/*
- * Filename: Spi_service.h
+/**
+ * @file Spi_service.h
  *
  * Created: 11/18/2016 7:33:29 PM
  * Author: Andrew Kaster
+ *
+ * @brief SPI App-facing API
  *
  * Description: This is the header for the SPI service utility.
  *              This utility registers a background function, and

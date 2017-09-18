@@ -1,8 +1,10 @@
-/*
- * n25q_512.h
+/**
+ * @file n25q_512.h
+ *
+ * @brief Flash Memory Driver
  *
  * Created: 3/15/2017 12:06:16 AM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
  */ 
 
 

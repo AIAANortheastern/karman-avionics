@@ -1,8 +1,10 @@
 /**
- * @file Spi_service.h
+ * @file Spi_service.c
  *
  * Created: 11/18/2016 7:33:16 PM
  * Author: Andrew Kaster
+ *
+ * @brief SPI App-facing API
  *
  * Description: This is the implementation of the SPI service
  *              This utility registers a background function, and

@@ -1,10 +1,10 @@
-/*
+/**
  * @file n25q_512.c
  *
- * External 512 Mb flash memory.
+ * @brief External 512 Mb flash memory.
  *
  * Created: 3/15/2017 12:06:51 AM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
  */ 
 
 #include <compiler.h>

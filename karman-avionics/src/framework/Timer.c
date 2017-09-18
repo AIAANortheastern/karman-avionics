@@ -1,5 +1,7 @@
-/*
+/**
  * @file Timer.c
+ *
+ * @brief Timer API
  *
  * Created: 11/5/2016 5:24:55 PM
  *  Author: Andrew Kaster

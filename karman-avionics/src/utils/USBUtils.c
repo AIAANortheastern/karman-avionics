@@ -1,6 +1,9 @@
  /**
  * @file USBUtils.c
- * /brief The utility to control the USB port to the main board.
+ * @brief Controls USB Port
+ *
+ * The utility to control the USB port to the main board.
+ *
  * Created: 4/16/2017 12:51:00 AM
  *  Author: Andrew Kaster
  */

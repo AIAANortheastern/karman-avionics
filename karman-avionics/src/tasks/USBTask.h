@@ -1,5 +1,7 @@
-/*
- * USBTask.h
+/**
+ * @file USBTask.h
+ *
+ * @brief USB Task Function
  *
  * Created: 5/19/2017 4:58:00 PM
  *  Author: Andrew Kaster

@@ -1,5 +1,7 @@
-/*
- * USBUtils.h
+/**
+ * @file USBUtils.h
+ *
+ * @brief USB App-facing API 
  *
  * Created: 4/13/2017 6:23:00 PM
  *  Author: Andrew Kaster

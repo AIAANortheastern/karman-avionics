@@ -1,14 +1,17 @@
 /**
- * @file ms5607_02ba03.c
+ * @file ms5607-02ba03.c
  *
  * Created: 2/1/2017 7:50:33 PM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
  *
- * This driver corresponds to Barometric Pressure Sensor, with stainless
+ * @brief Altimeter driver
+ *
+ * Description: This driver corresponds to Barometric Pressure Sensor, with stainless
  * steel cap. 
+ *
  * The barometer is capable of measuring altitude with a resolution of 
  * 20 cm. It uses I2c as its communication interface.
- */ 
+ */
  #include "conf_board.h"
  #include "ms5607-02ba03.h"
  #include "Timer.h"

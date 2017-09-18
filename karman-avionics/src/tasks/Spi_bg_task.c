@@ -1,11 +1,11 @@
-/*
+/**
  * Spi_bg_task.c
  *
  * Created: 11/19/2016 1:53:38 PM
  *  Author: Andrew Kaster
  *  
  *  @file Spi_bg_task.c
- *  /brief This generates the spi master that handles
+ *  @brief This generates the spi master that handles
  *  communication throughout the chip 
  * 
  */ 
