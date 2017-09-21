@@ -101,8 +101,13 @@ Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t
     Bool retVal = false;
     uint16_t word_idx = 0;
     uint8_t byte_idx = 0;
-
-    checksum = 0;
+    
+    if(NULL == checksum || NULL == message)
+    {
+        return retVal;
+    }
+    
+    *checksum = 0;
 
     if(len < 1)
     {
