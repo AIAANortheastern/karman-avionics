@@ -10,38 +10,40 @@
  * steel cap. 
  *
  * The barometer is capable of measuring altitude with a resolution of 
- * 20 cm. It uses I2c as its communication interface.
+ * 20 cm. It uses SPI as its communication interface.
  */
  #include "conf_board.h"
  #include "ms5607-02ba03.h"
  #include "Timer.h"
  #include <string.h>
 
- #define ALTIMETER_RESET            (0x1E)
- #define ALTIMETER_CONVERT_D1_256   (0x40)
- #define ALTIMETER_CONVERT_D1_512   (0x42)
- #define ALTIMETER_CONVERT_D1_1024  (0x44)
- #define ALTIMETER_CONVERT_D1_2048  (0x46)
- #define ALTIMETER_CONVERT_D1_4096  (0x48)
- #define ALTIMETER_CONVERT_D2_256   (0x50)
- #define ALTIMETER_CONVERT_D2_512   (0x52)
- #define ALTIMETER_CONVERT_D2_1024  (0x54)
- #define ALTIMETER_CONVERT_D2_2048  (0x56)
- #define ALTIMETER_CONVERT_D2_4096  (0x58)
- #define ALTIMETER_CONVERT_D1       (ALTIMETER_CONVERT_D1_4096)
- #define ALTIMETER_CONVERT_D2       (ALTIMETER_CONVERT_D2_4096)
- #define ALTIMETER_PROM_BASE        (0xA0) /* 0xA0 to 0xAE */
- #define ALTIMETER_ADC_READ         (0x00)
- #define ALTIMETER_NUM_CAL          (6)
+ #define ALTIMETER_RESET            (0x1E) /**< Reset command */
+ #define ALTIMETER_CONVERT_D1_256   (0x40) /**< D1 Conversion command with 8 bits of data */
+ #define ALTIMETER_CONVERT_D1_512   (0x42) /**< D1 Conversion command with 9 bits of data */
+ #define ALTIMETER_CONVERT_D1_1024  (0x44) /**< D1 Conversion command with 10 bits of data */
+ #define ALTIMETER_CONVERT_D1_2048  (0x46) /**< D1 Conversion command with 11 bits of data */
+ #define ALTIMETER_CONVERT_D1_4096  (0x48) /**< D1 Conversion command with 12 bits of data */
+ #define ALTIMETER_CONVERT_D2_256   (0x50) /**< D2 Conversion command with 8 bits of data */
+ #define ALTIMETER_CONVERT_D2_512   (0x52) /**< D2 Conversion command with 9 bits of data */
+ #define ALTIMETER_CONVERT_D2_1024  (0x54) /**< D2 Conversion command with 10 bits of data */
+ #define ALTIMETER_CONVERT_D2_2048  (0x56) /**< D2 Conversion command with 11 bits of data */
+ #define ALTIMETER_CONVERT_D2_4096  (0x58) /**< D2 Conversion command with 12 bits of data */
+ #define ALTIMETER_CONVERT_D1       (ALTIMETER_CONVERT_D1_4096) /**< Use most ADC bits */
+ #define ALTIMETER_CONVERT_D2       (ALTIMETER_CONVERT_D2_4096) /**< Use most ADC bits */
+ #define ALTIMETER_PROM_BASE        (0xA0) /**< PROM addresses are 0xA0 to 0xAE */
+ #define ALTIMETER_ADC_READ         (0x00) /**< ADC Read command */
+ #define ALTIMETER_NUM_CAL          (6)    /**< There are six calibraiton values */
 
- /* File scope global variable */
+ /** File scope global variable with control data for the altimeter */
  ms5607_02ba03_control_t gAltimeterControl;
 
 /** 
-* ms5607_02ba03_init(spi_master_t *spi_master)
-* spi_master is a reference to the SPI controller for the entire program
-* This is the initializer for the driver. 
-* It initializes buffers for SPI, prepares ports, and initializes the hardware
+* @brief Intialize the Altimeter.
+*
+* spi_master is a reference to the SPI controller for the sensor SPI Bus.
+* This is the initializer for the altimeter driver. 
+* It initializes buffers for SPI and other control data. Hardware initalization is done in init.c
+* Also resets the altimeter and retrieves the configuration data.
 */
 void ms5607_02ba03_init(spi_master_t *spi_master)
 {
@@ -52,30 +54,27 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
     gAltimeterControl.send_complete = false;
 
-    /* Set chip select pin high. */
-    gAltimeterControl.cs_info.csPort->DIRSET = gAltimeterControl.cs_info.pinBitMask;
-    gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask;
-
     memset((void *)(&(gAltimeterControl.raw_vals)), 0, sizeof(gAltimeterControl.raw_vals));
     memset((void *)(&(gAltimeterControl.final_vals)), 0, sizeof(gAltimeterControl.final_vals));
 
-    /* Call initial functions to prepare altimeter. */
+    /** Call initial functions to prepare altimeter. */
     ms5607_02ba03_reset();
-    timer_delay_ms(3); /* Delay 3 ms to allow for reset */
+    timer_delay_ms(3); /** Delay 3 ms to allow for reset */
     ms5607_02ba03_read_prom();
 }
 
 
 /**  
-* BLOCKING reset function
+* @brief BLOCKING reset function
+*
 * As in it waits for the reset to return and halts all other processing until
-* The reset is complete.
+* the reset is complete.
 */
  void ms5607_02ba03_reset(void)
  {
     gAltimeterControl.spi_send_buffer[0] = ALTIMETER_RESET;
 
-    /* Send BLOCKING request as this is done during initialization */
+    /** Send BLOCKING request as this is done during initialization */
     spi_master_blocking_send_request(gAltimeterControl.spi_master,
                        &(gAltimeterControl.cs_info),
                        gAltimeterControl.spi_send_buffer,
@@ -86,19 +85,15 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  }
 
  /** 
-  * Function ms5607_02ba03_read_prom
-  * This function reads directly from the PROM memory
-  * Where PROM is Programmable Read Only Memory
-  * 
-  * It reads 6 chunks of 16 bits of data
-  * 
-  * 128 bits of calibration data? No, only 6*16 bits 
-  * 
+  * @brief Read configuratin values from the Altimeter PROM
+  *
+  * Where PROM is Programmable Read Only Memory 
+  * It reads 6 16 bit words of data.
   */
  void ms5607_02ba03_read_prom(void)
  {
-    /* Grab addresses 1 through 6 of PROM (datasheet page 11) */
-    /* Each one is 16 bits. */
+    /** Grab addresses 1 through 6 of PROM (datasheet page 11) */
+    /** Each one is 16 bits. */
     memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
     gAltimeterControl.spi_send_buffer[0] = ALTIMETER_PROM_BASE + 0x2; /* 1st cal value*/
     gAltimeterControl.spi_send_buffer[3] = ALTIMETER_PROM_BASE + 0x4;
@@ -107,7 +102,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     gAltimeterControl.spi_send_buffer[12] = ALTIMETER_PROM_BASE + 0xA;
     gAltimeterControl.spi_send_buffer[15] = ALTIMETER_PROM_BASE + 0xC;
 
-    /* Send BLOCKING request as this is done during initialization */
+    /** Send BLOCKING request as this is done during initialization */
     spi_master_blocking_send_request(gAltimeterControl.spi_master,
                                     &(gAltimeterControl.cs_info),
                                     gAltimeterControl.spi_send_buffer,
@@ -116,8 +111,10 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                                     3 * ALTIMETER_NUM_CAL,
                                     &(gAltimeterControl.send_complete));
 
-	/* The above code puts the prom into read only mode. When it is done the spi_recv_buffer
+	/** The above code puts the prom into read only mode. When it is done the spi_recv_buffer
 	 * Should be written to allowing us to assign specific variables to the parts of that data*/
+
+    /** Retrieve the calibration values from the spi receive buffer. */
     gAltimeterControl.calibration_vals.sens = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[1]));
     gAltimeterControl.calibration_vals.offset = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[4]));
     gAltimeterControl.calibration_vals.tcs = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[7]));
@@ -127,7 +124,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  }
 
  /** 
-  * Get the pressure value and convert it to reasonable units.
+  * @brief Get the pressure value and convert it to reasonable units.
+  *
   * After calling this you have to wait 8.2 ms between conversion and ADC read 
   */
  void ms5607_02ba03_d1_convert(void)
@@ -146,8 +144,10 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  }
 
 /** 
- *This gets the temperature value and converts it into reasonable units
- *It partially relies on the pressure value and must be called after the d1 convert is called
+ * @brief Get the temperature value and converts it into reasonable units
+ *
+ * After calling this you have to wait 8.2 ms between conversion and ADC read 
+ * It partially relies on the pressure value and must be called after the d1 convert is called
  *
  */
  void ms5607_02ba03_d2_convert(void)
@@ -166,10 +166,12 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  }
 
  /** 
-  * ms5607_02ba03_read_data 
-  * This gets the pressure and temp data and puts it into the 24 bit buffer 
-  * read from below
-  * 24 bits pressure/temperature NOTE: Always convert d1 and d2 first 
+  * @brief Enqueue SPI Request for an ADC read.
+  *
+  * This tells the SPI library to get the pressure and temp data and puts it
+  * into the recieve buffer
+  *
+  * 24 bits for pressure/temperature. NOTE: Always convert d1 and d2 first 
   */
  void ms5607_02ba03_read_data(void)
  {
@@ -187,6 +189,9 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  }
 
 /** 
+ * @brief Helper function to re-order bytes to use as a 32 bit value.
+ *
+ *
  * This is what is called to actually pull the data out of the buffer the data is pushed to
  */
  static inline uint32_t get_data_from_buffer24(volatile uint8_t *buff)
@@ -194,8 +199,9 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     return (uint32_t)(((uint32_t)buff[1] << 16) | ((uint32_t)buff[2] << 8) | (uint32_t)buff[3]);
  }
 
-/** 
- * ms5607_02ba03_get_data
+/**
+ * @brief State machine for Altimeter
+ * 
  * This function is called repeatedly from SensorTask.c in tasks 
  * When this is called it does its current states job and increments 
  * this objects state to the next value. 
@@ -204,15 +210,15 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  */
  sensor_status_t ms5607_02ba03_get_data(void)
  {
-    /* 1. Enqueue D1 convert command */
-    /* 2. Wait for that to finish */
-    /* 3. Wait additional 8.2ms for conversion */
-    /* 4. Do adc read to get D1 */
-    /* 5. Enqueue D2 convert command */
-    /* 6. Wait for that to finish */
-    /* 7. Wait additional 8.2ms for conversion */
-    /* 8. Do adc read to get D2 */
-    /* 9. Calculate new temperature and pressure */
+    /** 1. Enqueue D1 convert command */
+    /** 2. Wait for that to finish */
+    /** 3. Wait additional 8.2ms for conversion */
+    /** 4. Do adc read to get D1 */
+    /** 5. Enqueue D2 convert command */
+    /** 6. Wait for that to finish */
+    /** 7. Wait additional 8.2ms for conversion */
+    /** 8. Do adc read to get D2 */
+    /** 9. Calculate new temperature and pressure */
 
     sensor_status_t returnStatus = SENSOR_BUSY;
 
@@ -284,7 +290,9 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     return returnStatus;
  }
 
-/** 
+/**
+ * @brief Convert raw adc temp value to sensible units. 
+ * 
  * This does some fun math to figure out the temp.
  * If you want details I suggest seeing the driver doc 
  *
@@ -299,6 +307,8 @@ void ms5607_02ba03_calculate_temp(void)
 }
 
 /** 
+ * @brief Convert raw adc pressure value to sensible units. 
+ *
  * This does some fun math to figure out the pressure.
  * If you want details I suggest seeing the driver doc 
  *

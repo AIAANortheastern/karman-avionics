@@ -16,23 +16,35 @@
 #include "Tasks.h"
 #include "Timer.h"
 
+/** Pointer to the task array from Task.c */
 static simple_task_t *taskArry;
+/** The number of tasks in the task array from Task.c */
 static uint8_t numTasks;
 
-/* perform scheduler initialization tasks */
+/**
+    @brief Intialize the scheduler.
+
+    Sets up the scheduler's global data.
+*/
 void init_scheduler(void){
     taskArry = get_task_list();
     numTasks = get_num_tasks();
 }
 
-/* Run the task loop forever */
+/**  
+    @brief Main Scheduler function.
+
+    Runs in an infinite loop, calling each task at its requested interval,
+    When possible. When there is time, if not possible.
+*/
 void run_scheduler(void){
+    
     static uint8_t i = 0;
     static volatile uint32_t timeCount = 0;
     static volatile uint32_t prevTimeCount = 0;
-    /* Loop infinitely, comparing every task's last time to the current time */
+    /** Loop infinitely, comparing every task's last time to the current time */
     for (;;){
-        /* Wait for 500us interrupt */
+        /** Wait for 500us interrupt */
         do {
             timeCount = get_timer_count();
         } while (timeCount == prevTimeCount);
@@ -41,15 +53,12 @@ void run_scheduler(void){
 
         for(i = 0; i < numTasks; i++)
         {
-            /* First, check if the task is not a background task */
-            /* Run the background task unconditionally */
-            if(taskArry[i].taskFreq == TASK_FREQ_BACKGROUND)
-            {
-                taskArry[i].task();
-                taskArry[i].lastCount = timeCount;
-            }
-            /* Then see if it's time to run the task or not */
-            else if ((timeCount - taskArry[i].lastCount) > taskArry[i].taskFreq)
+            /** First, check if the task is not a background task */
+            /** Run the background task unconditionally, otherwise 
+              * see if it's time to run the task or not 
+            */
+            if((taskArry[i].taskFreq == TASK_FREQ_BACKGROUND) ||
+               ((timeCount - taskArry[i].lastCount) > taskArry[i].taskFreq))
             {
                 taskArry[i].task();
                 taskArry[i].lastCount = timeCount;
