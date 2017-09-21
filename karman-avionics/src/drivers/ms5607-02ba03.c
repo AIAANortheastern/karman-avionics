@@ -320,3 +320,10 @@ void ms5607_02ba03_calculate_press(void)
 
 }
 
+void function_1()
+{
+	while(0)
+	{
+		;
+	}
+}
