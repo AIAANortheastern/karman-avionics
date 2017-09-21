@@ -1,8 +1,15 @@
-/*
- * Tasks.c
+/**
+ * @file Tasks.c
  *
- * Created: 11/5/2016 4:42:56 PM
+ * @brief Task List Defintion
+ *
+ *  Created: 11/5/2016 4:42:56 PM
  *  Author: Andrew Kaster
+ *  
+ *  This initializes the tasts that the program
+ *  will loop through from scheduler.c
+ *  Each task has a specific job or "task" if you will
+ *  that it will do as the scheduler loops through this list.
  */ 
 
 #include "Tasks.h"

@@ -1,5 +1,7 @@
-/*
- * Spi_bg_task.h
+/**
+ * @file Spi_bg_task.h
+ *
+ * @brief SPI Backround API
  *
  * Created: 11/19/2016 1:45:09 PM
  *  Author: Andrew

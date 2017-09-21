@@ -1,5 +1,7 @@
-/*
- * SensorTask.h
+/**
+ * @file SensorTask.h
+ *
+ * @brief Sensor Task Function and Intialization
  *
  * Created: 12/1/2016 7:19:55 PM
  *  Author: Andrew Kaster

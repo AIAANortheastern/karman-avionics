@@ -1,8 +1,12 @@
-/*
- * FlashMem.c
+/**
+ * @file FlashMem.c
  *
  * Created: 3/16/2017 7:22:59 PM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
+ * 
+ * @brief Flash Memory API
+ *
+ *
  */ 
 
 #include "FlashMem.h"

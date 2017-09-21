@@ -1,8 +1,14 @@
-/*
- * Background.c
+/**
+ * @file Background.c
  *
- * Created: 11/5/2016 6:15:29 PM
+ * @brief Background Function API
+ *
+ *  Created: 11/5/2016 6:15:29 PM
  *  Author: Andrew Kaster 
+ *  
+ *  This is used to run various functions in the background.
+ *  Check if a function is a background function
+ *  Create a new background function with a function sent to it
  */ 
 
 
@@ -62,6 +68,7 @@ Bool is_background_function(background_func_t key)
         if(backgroundFuncArry[idx] == key)
         {
             found = true;
+			break;
         }
     }
     return found;

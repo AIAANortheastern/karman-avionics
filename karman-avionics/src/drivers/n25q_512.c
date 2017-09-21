@@ -1,10 +1,10 @@
-/*
- * n25q_512.c
+/**
+ * @file n25q_512.c
  *
- * External 512 Mb flash memory.
+ * @brief External 512 Mb flash memory.
  *
  * Created: 3/15/2017 12:06:51 AM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
  */ 
 
 #include <compiler.h>
@@ -47,7 +47,9 @@ spi_master_t extflashSpiMaster;
 
 extflash_ctrl_t gExtflashControl;
 
-/* Initialize all things the external flash needs.*/
+/** 
+ * Initialize all things the external flash needs.
+ */
 void init_extflash(void)
 {
     /* Initialize SPI interface on port C */
@@ -268,7 +270,7 @@ Bool extflash_write_enable(Bool block)
      return retVal;
 }
 
-/* Send a valid number of bytes to the flash memeory. The caller is responsible for write enable and for read status register */
+/* Send a valid number of bytes to the flash memory. The caller is responsible for write enable and for read status register */
 /* For internal use only! use extflash_write instead! It has the proper error checking*/
 Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_offset, Bool block)
 {

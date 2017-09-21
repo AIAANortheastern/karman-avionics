@@ -1,5 +1,7 @@
-/*
- * RadioTask.c
+/**
+ * @file RadioTask.c
+ *
+ * @brief Radio Task Function and Intialization
  *
  * Created: 12/4/2016 10:19:36 PM
  *  Author: Andrew Kaster

@@ -1,5 +1,7 @@
-/*
- * ISRUtils.h
+/**
+ * @file ISRUtils.h
+ *
+ * @brief Atomic Access Routines
  *
  * Created: 3/16/2017 8:04:38 PM
  *  Author: Andrew Kaster
@@ -11,6 +13,7 @@
 
 #include <asf.h>
 
+/** Use to guarantee atomic access to a uint32 variable */
 static inline uint32_t isrutils_check_shared_u32( volatile uint32_t *var)
 {
     uint32_t varVal;

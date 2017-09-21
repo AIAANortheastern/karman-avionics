@@ -1,9 +1,17 @@
-/*
- * ms5607_02ba03.c
+/**
+ * @file ms5607-02ba03.c
  *
  * Created: 2/1/2017 7:50:33 PM
- *  Author: Andrew Kaster
- */ 
+ * Author: Andrew Kaster
+ *
+ * @brief Altimeter driver
+ *
+ * Description: This driver corresponds to Barometric Pressure Sensor, with stainless
+ * steel cap. 
+ *
+ * The barometer is capable of measuring altitude with a resolution of 
+ * 20 cm. It uses I2c as its communication interface.
+ */
  #include "conf_board.h"
  #include "ms5607-02ba03.h"
  #include "Timer.h"
@@ -29,6 +37,12 @@
  /* File scope global variable */
  ms5607_02ba03_control_t gAltimeterControl;
 
+/** 
+* ms5607_02ba03_init(spi_master_t *spi_master)
+* spi_master is a reference to the SPI controller for the entire program
+* This is the initializer for the driver. 
+* It initializes buffers for SPI, prepares ports, and initializes the hardware
+*/
 void ms5607_02ba03_init(spi_master_t *spi_master)
 {
     gAltimeterControl.cs_info.csPort = &ALTIMETER_PORT;
@@ -52,7 +66,11 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
 }
 
 
-/* BLOCKING reset function */
+/**  
+* BLOCKING reset function
+* As in it waits for the reset to return and halts all other processing until
+* The reset is complete.
+*/
  void ms5607_02ba03_reset(void)
  {
     gAltimeterControl.spi_send_buffer[0] = ALTIMETER_RESET;
@@ -67,7 +85,16 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                        &(gAltimeterControl.send_complete));
  }
 
- /* 128 bits of calibration data? No, only 6*16 bits */
+ /** 
+  * Function ms5607_02ba03_read_prom
+  * This function reads directly from the PROM memory
+  * Where PROM is Programmable Read Only Memory
+  * 
+  * It reads 6 chunks of 16 bits of data
+  * 
+  * 128 bits of calibration data? No, only 6*16 bits 
+  * 
+  */
  void ms5607_02ba03_read_prom(void)
  {
     /* Grab addresses 1 through 6 of PROM (datasheet page 11) */
@@ -89,6 +116,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                                     3 * ALTIMETER_NUM_CAL,
                                     &(gAltimeterControl.send_complete));
 
+	/* The above code puts the prom into read only mode. When it is done the spi_recv_buffer
+	 * Should be written to allowing us to assign specific variables to the parts of that data*/
     gAltimeterControl.calibration_vals.sens = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[1]));
     gAltimeterControl.calibration_vals.offset = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[4]));
     gAltimeterControl.calibration_vals.tcs = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[7]));
@@ -97,7 +126,10 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     gAltimeterControl.calibration_vals.temp_sens = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[16]));
  }
 
- /* Wait 8.2 ms between conversion and ADC read */
+ /** 
+  * Get the pressure value and convert it to reasonable units.
+  * After calling this you have to wait 8.2 ms between conversion and ADC read 
+  */
  void ms5607_02ba03_d1_convert(void)
  {
     memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
@@ -113,6 +145,11 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     &gAltimeterControl.send_complete);
  }
 
+/** 
+ *This gets the temperature value and converts it into reasonable units
+ *It partially relies on the pressure value and must be called after the d1 convert is called
+ *
+ */
  void ms5607_02ba03_d2_convert(void)
  {
      memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
@@ -128,7 +165,12 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
      &gAltimeterControl.send_complete);
  }
 
- /* 24 bits pressure/temperature NOTE: Always convert d1 and d2 first */
+ /** 
+  * ms5607_02ba03_read_data 
+  * This gets the pressure and temp data and puts it into the 24 bit buffer 
+  * read from below
+  * 24 bits pressure/temperature NOTE: Always convert d1 and d2 first 
+  */
  void ms5607_02ba03_read_data(void)
  {
         memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
@@ -144,12 +186,22 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         &gAltimeterControl.send_complete);
  }
 
+/** 
+ * This is what is called to actually pull the data out of the buffer the data is pushed to
+ */
  static inline uint32_t get_data_from_buffer24(volatile uint8_t *buff)
  {
     return (uint32_t)(((uint32_t)buff[1] << 16) | ((uint32_t)buff[2] << 8) | (uint32_t)buff[3]);
  }
 
-
+/** 
+ * ms5607_02ba03_get_data
+ * This function is called repeatedly from SensorTask.c in tasks 
+ * When this is called it does its current states job and increments 
+ * this objects state to the next value. 
+ * Eventually this will return successful and the data will be pulled out of the
+ * appropriate global buffers.
+ */
  sensor_status_t ms5607_02ba03_get_data(void)
  {
     /* 1. Enqueue D1 convert command */
@@ -232,6 +284,11 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     return returnStatus;
  }
 
+/** 
+ * This does some fun math to figure out the temp.
+ * If you want details I suggest seeing the driver doc 
+ *
+ */
 void ms5607_02ba03_calculate_temp(void)
 {    
     /* dT = D2 - TREF = D2 - C5 * 2^8 */
@@ -241,6 +298,11 @@ void ms5607_02ba03_calculate_temp(void)
     gAltimeterControl.final_vals.temp = (int32_t)(2000 + ((gAltimeterControl.raw_vals.t_diff * (uint32_t)gAltimeterControl.calibration_vals.temp_sens) >> 23));
 }
 
+/** 
+ * This does some fun math to figure out the pressure.
+ * If you want details I suggest seeing the driver doc 
+ *
+ */
 void ms5607_02ba03_calculate_press(void)
 {
     int64_t press_offs, press_sens;

@@ -1,8 +1,12 @@
-/*
- * ms5607_02ba03.h
+/**
+ * @file ms5607-02ba03.h
  *
  * Created: 2/1/2017 7:24:32 PM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
+ *
+ * \brief Altimeter Driver
+ *
+ * Driver for the MS5607-02BA03 temperature/pressure module.
  */ 
 
 

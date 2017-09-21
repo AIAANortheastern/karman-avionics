@@ -1,5 +1,10 @@
-/*
- * SensorDefs.h
+/**
+ * @file SensorDefs.h
+ *
+ * @brief Put all common sensor declarations here
+ *
+ * Should hold all data structures that depends on every sensor,
+ * or on multiple sensors. 
  *
  * Created: 2/15/2017 8:14:23 PM
  *  Author: Andrew

@@ -1,7 +1,9 @@
-/*
- * Background.h
+/**
+ * @file Background.h
  *
- * Created: 11/5/2016 6:16:17 PM
+ * @brief Background Function API
+ *
+ *  Created: 11/5/2016 6:16:17 PM
  *  Author: Andrew Kaster
  */ 
 

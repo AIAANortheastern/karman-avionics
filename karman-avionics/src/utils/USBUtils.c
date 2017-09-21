@@ -1,5 +1,8 @@
-/*
- * USBUtils.c
+ /**
+ * @file USBUtils.c
+ * @brief Controls USB Port
+ *
+ * The utility to control the USB port to the main board.
  *
  * Created: 4/16/2017 12:51:00 AM
  *  Author: Andrew Kaster
@@ -69,7 +72,7 @@ bool usb_utils_cdc_enabled(uint8_t port)
     return true;
 }
 
-/* called once udc_detach is finsihed */
+/* called once udc_detach is finished */
 void usb_utils_cdc_disabled(uint8_t port)
 {
     gIsUSBActive = false;
