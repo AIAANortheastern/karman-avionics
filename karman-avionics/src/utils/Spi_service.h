@@ -33,43 +33,42 @@
 #define SPI_MASTER_QUEUE_DEPTH (10)
 
 
-/* Information about the chip select pin for the device to be contacted */
+/** Information about the chip select pin for the device to be contacted */
 typedef struct
 {
-    PORT_t      *csPort;        /* The port that the chip select pin is on */
-    uint8_t     pinBitMask;     /* The bitmask for the pin. (1 << pinNum) */
+    PORT_t      *csPort;        /**< The port that the chip select pin is on */
+    uint8_t     pinBitMask;     /**< The bitmask for the pin. (1 << pinNum) */
 } chip_select_info_t;
 
-/* Structure to define parameters to give to the SPI service */
+/** Structure to define parameters to give to the SPI service */
 typedef struct  
 {
-  chip_select_info_t    csInfo;     /* Information about chip select pin */
-  volatile void         *sendBuff;  /* Buffer to send data from */
-  uint16_t               sendLen;    /* How many bytes to send */
-  volatile uint8_t      bytesSent;  /* How many bytes have already been sent */
-  volatile void         *recvBuff;  /* Buffer to store the result in */
-  uint16_t               recvLen;    /* How many bytes to expect from the device */
-  volatile uint8_t      bytesRecv;  /* How many bytes have actually been recieved */
-  volatile Bool         *complete;   /* Complete flag */
-  Bool                  valid;      /* Valid flag. Is this a valid request? */
+  chip_select_info_t    csInfo;     /**< Information about chip select pin */
+  volatile void         *sendBuff;  /**< Buffer to send data from */
+  uint16_t               sendLen;   /**< How many bytes to send */
+  volatile uint8_t      bytesSent;  /**< How many bytes have already been sent */
+  volatile void         *recvBuff;  /**< Buffer to store the result in */
+  uint16_t               recvLen;   /**< How many bytes to expect from the device */
+  volatile uint8_t      bytesRecv;  /**< How many bytes have actually been recieved */
+  volatile Bool         *complete;  /**< Complete flag */
+  Bool                  valid;      /**< Valid flag. Is this a valid request? */
 } spi_request_t;
 
-/* Struct to define the SPI interface to use. Note that there needs to exist one
+/** @brief Struct to define the SPI interface to use. 
+ *
+ * Note that there needs to exist one
  * for every port that needs a Master. Note that for best effect, this should be declared
  * globally. We're in C, so the idea of a singleton doesn't really work, but that's intent.
  */
 typedef struct
 {
-    USART_t *master; /* The SPI module associated with this struct */
-    PORT_t *port; /* The port the master is on */
-
+    USART_t *master; /**< The USART module associated with this master */
+    PORT_t *port;    /**< The port the master is on */
     /* The fields necessary to implement a queue. An array, and two indecies */
-    volatile spi_request_t  requestQueue[SPI_MASTER_QUEUE_DEPTH];
-    volatile uint8_t        front;
-    volatile uint8_t        back;
-
-    /* Flag to indicate if the master is busy or not */
-    volatile Bool           masterBusy;
+    volatile spi_request_t  requestQueue[SPI_MASTER_QUEUE_DEPTH]; /**< Array to hold queue items */
+    volatile uint8_t        front; /**< Index of the front of the queue */
+    volatile uint8_t        back;  /**< Index of the back of the queue */
+    volatile Bool           masterBusy; /**< Flag to indicate if the master is busy or not */
 } spi_master_t;
 
 Bool init_spi_master_service(spi_master_t *master,
@@ -99,8 +98,9 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                       uint16_t recvLen,
                                       volatile Bool *complete);
 
-
+/** Pull the chip select pin high to de-select the device */
 #define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTSET = reqPtr->csInfo.pinBitMask)
+/** Set the master's complete flag to true so it is ready to initiate a new request */
 #define spi_master_request_complete(master)     (*(master->requestQueue[master->front].complete) = true)
 
 #endif /* SPI_SERVICE_H_ */

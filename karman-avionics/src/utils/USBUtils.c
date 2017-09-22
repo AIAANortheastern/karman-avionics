@@ -157,7 +157,7 @@ void dump_to_usb(void) {
         while (!udi_cdc_is_tx_ready()) {
           asm volatile ("nop \n\t");
         }
-        udi_cdc_write_buf(&packet, sizeof(entry));
+        udi_cdc_write_buf(&packet, sizeof(packet));
         //udi_cdc_putc, getc, write_buff, read_buff
       }
       break;

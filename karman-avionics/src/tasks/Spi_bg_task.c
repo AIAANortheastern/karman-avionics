@@ -5,8 +5,8 @@
  *  Author: Andrew Kaster
  *  
  *  @file Spi_bg_task.c
- *  @brief This generates the spi master that handles
- *  communication throughout the chip 
+ *  @brief Manages all SPI Masters
+ *
  * 
  */ 
 #include <asf.h>
@@ -14,8 +14,15 @@
 #include "Spi_service.h"
 #include "Background.h"
 
+/** Array of pointers to each SPI master in the system. */
 spi_master_t *gSpiMasters[MAX_SPI_MASTER_MODULES];
 
+/**
+ * @brief Adds an SPI Master object to the array 
+ *
+ * @param master The SPI master to add to the processing list
+ * @return True on success, false on failure
+ */
 Bool spi_bg_add_master(spi_master_t *master)
 {
     static uint8_t currMasterIdx = 0;
@@ -34,18 +41,21 @@ Bool spi_bg_add_master(spi_master_t *master)
 }
 
 
-/* This is a background task that loops over the array of SPI master modules and */
-/* attempts to initiate a request on the idle ones. If there is no request in the queue */
-/* for the currently indexed master, it should do nothing, and simply move onto the next one. */
+/**
+ * @brief Background task for servicing SPI Master queues
+ *
+ * This is a background task that loops over the array of SPI master modules and
+ * attempts to initiate a request from the front of the queue on the idle ones. 
+ * If there is no request in the queue for the currently indexed master, it
+ * should do nothing, and simply move onto the next one. 
+*/
 void spi_bg_task(void)
 {
-    static uint8_t idx = 0;
-    static spi_master_t *currMaster = NULL;
+    uint8_t idx = 0;
+    spi_master_t *currMaster = gSpiMasters[0];
 
-    for(idx = 0; idx < MAX_SPI_MASTER_MODULES; idx++)
+    for(idx = 0; idx < MAX_SPI_MASTER_MODULES; idx++, currMaster++)
     {
-        currMaster = gSpiMasters[idx];
-
         if(currMaster != NULL)
         {
             if(!currMaster->masterBusy)

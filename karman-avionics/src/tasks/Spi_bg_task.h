@@ -13,7 +13,8 @@
 
 #include "Spi_service.h"
 
-#define MAX_SPI_MASTER_MODULES (5)
+/** How many SPI interfaces we are using */
+#define MAX_SPI_MASTER_MODULES (3)
 
 extern spi_master_t *gSpiMasters[MAX_SPI_MASTER_MODULES];
 

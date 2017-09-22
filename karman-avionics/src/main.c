@@ -18,7 +18,10 @@
 #include "Scheduler.h"
 #include "Timer.h"
 
-/** @brief It's main. 
+/**
+ * @brief int main(void)
+ *
+ * Doxygen really hates that attribute... :/
  *
  * Gets called after we have fun in .init0 through .init9
  * Intialize all the ASF boring stuff. Intialize the timer, and the
@@ -26,7 +29,7 @@
  * Then initialize the scheduler, never to return. Otherwise we've got problems.
  *
 */
-int main(void) __attribute__((OS_main)) 
+__attribute__((OS_main)) int main(void)
 {
     pmic_init(); /** Enable the Programmable Multiple Interrupt Controller */
     sysclk_init(); /** Enable the system clock (32MHz). See conf_clock.h */
