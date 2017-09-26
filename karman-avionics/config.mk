@@ -43,7 +43,7 @@ BUILD_DIR = Debug/
 PRJ_PATH =
 
 # Microcontroller: atxmega128a1, atmega128, attiny261, etc.
-MCU = atxmega128a3u
+MCU = atxmega256a3u
 
 # Application target name. Given with suffix .a for library and .elf for a
 # standalone application.
