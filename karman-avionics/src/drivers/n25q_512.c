@@ -378,7 +378,7 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     uint16_t buffer_offset = 0;
 
     /* Validate address. Not too big and won't overflow the max number of bytes. */
-    if((addr > 0x4000000) || ((addr + num_bytes) > 0x4000000))
+    if((addr > EXTFLASH_SIZE) || ((addr + num_bytes) > EXTFLASH_SIZE))
     {
         return true;
     }

@@ -15,8 +15,9 @@
 #include "Spi_service.h"
 #include "FlashMem.h"
 
-#define EXTFLASH_CMDADDR_SIZE (5) /**< 5 bytes for 1 byte command and 4 byte address */
-#define EXTFLASH_PAGE_SIZE      (0x100) /**< Writes that cross page boundary cause unwanted behavior */
+#define EXTFLASH_CMDADDR_SIZE   (5)         /**< 5 bytes for 1 byte command and 4 byte address */
+#define EXTFLASH_PAGE_SIZE      (0x100)     /**< Writes that cross page boundary cause unwanted behavior */
+#define EXTFLASH_SIZE           (0x1000000) /**< 128 Mebibit */
 
 /** Control structure. */
 typedef struct  
