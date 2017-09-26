@@ -12,11 +12,13 @@
 #define SENSORTASK_H_
 
 #include "Spi_service.h"
+
+/** Return for all sensor state machines */
 typedef enum
 {
-    SENSOR_WAITING,
-    SENSOR_BUSY,
-    SENSOR_COMPLETE,
+    SENSOR_WAITING,     /**< In a sleep state */
+    SENSOR_BUSY,        /**< Transaction in progress */
+    SENSOR_COMPLETE,    /**< New data available */
 } sensor_status_t;
 
 void sensor_task_func(void);

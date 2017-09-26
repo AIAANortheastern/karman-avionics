@@ -119,7 +119,7 @@ void extflash_initialize_regs(void)
  *
  * @param addr Address to read from
  * @param num_bytes How many bytes to read
- * @param buf[out] Buffer to store the data in
+ * @param[out] buf Buffer to store the data in
  * @param block Use blocking/nonblocking path
  * @return false--No error, true--error
  *
@@ -213,7 +213,7 @@ Bool extflash_get_status(void)
 /** 
    @brief Read the status register of the flash memory. 
  
-   @param buf[out] Place to store status register value
+   @param[out] buf Place to store status register value
    @param block Use blocking/nonblocking path
 
    Before writing to any register or any memory, the write enable command must be sent.
@@ -347,6 +347,7 @@ Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_
  * @param num_bytes Number of bytes to write
  * @param buf Buffer to send bytes from 
  * @param block Use blocking/nonblocking path
+ * @return True on failure, false on success 
  *
  * Cannot write more than 65536 bytes. Why we would ever need to write that many is a mystery.
 */

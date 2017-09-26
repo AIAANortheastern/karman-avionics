@@ -16,11 +16,11 @@
 /** How many SPI interfaces we are using */
 #define MAX_SPI_MASTER_MODULES (3)
 
+/** Array of pointers to each SPI master in the system. */
 extern spi_master_t *gSpiMasters[MAX_SPI_MASTER_MODULES];
 
 void spi_bg_task(void);
 
 Bool spi_bg_add_master(spi_master_t *master);
-
 
 #endif /* SPI_BG_TASK_H_ */

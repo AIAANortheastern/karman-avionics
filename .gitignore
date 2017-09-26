@@ -37,13 +37,16 @@ ehthumbs.db
 Thumbs.db
 *.swp
 
+# Above is taken from https://gist.github.com/octocat/9257657
+# Below are custom
+
 # Documentation #
 #################
 doxygen/html/
 doxygen/latex/
+doxygen/doxygen_warnings.txt
 
-#Above is taken from https://gist.github.com/octocat/9257657
-#Below are custom
+# Build Artifacts and VS garbage
 *.d
 *Debug*
 *.atsuo

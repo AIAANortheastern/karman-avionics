@@ -39,7 +39,8 @@
  * @param regSet - The hardware peripheral assocaited with the SPI bus
  * @param port - The port this is being initialized on.
  * @param taskName - A function to be run in the background that process its queue
- * initializes an SPI master servicer object */
+ * initializes an SPI master servicer object
+ */
 Bool init_spi_master_service(spi_master_t *masterObj, USART_t *regSet, PORT_t *port, background_func_t taskName)
 {
     Bool initSuccess = true;
@@ -70,7 +71,7 @@ Bool init_spi_master_service(spi_master_t *masterObj, USART_t *regSet, PORT_t *p
  * @param csInfo Chip select information for the hardware device to contact
  * @param sendBuff Caller's buffer containing the data to be sent out
  * @param sendLen Number of bytes to send
- * @param recvBuff[out] Caller's buffer to store response from device into
+ * @param[out] recvBuff Caller's buffer to store response from device into
  * @param recvLen Number of bytes to receive
  * @param complete Flag to set true when the transaction is complete
  * @return True on success, false on failure
@@ -299,7 +300,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
  * @param csInfo Chip select information for the hardware device to contact
  * @param sendBuff Caller's buffer containing the data to be sent out
  * @param sendLen Number of bytes to send
- * @param recvBuff[out] Caller's buffer to store response from device into
+ * @param[out] recvBuff Caller's buffer to store response from device into
  * @param recvLen Number of bytes to receive
  * @param complete Flag to set true when the transaction is complete
  * @return True on success, false on failure

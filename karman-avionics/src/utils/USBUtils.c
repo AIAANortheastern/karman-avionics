@@ -4,11 +4,14 @@
  *
  * The utility to control the USB port to the main board.
  *
+ * TODO list: Finish 2 state machines.
+ *            Create functions to make each type of packet.
+ *
  * Created: 4/16/2017 12:51:00 AM
  *  Author: Andrew Kaster
  */
 
-/* http://www.atmel.com/Images/Atmel-42336-ASF-USB-Stack-Manual_ApplicationNote_AT09331.pdf */
+/** http://www.atmel.com/Images/Atmel-42336-ASF-USB-Stack-Manual_ApplicationNote_AT09331.pdf */
 
 #include "USBUtils.h"
 #include "conf_usb.h"
@@ -16,17 +19,25 @@
 #include "Timer.h"
 #include <compiler.h>
 
+/** Size of the USB message buffer. TX/RX? TODO */
 #define USB_MSG_BUF_SIZE (200)
 
 /* Global Variables */
-Bool gIsUSBActive;
-volatile Bool gIsUSBConnected = false;
-volatile uint32_t gUSBConnectTime; /* For debounce */
-uint8_t gUSBMsgBuf[USB_MSG_BUF_SIZE];
+Bool gIsUSBActive; /**< Flag to know if USB is ready for communication */
+volatile Bool gIsUSBConnected = false; /**< Flag to know if USB sense pin is high */
+volatile uint32_t gUSBConnectTime; /**< Time for debouncing USB sense pin */
+uint8_t gUSBMsgBuf[USB_MSG_BUF_SIZE]; /**< For holding USB data */
 
-usb_utils_state_t gUsbUtilsState;
-usb_utils_messageparse_state_t gUSBUtilsMessageState;
+usb_utils_state_t gUsbUtilsState; /**< Main state machine for USB */
+usb_utils_messageparse_state_t gUSBUtilsMessageState; /**< TX message parsing state machine */
 
+/** 
+ * @brief Initialize the USB driver
+ *
+ * Setup Interrupt on the usb sense pin to allow usb connection
+ * and avoid needless processsing when its disconnected. 
+ * Also start the ASF usb stack.
+ */
 void init_usb(void)
 {
     gIsUSBActive = false;
@@ -46,8 +57,14 @@ void init_usb(void)
     udc_start();
 }
 
-/* Custom VBUS monitoring */
-/* http://www.microchip.com/forums/m616629.aspx */
+/** 
+ * @brief Custom VBUS monitoring Interrupt
+ *
+ * Set variable to true if we have a connection, record connection time.
+ * Debounced in the USB task.
+ *
+ * Ref http://www.microchip.com/forums/m616629.aspx
+*/
 ISR(PORTD_INT0_vect)
 {
     uint8_t pinval = USB_PORT.IN & USB_SENSE;
@@ -64,7 +81,15 @@ ISR(PORTD_INT0_vect)
     }
 }
 
-/* Called once udc_attach is finished */
+/** 
+ * @brief OS callback from udc_attach
+ *
+ * @param port Ignored, only one USB peripheral on chip
+ * @return True always.
+ *
+ * Called once udc_attach is finished. Initializes state machine and
+ * Confirms that USB is ready for communication.
+ */
 bool usb_utils_cdc_enabled(uint8_t port)
 {
     gIsUSBActive= true;
@@ -72,13 +97,31 @@ bool usb_utils_cdc_enabled(uint8_t port)
     return true;
 }
 
-/* called once udc_detach is finished */
+/**
+ * @brief OS callback from udc_detach
+ *
+ * @param port Ignored, only one USB peripheral on chip
+ *
+ * Called once udc_detach is finished. Informs USB thread that
+ * USB is fully detached.
+ */
 void usb_utils_cdc_disabled(uint8_t port)
 {
     gIsUSBActive = false;
 }
 
-/* Computes checksum for message and fills packet pointer */
+/**
+ * @brief Form packet in caller's pointer
+ *
+ * @param id The ID of the message to create
+ * @param len The message length of the intended message
+ * @param message Pointer to the payload. Will be copied to packet.
+ * @param[out] packet Will be filled with message.
+ *
+ * @return True on failure, false on success
+ *
+ * Computes checksum for message and fills packet pointer
+ */
 Bool usb_utils_create_packet(uint16_t id, uint16_t len, uint8_t *message, usb_packet_t *packet)
 {
     Bool retVal = false; /* Nothing wrong */
@@ -98,7 +141,17 @@ Bool usb_utils_create_packet(uint16_t id, uint16_t len, uint8_t *message, usb_pa
     return retVal;
 }
 
-/* Takes in message and computes checksum */
+/**
+ * @brief Calculate 8-bit checksum
+ *
+ * @param[out] checksum The checksum of the message
+ * @param message Pointer to where the message is
+ * @param len The length of the message
+ *
+ * @return True on failure, false on success
+ *
+ * Takes in message and computes checksum.
+ */
 Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t len)
 {
     Bool retVal = false;
@@ -136,6 +189,15 @@ Bool usb_utils_calculate_checksum(uint16_t *checksum, uint8_t *message, uint16_t
     return retVal;
 }
 
+/** 
+ * @brief Transfers flash memory contents to host
+ *
+ * Checks the Flash memory for a valid header, and then copies the
+ * contents over USB to the host, one entry at a time.
+ *
+ * Does not transfer the header, only the packets. Each packet contains
+ * a packet number and the total number of packets.
+ */
 void dump_to_usb(void) {
   usb_packet_t packet;
   usb_msg_flashentry_t payload;
@@ -170,7 +232,29 @@ void dump_to_usb(void) {
   }
 }
 
-/* this function runs a state machine */
+/**
+ * @brief Main USB state machine
+ *
+ * Runs in the USB thread if the USB cable is connected and
+ * the ASF USB stack is ready. Starts off with a lengthy intialization
+ * handshake to make sure host and application are both ready to begin 
+ * communcation. Then, the Host will request a mode. The App will acknowledge
+ * the mode, and wait for the host to confirm it. If at any time a bad or
+ * out of order message is rx, the app will revert to Initial state to redo 
+ * the handshake. Once the mode is confirmed, the app will either transmit the
+ * contents of the external flash memory, continue on to data acquistion mode,
+ * or begin an ejection test. After transmitting flash or finishing an ejection
+ * test, it will transition to an idle mode while waiting for a new mode 
+ * request. While in ejection test mode, it will wait for a request to eject 
+ * the main or drogue. As with the mode request, a response will be transmitted
+ * to the host, which will send an acknowledgement of the response. On receipt
+ * of the acknowledgement of the Main/Drogue test, it will wait 2 seconds
+ * before triggering the corresponding pyrotechnics. The test is ended with an
+ * end test message. While in data acquistion mode, the OS will keep
+ * collecting data and keep running the main application. In the other three 
+ * modes, the main app is not running. 
+ *
+ */
 void usb_utils_state_mach(void)
 {
     nack_error_t error_code = NACK_UNKNOWN;
@@ -220,12 +304,26 @@ void usb_utils_state_mach(void)
     }
 }
 
+/** 
+ * @brief Sends nack packet over USB
+ *
+ * @param error_code the specific NACK to send
+ *
+ */
 void usb_utils_send_nack(nack_error_t error_code)
 {
     /* Send nack message over usb */
 }
 
-/* uses global variable gUSBMsgBuf. Think about buffer of packets */
+/**
+ * @brief Message parsing state machine
+ *
+ * @param[out] packet_out Rx'd packet is copied into this pointer
+ * @returns True if packet RX, false otherwise
+ *
+ * TODO
+ * uses global variable gUSBMsgBuf. Think about buffer of packets
+ */
 bool usb_utils_check_for_message(usb_packet_t *packet_out)
 {
     /* Check how much data is ready to be processed */

@@ -19,6 +19,7 @@
 #include "RadioTask.h"
 #include "USBTask.h"
 
+/** The inital count for when the tasks were last ran. */
 #define INITIAL_COUNT (0)
 
 /** List of tasks to be run. Tasks must have defined a Frequency, last_count 

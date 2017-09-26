@@ -16,10 +16,10 @@
 
 #include "ms5607-02ba03.h"
 
-/* contains data for every sensor */
+/** contains data for every sensor */
 typedef struct
 {
-    ms5607_02ba03_data_t altimeter;
+    ms5607_02ba03_data_t altimeter; /**< Temp and pressure */
     /* TODO add all sensors' data */
 } sensor_data_t;
 
