@@ -9,20 +9,9 @@
 #include <asf.h>
 
 #define LEDPORT (PYRO_34_PORT)
-#define LEDPIN  (PYRO_4A)
+#define LEDPIN  (PYRO_SENSE4A)
 
 void led_task_func(void)
 {
-    static Bool led_status = false;
-
-    if(led_status)
-    {
-        LEDPORT.OUTCLR = LEDPIN;
-        led_status = false;
-    }
-    else
-    {
-        LEDPORT.OUTSET = LEDPIN;
-        led_status = true;
-    }
+    LEDPORT.OUTTGL = LEDPIN;
 }
