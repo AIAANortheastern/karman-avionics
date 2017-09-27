@@ -8,8 +8,8 @@
 #include "LEDTask.h"
 #include <asf.h>
 
-#define LEDPORT (PYRO_12_PORT)
-#define LEDPIN  (PYRO_1A)
+#define LEDPORT (PYRO_34_PORT)
+#define LEDPIN  (PYRO_4A)
 
 void led_task_func(void)
 {
@@ -17,10 +17,12 @@ void led_task_func(void)
 
     if(led_status)
     {
-        LEDPORT.OUTSET = LEDPIN;
+        LEDPORT.OUTCLR = LEDPIN;
+        led_status = false;
     }
     else
     {
-        LEDPORT.OUTCLR = LEDPIN;
+        LEDPORT.OUTSET = LEDPIN;
+        led_status = true;
     }
 }
