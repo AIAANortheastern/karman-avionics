@@ -53,12 +53,11 @@ void run_scheduler(void){
 
         for(i = 0; i < numTasks; i++)
         {
-            /** First, check if the task is not a background task */
             /** Run the background task unconditionally, otherwise 
               * see if it's time to run the task or not 
             */
             if((taskArry[i].taskFreq == TASK_FREQ_BACKGROUND) ||
-               ((timeCount - taskArry[i].lastCount) > taskArry[i].taskFreq))
+               ((timeCount - taskArry[i].lastCount) >= taskArry[i].taskFreq))
             {
                 taskArry[i].task();
                 taskArry[i].lastCount = timeCount;

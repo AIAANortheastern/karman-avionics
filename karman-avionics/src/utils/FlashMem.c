@@ -67,7 +67,7 @@ void init_flashmem(void)
     }
     else
     {
-        /* Use the value we found already on the flash memory to inform where to write data
+        /** Use the value we found already on the flash memory to inform where to write data
          * This means that any new data will be written following the pre-exisiting entries.
          * In order to ignore the previous entries, the size of entries or the version string
          * must be different from what the code expects. Or the magic number is not correct.
