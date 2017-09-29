@@ -41,7 +41,7 @@ void run_scheduler(void){
                 taskArry[i].lastCount = timeCount;
             }
             /* Then see if it's time to run the task or not */
-            else if ((timeCount - taskArry[i].lastCount) > taskArry[i].taskFreq)
+            else if ((timeCount - taskArry[i].lastCount) >= taskArry[i].taskFreq)
             {
                 taskArry[i].task();
                 taskArry[i].lastCount = timeCount;
