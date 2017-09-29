@@ -13,6 +13,7 @@
 
 #include "Pyrotechnics.h"
 
+/** Template. */
 void check_pyro_task_func(void){
     /* Do some pyro stuff*/
     /* Do stuff if it's time to trigger pyrotechnics*/

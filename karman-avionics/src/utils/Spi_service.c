@@ -28,17 +28,19 @@
 #include <stdint.h>
 #include <string.h>
 
+/** The size of every SPI master's queue */
 #define SPI_MASTER_QUEUE_SIZE (SPI_MASTER_QUEUE_DEPTH*sizeof(spi_request_t))
 
 /** 
- * init_spi_master_service
+ * @brief Intialize an SPI master object
  * @return bool - Whether or not it initialized successfully.
  * 
- * @param masterObj - This is the spi master control for the entire program
- * @param regSet - The register to set?
+ * @param masterObj -  Spi master object for a given SPI bus
+ * @param regSet - The hardware peripheral assocaited with the SPI bus
  * @param port - The port this is being initialized on.
- * @param taskName - A function to be run in the background that will actually do the init
- * initializes an SPI master service */
+ * @param taskName - A function to be run in the background that process its queue
+ * initializes an SPI master servicer object
+ */
 Bool init_spi_master_service(spi_master_t *masterObj, USART_t *regSet, PORT_t *port, background_func_t taskName)
 {
     Bool initSuccess = true;
@@ -62,7 +64,19 @@ Bool init_spi_master_service(spi_master_t *masterObj, USART_t *regSet, PORT_t *p
     return initSuccess;
 }
 
-/* Push function for queue. The queue is wrapping, and so the array acts like a ring buffer
+/**
+ * @brief Push function for queue.
+ *
+ * @param spi_interface The SPI master object to use
+ * @param csInfo Chip select information for the hardware device to contact
+ * @param sendBuff Caller's buffer containing the data to be sent out
+ * @param sendLen Number of bytes to send
+ * @param[out] recvBuff Caller's buffer to store response from device into
+ * @param recvLen Number of bytes to receive
+ * @param complete Flag to set true when the transaction is complete
+ * @return True on success, false on failure
+ *
+ * The queue is wrapping, and so the array acts like a ring buffer
  * This makes detecting collisions a lot more fun. A lot of care is taken.
  * If front and back are the same, this can cause issues. Adding a new entry
  * when there is still an old entry there is bad. So, we check the valid flag
@@ -85,26 +99,26 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
     uint8_t newIndex = spi_interface->back;
     volatile spi_request_t *newRequest = NULL;
 
-    /* Are front and back the same? This should only be true if a) the queue
+    /** first check, Are front and back the same? This should only be true if a) the queue
      * is empty, or b) the queue is full. If they are, don't modify the new index.
      * otherwise, add one.
      */
     newIndex += (spi_interface->front == spi_interface->back) ? 0 : 1;
 
-    /* Check for index wrapping */
+    /** Next check for index wrapping */
     if(newIndex == SPI_MASTER_QUEUE_DEPTH)
     {
         newIndex = 0;
     }
 
-    /* Check for collisions on addition */
+    /** Check for collisions on addition */
     if((spi_interface->requestQueue[newIndex].valid == true) &&
         (spi_interface->back == spi_interface->front))
     {
         createStatus = false;
     }
 
-    /* we're safe to add the new entry */
+    /** If it's safe, add the new entry */
     if (createStatus == true)
     {
         newRequest = &spi_interface->requestQueue[newIndex];
@@ -130,7 +144,15 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
     return createStatus;
 }
 
-/* pop an item from the request queue by invalidating the entry */
+/** 
+ * @brief Dequeue an item from an SPI master's queue
+ * 
+ * @param spi_interface The SPI master to dequeue from
+ * @return True on success, false on failure 
+ *
+ * Pop an item from the request queue by invalidating the entry, then fix up the
+ * front and back indexes
+*/
 Bool spi_master_dequeue(spi_master_t *spi_interface)
 {
     Bool popStatus = true;
@@ -160,7 +182,15 @@ Bool spi_master_dequeue(spi_master_t *spi_interface)
     return popStatus;
 }
 
-/* Instructs the SPI interface to start the request at the beginning of its queue */
+/**
+ * @brief Start a transaction on an SPI bus
+ *
+ * @param spi_interface The SPI master object that controls the desired interface
+ * @return True on success, false on failure
+ *
+ * Instructs the SPI interface to start the request at the beginning of its queue.
+ * Also pulls the chip select line low for the enqueued request.
+ */
 Bool spi_master_initate_request(spi_master_t *spi_interface)
 {
     Bool initiateSuccess = true;
@@ -172,17 +202,17 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
     }
     else
     {
-        /* Start the request */
+        /** Start the request */
         frontQueue->complete = false;
         frontQueue->bytesRecv = 0;
         frontQueue->bytesSent = 0;
         
-        /* Mark this device as "busy" */
+        /** Mark this device as "busy" */
         spi_interface->masterBusy = true;
-        /* Enable chip select for the device in this request */
+        /** Enable chip select for the device in this request */
         frontQueue->csInfo.csPort->OUTCLR = frontQueue->csInfo.pinBitMask;
 
-        /* Write to the spi master data. this will send the first byte. */
+        /** Write to the spi master data. this will send the first byte. */
         spi_interface->master->DATA = ((uint8_t *)(frontQueue->sendBuff))[0];
         frontQueue->bytesSent++;
 
@@ -190,8 +220,15 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
     return initiateSuccess;
 }
 
-/* The interrupt service routine should trigger when the first byte is sent back
- * or it's time to send the next byte.
+/**
+ * @brief Generic SPI Interrupt Service Routine
+ *
+ * @param spi_interface The SPI master object that controls the bus.
+ *
+ * The interrupt service routine should be called on a data receive interrupt.
+ * NOTE: This function must be re-entrant from multiple iterrupts. If one
+ * SPI interrupt is higher than another, it could pre-empt in the middle
+ * Of processing. (But please don't do that, keep them the same level...)
  */
 void spi_master_ISR(spi_master_t *spi_interface)
 {
@@ -199,52 +236,52 @@ void spi_master_ISR(spi_master_t *spi_interface)
     uint16_t dataToSend, dataToRecv, dummyByte;
     Bool moreToDo;
 
-    /* Look at the front of the queue */
+    /** Look at the front of the queue */
     volatile spi_request_t *currRequest = &spi_interface->requestQueue[spi_interface->front];
     dataSent = &(currRequest->bytesSent);
     dataRecv = &(currRequest->bytesRecv);
     dataToSend = currRequest->sendLen;
     dataToRecv = currRequest->recvLen;
 
-    /* If there's still bytes to receive, keep receiving them. */
+    /** If there's still bytes to receive, keep receiving them. */
     if ((*dataRecv) < dataToRecv)
     {
         ((uint8_t *)(currRequest->recvBuff))[(*dataRecv)] = spi_interface->master->DATA;
         (*dataRecv)++;
     }
-    /* If we don't care what's in the buffer, read the register then ignore the value. */
-    /* NOTE AS WE ARE USING THE RXC INTERRUPT DATA MUST BE READ TO CLEAR THE INTERRUPT */
+    /** If we don't care what's in the buffer, read the register then ignore the value. */
+    /** NOTE AS WE ARE USING THE RXC INTERRUPT DATA MUST BE READ TO CLEAR THE INTERRUPT */
     else
     {
         dummyByte = spi_interface->master->DATA;
     }
 
-    /* If there's still bytes to send, keep sending them*/
+    /** If there's still bytes to send, keep sending them*/
     if((*dataSent) < dataToSend)
     {
         spi_interface->master->DATA = ((uint8_t *)(currRequest->sendBuff))[(*dataSent)];
         (*dataSent)++;
     }
-    /* We want to recieve more data but we don't have any more to send */
+    /** Otherwise, if  want to recieve more data but we don't have any more to send... */
     else if((*dataRecv) < dataToRecv)
     {
         dummyByte = 0x00;
-        /* Send a dummy byte to clock out the next bits of data. */
+        /** Send a dummy byte to clock out the next bits of data. */
         spi_interface->master->DATA = dummyByte;
     }
 
-    /* are we done? */
+    /** Check if are we done */
     moreToDo = (*dataSent < dataToSend) ? true : false;
     moreToDo |= (*dataRecv < dataToRecv) ? true : false;
 
     if(!moreToDo)
     {
-        /* If we're done, raise chip select again*/
+        /** If we're done, raise chip select again*/
         spi_master_finish_request(currRequest);
-        /* Inform the initiator that the request has completed*/
+        /** Inform the initiator that the request has completed*/
         spi_interface->masterBusy = false;
         spi_master_request_complete(spi_interface);
-        /* Dequeue the request from the list*/
+        /** Dequeue the request from the list*/
         spi_master_dequeue(spi_interface);
     }
 }
@@ -255,6 +292,24 @@ void spi_master_ISR(spi_master_t *spi_interface)
 /*              the scheduler has started...unless you know what you're doing*/
 /*****************************************************************************/
 
+
+/**
+ * @brief Send a request, but block the whole time while waiting for it to finish
+ *
+ * @param spi_interface The SPI master object to use
+ * @param csInfo Chip select information for the hardware device to contact
+ * @param sendBuff Caller's buffer containing the data to be sent out
+ * @param sendLen Number of bytes to send
+ * @param[out] recvBuff Caller's buffer to store response from device into
+ * @param recvLen Number of bytes to receive
+ * @param complete Flag to set true when the transaction is complete
+ * @return True on success, false on failure
+ *
+ *
+ * Instead of enqueueing a request and waiting for the SPI Background routine to
+ * start it up, enqueue a request, start it up yourself, and then sit and wait for the
+ * complete boolean to indicate it's done.
+*/
 Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                  chip_select_info_t *csInfo,
                                  volatile void *sendBuff,
@@ -263,7 +318,7 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                  uint16_t recvLen,
                                  volatile Bool *complete)
 {
-    /* In the future we might add a timeout..? */
+    /** In the future we might add a timeout..? */
     Bool retVal = true;
 
     spi_master_enqueue(spi_interface, csInfo, sendBuff, sendLen, recvBuff, recvLen, complete);
@@ -271,12 +326,12 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
 
     while((*complete) != true)
     {
-        asm("");/* do nothing. empty Asm here just to make sure we keep the loop as a loop.
+        asm("");/** Do nothing while waitng. empty Asm here just to make sure we keep the loop as a loop.
                  * The fact that complete is a pointer to a volatile variable should be enough though.
                  */
     }
     
-    /* The ISR routine dequeues the request */
+    /** The ISR routine dequeues the request */
 
     return retVal;
 }

@@ -20,19 +20,30 @@
 /*#define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
  Using USART in SPI master mode instead */
 
-#define SPI_BAUD_RATE (1000000) /* 1MHz */
+#define SPI_BAUD_RATE (1000000) /**< 1MHz */
 
 #ifndef F_CPU
-#define F_CPU (sysclk_get_per_hz())
+#define F_CPU (sysclk_get_per_hz()) /**< System clock speed */
 #endif
 
-/* https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h */
+/**
+ * @brief Control value to write to USART baud control regs
+ *
+ *  Ref https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h
+ */
 #define SPI_BAUDCTRLVAL(Baud)       ((Baud < (F_CPU / 2)) ? ((F_CPU / (2 * Baud)) - 1) : 0)
 
+/** SPI Master object for the sensor bus */
 spi_master_t sensorSpiMaster;
 
 
-/* Initialize all things the sensor task needs.*/
+/** 
+ * @brief Initialize all things the radio task needs
+ * 
+ * Setup USART in SPI Master Mode.
+ * Setup SPI master
+ * Intialize all sensor drivers
+ */
 void init_sensor_task(void)
 {
     /* Initialize SPI interface on port D*/
@@ -51,7 +62,7 @@ void init_sensor_task(void)
     init_spi_master_service(&sensorSpiMaster, &SENSOR_SPI, &SENSOR_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&sensorSpiMaster);
 
-    /* run initialization for all sensors */
+    /* run initialization for all sensors. Most of these names are out of date */
 
     /* 1 axis accelerometer */
     /* init_mma6855bkcw() */
@@ -69,7 +80,12 @@ void init_sensor_task(void)
     ms5607_02ba03_init(&sensorSpiMaster);
 }
 
-/* This task runs all sensor getData functions and passes the updated ones to the radio*/
+/**
+ * @brief High level sensor operations
+ *
+ * This task runs all sensor state machine functions and passes the updated data to
+ * the main control loop and the radio.
+ */
 void sensor_task_func(void)
 {
     sensor_status_t curr_status;
@@ -92,13 +108,7 @@ void sensor_task_func(void)
 
 }
 
-/* Interrupt service routine for the SPI interrupt on port D. */
-// USARTD0_RXC_vect
-// CTRLA = 0x10; // RXCINTLVL = 1
-// CTRLB = 0x18; 
-// CTRLC = 0xC6; // MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI
-// BAUDB = (1000000 >> 8); //use SPI_BAUD_RATE instead ie #define SPI_BAUD_RATE (1000000)
-// BAUDA = (1000000 & 0xFF);
+/** Interrupt service routine for the USART RXC interrupt on port D. */
 ISR(SENSOR_SPI_INT)
 {
     spi_master_ISR(&sensorSpiMaster);   

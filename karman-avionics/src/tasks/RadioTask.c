@@ -5,7 +5,8 @@
  *
  * Created: 12/4/2016 10:19:36 PM
  *  Author: Andrew Kaster
- */ 
+ */
+
 #include "RadioTask.h"
 #include <compiler.h>
 #include <asf.h>
@@ -16,19 +17,31 @@
 /*#define RADIO_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
  Using USART in SPI master mode instead */
 
-#define SPI_BAUD_RATE (1000000) /* 1MHz */
+#define SPI_BAUD_RATE (1000000) /**< 1MHz */
 
 #ifndef F_CPU
-#define F_CPU (sysclk_get_per_hz())
+#define F_CPU (sysclk_get_per_hz()) /**< System clock speed */
 #endif
 
-/* https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h */
+/**
+ * @brief Control value to write to USART baud control regs
+ *
+ *  Ref https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h
+ */
 #define SPI_BAUDCTRLVAL(Baud)       ((Baud < (F_CPU / 2)) ? ((F_CPU / (2 * Baud)) - 1) : 0)
 
+/** SPI Master object for the radio bus */
 spi_master_t radioSpiMaster;
 
 
-/* Initialize all things the radio task needs.*/
+/** 
+ * @brief Initialize all things the radio task needs
+ * 
+ * Setup USART in SPI Master Mode.
+ * Setup SPI master
+ * Intialize radio driver
+ *
+ */
 void init_radio_task(void)
 {
     /* Initialize SPI interface on port E*/
@@ -48,18 +61,22 @@ void init_radio_task(void)
     spi_bg_add_master(&radioSpiMaster);
 
     /* run initialization for radio driver */
-    /* init_cc2500(); */
+    /* init_xbee(); */
 }
 
-/* This task receives messages from the sensors and from the control loop, and sends them to the radio.
- * It also receives messages from the radio and transfers them to the control loop.
+/**
+ * Runs high level Radio state machine and responsiblities
+ *
+ * This task receives messages from the sensors and from the control loop, and
+ * sends them to the radio. It also receives messages from the radio and 
+ * transfers them to the control loop.
  */
 void radio_task_func(void)
 {
    /* Do the stuff*/
 }
 
-/* Interrupt service routine for the SPI interrupt on port E. */
+/** Interrupt service routine for the USART RXC interrupt on port E. */
 ISR(RADIO_SPI_INT)
 {
     spi_master_ISR(&radioSpiMaster);

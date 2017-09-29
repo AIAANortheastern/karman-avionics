@@ -18,24 +18,32 @@
 #include "Scheduler.h"
 #include "Timer.h"
 
+/**
+ * @brief int main(void)
+ *
+ * Doxygen really hates that attribute... :/
+ *
+ * Gets called after we have fun in .init0 through .init9
+ * Intialize all the ASF boring stuff. Intialize the timer, and the
+ * board pins and such. Intialize all tasks and drivers.
+ * Then initialize the scheduler, never to return. Otherwise we've got problems.
+ *
+*/
 __attribute__((OS_main)) int main(void)
 {
-    /* Insert system clock initialization code here (sysclk_init()). */
-    pmic_init(); /* Enable the Programmable Multiple Interrupt Controller */
-    sysclk_init(); /* Enable the system clock (32MHz). See conf_clock.h */
+    pmic_init(); /** Enable the Programmable Multiple Interrupt Controller */
+    sysclk_init(); /** Enable the system clock (32MHz). See conf_clock.h */
 
-    /* Enable global interrupts and enable timer */
+    /** Enable global interrupts and enable timer */
     cpu_irq_enable();
-    timer_init(); /* Initialize timer. DO NO REMOVE*/
-    tc_write_clock_source(&TCC0, TC_CLKSEL_DIV1_gc);
+    timer_init(); /** Initialize timer. DO NO REMOVE*/
+    tc_write_clock_source(&TCC0, TC_CLKSEL_DIV1_gc); /** start the timer. */
 
-    /* TODO x a million. Need to put code in this function*/
-    board_init(); /* Do board initialization steps. */
-                  /* Function defined in src/ASF/common/boards/user_board/init.c */
+    board_init(); /** Do board initialization steps. */
+                  /** Function defined in src/ASF/common/boards/user_board/init.c */
 
-    /* Insert application code here, after the board has been initialized. */
+    /** Initalize, then start the task scheduler */
     init_scheduler();
-    /* Start the task scheduler */
     run_scheduler();
 
     while(1)
