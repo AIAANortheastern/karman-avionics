@@ -107,8 +107,8 @@
 
 #define PYRO_SENSE4B (1 << 7) /* Input  */
 #define PYRO_4A      (1 << 6) /* Output */
-#define PYRO_4B      (1 << 5) /* Output */
-#define PYRO_SENSE4A (1 << 4) /* Input  */ /* OUTPUT FOR THIS DEMO */
+#define PYRO_SENSE4A (1 << 5) /* Input */ /* OUTPUT FOR THIS DEMO */
+#define PYRO_4B      (1 << 4) /* Output  */
 #define PYRO_SENSE3B (1 << 3) /* Input  */
 #define PYRO_3A      (1 << 2) /* Output */
 #define PYRO_3B      (1 << 1) /* Output */
