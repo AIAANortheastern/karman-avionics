@@ -15,6 +15,7 @@
 #include "Tasks.h"
 
 #include "ms5607-02ba03.h"
+#include "ADXL375.h"
 
 /* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
 /*#define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
@@ -36,6 +37,9 @@
 /** SPI Master object for the sensor bus */
 spi_master_t sensorSpiMaster;
 
+/* external control data structures for each sensor */
+extern gAltimeterControl;
+extern gHighGAccelerometer;
 
 /** 
  * @brief Initialize all things the radio task needs
@@ -78,6 +82,8 @@ void init_sensor_task(void)
 
     /* altimeter/pressure */
     ms5607_02ba03_init(&sensorSpiMaster);
+	
+	ADXL375_init(&sensorSpiMaster);
 }
 
 /**
@@ -96,6 +102,13 @@ void sensor_task_func(void)
     {
         /* Do fancy things with current temp/pressure data */
     }
+
+	curr_status = ADXL375_get_data();
+
+	if (curr_status == SENSOR_COMPLETE)
+	{
+		/* Do fancy things with current high g accel data */
+	}
 
     /* ----TEMPLATE----
      * curr_status = <foo>_get_data();

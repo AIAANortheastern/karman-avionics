@@ -12,30 +12,34 @@ void ADXL375_init(spi_master_t *spi_master) {
 
 }
 
-void ADXL375_get_data() {
+sensor_status_t ADXL375_get_data() {
 //x, y, z
 
+	sensor_status_t return_status;
+
+	return_status = SENSOR_BUSY;
 
 	switch(gHighGAccelerometer.get_data_state) {
+		
 		case ENQUEUE:
 			enqueue_helper();
 			gHighGAccelerometer.get_data_state = XYZ_DATA_CONVERT;
+			return_status = SENSOR_WAITING;
 			break;	
-		case XYZ_DATA_CONVERT:
 			
+		case XYZ_DATA_CONVERT:		
 			if(gHighGAccelerometer.send_complete){
 				//do some logic
 				xyz_read_helper();
 				convert_helper();
-				// offsets?
-				gHighGAccelerometer.get_data_state = ENQUEUE;			
+			
+				gHighGAccelerometer.get_data_state = ENQUEUE;
+				return_status = SENSOR_COMPLETE;			
 			}
 			break;
 	}
-
-
-
-					   
+	
+	return return_status;					   
 
 }
 

@@ -4,7 +4,7 @@
 #define HIGH_G_ACCELEROMETER_BUFF_SIZE (8)
 
 #include "Spi_service.h"
-//#include "SensorTask.h"
+#include "SensorTask.h"
 
 typedef struct high_g_accel_raw_s
 {
