@@ -51,7 +51,7 @@ typedef struct high_g_accel_control_s
 
 void ADXL375_init(spi_master_t *spi_master);
 void ADXL375_reset(void);
-void ADXL375_get_data(void);
+sensor_status_t ADXL375_get_data(void);
 void ADXL375_get_offset_values(void);
 void enqueue_helper(void);
 void xyz_read_helper(void);

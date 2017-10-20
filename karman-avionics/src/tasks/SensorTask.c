@@ -107,6 +107,8 @@ void sensor_task_func(void)
 
 	if (curr_status == SENSOR_COMPLETE)
 	{
+		volatile uint16_t a = 0;
+		while(!a);
 		/* Do fancy things with current high g accel data */
 	}
 

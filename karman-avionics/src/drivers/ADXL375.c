@@ -47,6 +47,9 @@ void ADXL375_get_offset_values() {
 	
 }
 
+void ADXL375_reset() {
+	
+}
 
 ////////////////////////////////
 //HELPERS BELOW HERE

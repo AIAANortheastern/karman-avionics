@@ -203,7 +203,7 @@ Bool spi_master_initate_request(spi_master_t *spi_interface)
     else
     {
         /** Start the request */
-        frontQueue->complete = false;
+        *(frontQueue->complete) = false;
         frontQueue->bytesRecv = 0;
         frontQueue->bytesSent = 0;
         
