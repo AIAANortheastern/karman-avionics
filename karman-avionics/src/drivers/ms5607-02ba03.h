@@ -76,7 +76,9 @@ typedef struct altimeter_control_s
 
 void ms5607_02ba03_init(spi_master_t *spi_master);
 
-sensor_status_t ms5607_02ba03_get_data(void);
+sensor_status_t ms5607_02ba03_run(void);
+
+void ms5607_02ba03_get_data(ms5607_02ba03_data_t *out_data);
 
 void ms5607_02ba03_reset(void);
 

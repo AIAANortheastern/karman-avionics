@@ -16,6 +16,8 @@
 
 #include "ms5607-02ba03.h"
 
+#include "SensorDefs.h"
+
 /* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
 /*#define SENSOR_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
  Using USART in SPI master mode instead */
@@ -36,6 +38,8 @@
 /** SPI Master object for the sensor bus */
 spi_master_t sensorSpiMaster;
 
+/** Contains all current sensor values for use in ... TBD. Processing. */
+sensor_data_t gCurrSensorValues;
 
 /** 
  * @brief Initialize all things the radio task needs
@@ -90,18 +94,20 @@ void sensor_task_func(void)
 {
     sensor_status_t curr_status;
 
-    curr_status = ms5607_02ba03_get_data();
+    curr_status = ms5607_02ba03_run();
 
     if (curr_status == SENSOR_COMPLETE)
     {
         /* Do fancy things with current temp/pressure data */
+        ms5607_02ba03_get_data(&(gCurrSensorValues.altimeter));
     }
 
     /* ----TEMPLATE----
-     * curr_status = <foo>_get_data();
+     * curr_status = <foo>_run();
      * if (curr_status == SENSOR_COMPLETE)
      * {
      *    Do fancy things with current sensor's data
+     *    <foo>_get_data(&(gCurrSensorValues.<foo_type>))
      * }
      *
      */

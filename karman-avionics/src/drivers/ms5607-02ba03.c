@@ -208,7 +208,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
  * Eventually this will return successful and the data will be pulled out of the
  * appropriate global buffers.
  */
- sensor_status_t ms5607_02ba03_get_data(void)
+ sensor_status_t ms5607_02ba03_run(void)
  {
     /** 1. Enqueue D1 convert command */
     /** 2. Wait for that to finish */
@@ -241,7 +241,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             /* if 8ms done */
             if(get_timer_count() - gAltimeterControl.time_start >= EIGHT_MS)
             {
-                ms5607_02ba03_get_data();
+                ms5607_02ba03_read_data();
                 gAltimeterControl.get_data_state = WAIT_D1_READ;
                 returnStatus = SENSOR_WAITING;
             }
@@ -270,7 +270,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             /* if 8ms done */
             if(get_timer_count() - gAltimeterControl.time_start >= EIGHT_MS)
             {
-                ms5607_02ba03_get_data();
+                ms5607_02ba03_read_data();
                 gAltimeterControl.get_data_state = WAIT_D2_READ;
                 returnStatus = SENSOR_WAITING;
             }
@@ -330,3 +330,13 @@ void ms5607_02ba03_calculate_press(void)
 
 }
 
+/**
+ * @brief Copies Altimeter data
+ *
+ * @param[out] out_data The caller's struct that data will be copied into
+ */
+void ms5607_02ba03_get_data(ms5607_02ba03_data_t *out_data)
+{
+    out_data->temp = gAltimeterControl.final_vals.temp;
+    out_data->pressure = gAltimeterControl.final_vals.pressure;
+}
