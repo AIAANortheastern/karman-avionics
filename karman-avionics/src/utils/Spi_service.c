@@ -31,6 +31,8 @@
 /** The size of every SPI master's queue */
 #define SPI_MASTER_QUEUE_SIZE (SPI_MASTER_QUEUE_DEPTH*sizeof(spi_request_t))
 
+volatile static Bool raiseCS = true;
+
 /** 
  * @brief Intialize an SPI master object
  * @return bool - Whether or not it initialized successfully.
@@ -74,6 +76,7 @@ Bool init_spi_master_service(spi_master_t *masterObj, USART_t *regSet, PORT_t *p
  * @param[out] recvBuff Caller's buffer to store response from device into
  * @param recvLen Number of bytes to receive
  * @param complete Flag to set true when the transaction is complete
+ * @param keep_cs_low Flag to determine if we should disable pulling the CS high after the transaction is finished. WARNING: The caller will be required to pull the CS high again or the SPI interface will be broken!!!
  * @return True on success, false on failure
  *
  * The queue is wrapping, and so the array acts like a ring buffer
@@ -93,7 +96,8 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
                             uint16_t sendLen,
                             volatile void *recvBuff,
                             uint16_t recvLen,
-                            volatile Bool *complete)
+                            volatile Bool *complete,
+                            Bool keep_cs_low)
 {
     Bool createStatus = true;
     uint8_t newIndex = spi_interface->back;
@@ -125,6 +129,12 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
 
         newRequest->csInfo.csPort = csInfo->csPort;
         newRequest->csInfo.pinBitMask = csInfo->pinBitMask;
+
+        if(keep_cs_low) {
+            raiseCS = false;
+        }else {
+            raiseCS = true;
+        }
 
         newRequest->sendBuff = sendBuff;
         newRequest->sendLen = sendLen;
@@ -276,8 +286,13 @@ void spi_master_ISR(spi_master_t *spi_interface)
 
     if(!moreToDo)
     {
-        /** If we're done, raise chip select again*/
-        spi_master_finish_request(currRequest);
+        /** If we're done, raise chip select again. NOTE: This is enabled by default. 
+         * There are a few special cases (i.e. Altimeter Reset procedure) that
+         * require it to be held low.
+        */
+        if(raiseCS){
+            spi_master_finish_request(currRequest);
+        }
         /** Inform the initiator that the request has completed*/
         spi_interface->masterBusy = false;
         spi_master_request_complete(spi_interface);
@@ -303,6 +318,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
  * @param[out] recvBuff Caller's buffer to store response from device into
  * @param recvLen Number of bytes to receive
  * @param complete Flag to set true when the transaction is complete
+ * @param keep_cs_low Flag to determine if we should disable pulling the CS high after the transaction is finished. WARNING: The caller will be required to pull the CS high again or the SPI interface will be broken!!!
  * @return True on success, false on failure
  *
  *
@@ -316,12 +332,13 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                  uint16_t sendLen,
                                  volatile void *recvBuff,
                                  uint16_t recvLen,
-                                 volatile Bool *complete)
+                                 volatile Bool *complete,
+                                 Bool keep_cs_low)
 {
     /** In the future we might add a timeout..? */
     Bool retVal = true;
 
-    spi_master_enqueue(spi_interface, csInfo, sendBuff, sendLen, recvBuff, recvLen, complete);
+    spi_master_enqueue(spi_interface, csInfo, sendBuff, sendLen, recvBuff, recvLen, complete, keep_cs_low);
     spi_master_initate_request(spi_interface);
 
     while((*complete) != true)

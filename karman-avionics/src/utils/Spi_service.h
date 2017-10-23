@@ -97,6 +97,7 @@ Bool init_spi_master_service(spi_master_t *master,
  * @param[out] recvBuff Caller's buffer to store response from device into
  * @param recvLen Number of bytes to receive
  * @param complete Flag to set true when the transaction is complete
+ * @param keep_cs_low Flag to determine if we should disable pulling the CS high after the transaction is finished. WARNING: The caller will be required to pull the CS high again or the SPI interface will be broken!!!
  * @return True on success, false on failure
  *
  * The queue is wrapping, and so the array acts like a ring buffer
@@ -116,7 +117,8 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
                         uint16_t sendLen,
                         volatile void *recvBuff,
                         uint16_t recvLen,
-                        volatile Bool *complete);
+                        volatile Bool *complete,
+                        Bool keep_cs_low);
 
 /** 
  * @brief Dequeue an item from an SPI master's queue
@@ -162,6 +164,7 @@ Bool spi_master_initate_request(spi_master_t *spi_interface);
  * @param[out] recvBuff Caller's buffer to store response from device into
  * @param recvLen Number of bytes to receive
  * @param complete Flag to set true when the transaction is complete
+ * @param keep_cs_low Flag to determine if we should disable pulling the CS high after the transaction is finished. WARNING: The caller will be required to pull the CS high again or the SPI interface will be broken!!!
  * @return True on success, false on failure
  *
  *
@@ -170,12 +173,13 @@ Bool spi_master_initate_request(spi_master_t *spi_interface);
  * complete boolean to indicate it's done.
 */
 Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
-                                      chip_select_info_t *csInfo,
-                                      volatile void *sendBuff,
-                                      uint16_t sendLen,
-                                      volatile void *recvBuff,
-                                      uint16_t recvLen,
-                                      volatile Bool *complete);
+                                 chip_select_info_t *csInfo,
+                                 volatile void *sendBuff,
+                                 uint16_t sendLen,
+                                 volatile void *recvBuff,
+                                 uint16_t recvLen,
+                                 volatile Bool *complete,
+                                 Bool keep_cs_low);
 
 /** Pull the chip select pin high to de-select the device */
 #define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTSET = reqPtr->csInfo.pinBitMask)

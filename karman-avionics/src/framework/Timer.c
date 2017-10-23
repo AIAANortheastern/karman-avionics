@@ -63,7 +63,7 @@ inline uint32_t get_timer_count(void){
     @brief Sleep for \a millis \a milliseconds
     @param millis The number of milliseconds to wait.
 */
-inline void timer_delay_ms(uint8_t millis)
+void timer_delay_ms(uint8_t millis)
 {
     /** Get the start time and calcualte the duration in counts.
      *  Then, twiddle thumbs until \a millis \a milliseconds have
@@ -71,9 +71,9 @@ inline void timer_delay_ms(uint8_t millis)
      */
     uint32_t timer_begin = get_timer_count();
     uint32_t wait_len = 2*millis;
-    while((get_timer_count() - timer_begin) > wait_len)
+    while((get_timer_count() - timer_begin) < wait_len)
     {
-        asm("");
+        /* Do nothing */
     }
 }
 

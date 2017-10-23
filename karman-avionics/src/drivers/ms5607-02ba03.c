@@ -60,6 +60,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     /** Call initial functions to prepare altimeter. */
     ms5607_02ba03_reset();
     timer_delay_ms(3); /** Delay 3 ms to allow for reset */
+    gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask; /** Pull CS High to allow continued operation */
     ms5607_02ba03_read_prom();
 }
 
@@ -75,13 +76,15 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     gAltimeterControl.spi_send_buffer[0] = ALTIMETER_RESET;
 
     /** Send BLOCKING request as this is done during initialization */
+    /** Tell SPI to NOT pull CS high after transaction to allow for reset time. */
     spi_master_blocking_send_request(gAltimeterControl.spi_master,
                        &(gAltimeterControl.cs_info),
                        gAltimeterControl.spi_send_buffer,
                        1,
                        gAltimeterControl.spi_recv_buffer,
                        0,
-                       &(gAltimeterControl.send_complete));
+                       &(gAltimeterControl.send_complete),
+                       true);
  }
 
  /** 
@@ -109,7 +112,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                                     3 * ALTIMETER_NUM_CAL,
                                     gAltimeterControl.spi_recv_buffer,
                                     3 * ALTIMETER_NUM_CAL,
-                                    &(gAltimeterControl.send_complete));
+                                    &(gAltimeterControl.send_complete),
+                                    false);
 
 	/** The above code puts the prom into read only mode. When it is done the spi_recv_buffer
 	 * Should be written to allowing us to assign specific variables to the parts of that data*/
@@ -140,7 +144,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     1,
     gAltimeterControl.spi_recv_buffer,
     0,
-    &gAltimeterControl.send_complete);
+    &gAltimeterControl.send_complete,
+    false);
  }
 
 /** 
@@ -162,7 +167,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
      1,
      gAltimeterControl.spi_recv_buffer,
      0,
-     &gAltimeterControl.send_complete);
+     &gAltimeterControl.send_complete,
+     false);
  }
 
  /** 
@@ -185,7 +191,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         1,
         gAltimeterControl.spi_recv_buffer,
         4,
-        &gAltimeterControl.send_complete);
+        &gAltimeterControl.send_complete,
+        false);
  }
 
 /** 

@@ -111,7 +111,8 @@ void extflash_initialize_regs(void)
                                            1,
                                            (void *)(gExtflashControl.spi_recv_buffer),
                                            0,
-                                           &(gExtflashControl.send_complete));
+                                           &(gExtflashControl.send_complete),
+                                           false);
 }
 
 /** 
@@ -158,7 +159,8 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
                                                       EXTFLASH_CMDADDR_SIZE,
                                                       (void *)(gExtflashControl.spi_recv_buffer),
                                                       EXTFLASH_CMDADDR_SIZE + num_bytes,
-                                                      &(gExtflashControl.send_complete));
+                                                      &(gExtflashControl.send_complete),
+                                                      false);
             /* Copy data into caller's buffer, ignoring garbage data from sending command */
             memcpy((void *)buf, (void *)(&(gExtflashControl.spi_recv_buffer[5])), num_bytes);
         }
@@ -171,7 +173,8 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
                                     EXTFLASH_CMDADDR_SIZE,
                                     (void *)buf,
                                     num_bytes,
-                                    &(gExtflashControl.send_complete));
+                                    &(gExtflashControl.send_complete),
+                                    false);
 
             gExtflashControl.task_inprog = true;
         }
@@ -243,7 +246,8 @@ Bool extflash_read_status_reg(uint16_t *buf, Bool block)
                                                   1,
                                                   (void *)buf,
                                                   2,
-                                                  &(gExtflashControl.send_complete));
+                                                  &(gExtflashControl.send_complete),
+                                                  false);
     }
     else
     {
@@ -279,7 +283,8 @@ Bool extflash_write_enable(Bool block)
                                                    1,
                                                    (void *)(gExtflashControl.spi_recv_buffer),
                                                    0,
-                                                   &(gExtflashControl.send_complete));
+                                                   &(gExtflashControl.send_complete),
+                                                   false);
 
         /* Keep reading the status regsiter until the write enable is confirmed. No timeout. this is pretty dangerous tbh. */
         do 
@@ -330,7 +335,8 @@ Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_
                                                    num_bytes + EXTFLASH_CMDADDR_SIZE,
                                                    (void *)(gExtflashControl.spi_recv_buffer),
                                                    0,
-                                                   &(gExtflashControl.send_complete));
+                                                   &(gExtflashControl.send_complete),
+                                                   false);
     }
     else
     {
