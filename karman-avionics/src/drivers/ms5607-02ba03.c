@@ -59,7 +59,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
 
     /** Call initial functions to prepare altimeter. */
     ms5607_02ba03_reset();
-    timer_delay_ms(3); /** Delay 3 ms to allow for reset */
+    timer_delay_us(2800); /** Delay 2.8 ms to allow for reset */
     gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask; /** Pull CS High to allow continued operation */
     ms5607_02ba03_read_prom();
 }
@@ -145,7 +145,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     gAltimeterControl.spi_recv_buffer,
     0,
     &gAltimeterControl.send_complete,
-    false);
+    true);
  }
 
 /** 
@@ -168,7 +168,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
      gAltimeterControl.spi_recv_buffer,
      0,
      &gAltimeterControl.send_complete,
-     false);
+     true);
  }
 
  /** 
@@ -246,8 +246,9 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         case WAIT_8ms_D1:
             /* wait 8ms */
             /* if 8ms done */
-            if(get_timer_count() - gAltimeterControl.time_start >= EIGHT_MS)
+            if(get_timer_count() - gAltimeterControl.time_start > EIGHT_MS)
             {
+                gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask; /** Pull CS High to allow continued operation */
                 ms5607_02ba03_read_data();
                 gAltimeterControl.get_data_state = WAIT_D1_READ;
                 returnStatus = SENSOR_WAITING;
@@ -275,8 +276,9 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         case WAIT_8ms_D2:
             /* wait 8ms */
             /* if 8ms done */
-            if(get_timer_count() - gAltimeterControl.time_start >= EIGHT_MS)
+            if(get_timer_count() - gAltimeterControl.time_start > EIGHT_MS)
             {
+                gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask; /** Pull CS High to allow continued operation */
                 ms5607_02ba03_read_data();
                 gAltimeterControl.get_data_state = WAIT_D2_READ;
                 returnStatus = SENSOR_WAITING;
