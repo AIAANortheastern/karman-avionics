@@ -28,21 +28,21 @@
  #define ALTIMETER_CONVERT_D2_1024  (0x54) /**< D2 Conversion command with 10 bits of data */
  #define ALTIMETER_CONVERT_D2_2048  (0x56) /**< D2 Conversion command with 11 bits of data */
  #define ALTIMETER_CONVERT_D2_4096  (0x58) /**< D2 Conversion command with 12 bits of data */
- #define ALTIMETER_CONVERT_D1       (ALTIMETER_CONVERT_D1_4096) /**< Use most ADC bits */
- #define ALTIMETER_CONVERT_D2       (ALTIMETER_CONVERT_D2_4096) /**< Use most ADC bits */
+ #define ALTIMETER_CONVERT_D1       (ALTIMETER_CONVERT_D1_2048) /**< Use most ADC bits */
+ #define ALTIMETER_CONVERT_D2       (ALTIMETER_CONVERT_D2_2048) /**< Use most ADC bits */
  #define ALTIMETER_PROM_BASE        (0xA0) /**< PROM addresses are 0xA0 to 0xAE */
  #define ALTIMETER_ADC_READ         (0x00) /**< ADC Read command */
- #define ALTIMETER_NUM_CAL          (6)    /**< There are six calibraiton values */
+ #define ALTIMETER_NUM_CAL          (6)    /**< There are six calibration values */
 
  /** File scope global variable with control data for the altimeter */
  ms5607_02ba03_control_t gAltimeterControl;
 
 /** 
-* @brief Intialize the Altimeter.
+* @brief Initialize the Altimeter.
 *
 * spi_master is a reference to the SPI controller for the sensor SPI Bus.
 * This is the initializer for the altimeter driver. 
-* It initializes buffers for SPI and other control data. Hardware initalization is done in init.c
+* It initializes buffers for SPI and other control data. Hardware initialization is done in init.c
 * Also resets the altimeter and retrieves the configuration data.
 */
 void ms5607_02ba03_init(spi_master_t *spi_master)
@@ -59,7 +59,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
 
     /** Call initial functions to prepare altimeter. */
     ms5607_02ba03_reset();
-    timer_delay_us(2800); /** Delay 2.8 ms to allow for reset */
+    timer_delay_ms(3); /** Delay 3 ms to allow for reset */
     gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask; /** Pull CS High to allow continued operation */
     ms5607_02ba03_read_prom();
 }
@@ -95,36 +95,27 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
   */
  void ms5607_02ba03_read_prom(void)
  {
+    uint8_t i;
+    uint16_t *calptr = (uint16_t *)&(gAltimeterControl.calibration_vals);
     /** Grab addresses 1 through 6 of PROM (datasheet page 11) */
     /** Each one is 16 bits. */
     memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
-    gAltimeterControl.spi_send_buffer[0] = ALTIMETER_PROM_BASE + 0x2; /* 1st cal value*/
-    gAltimeterControl.spi_send_buffer[3] = ALTIMETER_PROM_BASE + 0x4;
-    gAltimeterControl.spi_send_buffer[6] = ALTIMETER_PROM_BASE + 0x6;
-    gAltimeterControl.spi_send_buffer[9] = ALTIMETER_PROM_BASE + 0x8;
-    gAltimeterControl.spi_send_buffer[12] = ALTIMETER_PROM_BASE + 0xA;
-    gAltimeterControl.spi_send_buffer[15] = ALTIMETER_PROM_BASE + 0xC;
 
-    /** Send BLOCKING request as this is done during initialization */
-    spi_master_blocking_send_request(gAltimeterControl.spi_master,
-                                    &(gAltimeterControl.cs_info),
-                                    gAltimeterControl.spi_send_buffer,
-                                    3 * ALTIMETER_NUM_CAL,
-                                    gAltimeterControl.spi_recv_buffer,
-                                    3 * ALTIMETER_NUM_CAL,
-                                    &(gAltimeterControl.send_complete),
-                                    false);
-
-	/** The above code puts the prom into read only mode. When it is done the spi_recv_buffer
-	 * Should be written to allowing us to assign specific variables to the parts of that data*/
-
-    /** Retrieve the calibration values from the spi receive buffer. */
-    gAltimeterControl.calibration_vals.sens = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[1]));
-    gAltimeterControl.calibration_vals.offset = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[4]));
-    gAltimeterControl.calibration_vals.tcs = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[7]));
-    gAltimeterControl.calibration_vals.tco = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[10]));
-    gAltimeterControl.calibration_vals.t_ref = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[13]));
-    gAltimeterControl.calibration_vals.temp_sens = *(uint16_t *)(&(gAltimeterControl.spi_recv_buffer[16]));
+    for(i = ALTIMETER_PROM_BASE + 2; i < ALTIMETER_PROM_BASE + 0x0E; i = i+2)
+    {
+        gAltimeterControl.spi_send_buffer[0] = i;
+        /** Send BLOCKING request as this is done during initialization */
+        spi_master_blocking_send_request(gAltimeterControl.spi_master,
+                                        &(gAltimeterControl.cs_info),
+                                        gAltimeterControl.spi_send_buffer,
+                                        1,
+                                        gAltimeterControl.spi_recv_buffer,
+                                        3,
+                                        &(gAltimeterControl.send_complete),
+                                        false);
+        *calptr = ((uint16_t)gAltimeterControl.spi_recv_buffer[1] << 8) | gAltimeterControl.spi_recv_buffer[0];
+        calptr++;
+    }
  }
 
  /** 
@@ -145,7 +136,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     gAltimeterControl.spi_recv_buffer,
     0,
     &gAltimeterControl.send_complete,
-    true);
+    false);
  }
 
 /** 
@@ -168,7 +159,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
      gAltimeterControl.spi_recv_buffer,
      0,
      &gAltimeterControl.send_complete,
-     true);
+     false);
  }
 
  /** 
@@ -248,7 +239,6 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             /* if 8ms done */
             if(get_timer_count() - gAltimeterControl.time_start > EIGHT_MS)
             {
-                gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask; /** Pull CS High to allow continued operation */
                 ms5607_02ba03_read_data();
                 gAltimeterControl.get_data_state = WAIT_D1_READ;
                 returnStatus = SENSOR_WAITING;
@@ -278,7 +268,6 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
             /* if 8ms done */
             if(get_timer_count() - gAltimeterControl.time_start > EIGHT_MS)
             {
-                gAltimeterControl.cs_info.csPort->OUTSET = gAltimeterControl.cs_info.pinBitMask; /** Pull CS High to allow continued operation */
                 ms5607_02ba03_read_data();
                 gAltimeterControl.get_data_state = WAIT_D2_READ;
                 returnStatus = SENSOR_WAITING;
