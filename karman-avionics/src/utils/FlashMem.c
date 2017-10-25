@@ -74,6 +74,9 @@ void init_flashmem(void)
          */
         memcpy((void *)&gFlashmemCtrl.header, (void *)&header, sizeof(flash_data_hdr_t));
     }
+
+    /* FOR DEBUG ONLY */
+    headerStatus = flashmem_verify_header(&header);
 }
 
 /** @brief Write the header to flash

@@ -1,7 +1,7 @@
 /**
  * @file RadioTask.c
  *
- * @brief Radio Task Function and Intialization
+ * @brief Radio Task Function and Initialization
  *
  * Created: 12/4/2016 10:19:36 PM
  *  Author: Andrew Kaster
@@ -55,7 +55,7 @@ void init_radio_task(void)
     RADIO_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
     RADIO_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
     RADIO_SPI.CTRLB = 0x18; /* Enable RX and TX */
-    RADIO_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
+    RADIO_SPI.CTRLC = 0xC0; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&radioSpiMaster, &RADIO_SPI, &RADIO_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&radioSpiMaster);
@@ -65,7 +65,7 @@ void init_radio_task(void)
 }
 
 /**
- * Runs high level Radio state machine and responsiblities
+ * Runs high level Radio state machine and responsibilities
  *
  * This task receives messages from the sensors and from the control loop, and
  * sends them to the radio. It also receives messages from the radio and 
