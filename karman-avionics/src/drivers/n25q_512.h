@@ -35,7 +35,7 @@ void init_extflash(void);
 
 void extflash_initialize_regs(void);
 
-Bool extflash_get_status(void);
+Bool extflash_is_busy(void);
 
 Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block);
 

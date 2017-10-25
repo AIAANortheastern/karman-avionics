@@ -14,7 +14,7 @@
 #include "SensorDefs.h"
 
 /** Data Entry in the flash memory */
-typedef struct  
+typedef struct flashentry
 {
     uint32_t timestamp; /**< Timestamp in ticks since start of the timer */
     sensor_data_t data; /**< All the sensor information that will be logged */

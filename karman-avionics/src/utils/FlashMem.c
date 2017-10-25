@@ -38,6 +38,7 @@ void init_flashmem(void)
     /** Parse flash memory header */
     flashmem_hdrstatus_t headerStatus;
     flash_data_hdr_t header;
+    memset((void *)&header, 0, sizeof(header));
 
     headerStatus = flashmem_verify_header(&header);
 
@@ -80,7 +81,7 @@ void init_flashmem(void)
 }
 
 /** @brief Write the header to flash
- *  @return True on failure, false on success
+ *  @return True on success, false on failure
  * 
  * Write the data header stored in gFlashmemCtrl.header to the flash memory 
  */
@@ -107,7 +108,7 @@ flashmem_hdrstatus_t flashmem_verify_header(flash_data_hdr_t *header)
     Bool block = true;
 
     /** read sizeof(data_hdr) bytes from flash memory starting at byte 0x0000_0000 */
-    if(true == extflash_read( 0x00000000L,  sizeof(flash_data_hdr_t), (uint8_t *)&header, block))
+    if(false == extflash_read( 0x00000000L,  sizeof(flash_data_hdr_t), (uint8_t *)header, block))
     {
         retVal = HDR_READFAIL;
     }
@@ -154,15 +155,15 @@ Bool flashmem_write_entry(flash_data_entry_t *entry)
     /** Increment the number of entries */
     gFlashmemCtrl.header.num_entries++;
     /** Write the new number of entries to the data header at the beginning of the flash memory */
-    retVal = extflash_write(FLASHMEM_ENTRIES_ADDR, 2, (uint8_t *)(gFlashmemCtrl.header.num_entries), block);
+    retVal = extflash_write(FLASHMEM_ENTRIES_ADDR, 2, (uint8_t *)&(gFlashmemCtrl.header.num_entries), block);
 
     /** If no bad things happened, go ahead and write the data. */
-    if(retVal == false)
+    if(retVal == true)
     {
         /** Write to the current data address. This might fail if the data memory is full (i.e. already 512Mb of data on it) */
         retVal = extflash_write(gFlashmemCtrl.data_addr, sizeof(flash_data_entry_t), (uint8_t *)entry, block);
-        /** If there were still no bad things that happend, increment the data addresss. */
-        if(retVal == false)
+        /** If there were still no bad things that happened, increment the data addresses. */
+        if(retVal == true)
         {
             gFlashmemCtrl.data_addr+= sizeof(flash_data_entry_t);
         }
@@ -175,7 +176,7 @@ Bool flashmem_write_entry(flash_data_entry_t *entry)
  *
  * @param[out] entry Pointer to write the entry to
  * @param index Data entry to read
- * @return True on failure, false on success
+ * @return True on success, false on failure
  *
  * Read the entry addressed by index and put it in the caller's struct.
  */
