@@ -418,6 +418,12 @@
     <Compile Include="src\ASF\common\boards\user_board\init.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\drivers\BMX005Gyro.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\BMX005Gyro.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\tasks\USBTask.c">
       <SubType>compile</SubType>
     </Compile>
