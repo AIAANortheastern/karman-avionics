@@ -17,8 +17,13 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	
 
 	/* Call initial functions to prepare gyroscope. */
-	- Set Power Mode "Normal". Line 162 of support
-	- Set Bandwidth of input data. Line 172 of support
+	/* - Set Power Mode "Normal". Line 162 of support */
+	/* - Check (rate_ok) bit: bit4 in GYR 0x3C (1 means ok) */
+	/* - Run self test: in GYR 0x3C set bit0 -> 1 to trigger
+	- bit 1 will stay 1 while running, when done bit2 will be set to 1 if failed, stay 0 if passed. */
+	/* - Measure offset by running slow compensation (GYR 0x31<0:2> slow_offset_en_x/y/z bits to enable)
+	   - After a time set the bits to 0s and the last calculated values should remain.*/
+	/* - Set Bandwidth of input data. Line 172 of support */
 	
 }
 
