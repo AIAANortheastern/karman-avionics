@@ -17,7 +17,8 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	
 
 	/* Call initial functions to prepare gyroscope. */
-	/* - Set Power Mode "Normal". Line 162 of support */
+	/* - Set Power Mode "Normal". Line 162 of support 
+	- bits 7 and 5 in 0x11 have to be 0 */
 	/* - Check (rate_ok) bit: bit4 in GYR 0x3C (1 means ok) */
 	/* - Run self test: in GYR 0x3C set bit0 -> 1 to trigger
 	- bit 1 will stay 1 while running, when done bit2 will be set to 1 if failed, stay 0 if passed. */

@@ -14,6 +14,14 @@
 
 #define GYRO_SPI_BUFF_SIZE (48)
 #define GYRO_SEND_READ_CODE (0x82)
+
+//--Init codes--
+#define GYRO_POWER_MODE (0x11)
+#define GYRO_SELF_TEST (0x3C)
+#define GYRO_SLOW_OFFSET (0x31)
+#define GYRO_OFFSET_VALUES (0x36) /* 0x36 to 0x39 */
+//--------------
+
 #define BYTES_PER_AXIS_SAMPLE (2)
 void bmx500Gyro_init(spi_master_t *spi_master);
 
