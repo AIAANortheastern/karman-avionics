@@ -15,6 +15,7 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	memset((void*) gyroControl.spi_send_buffer, 0 ,sizeof(gyroControl.spi_send_buffer));
 	gyroControl.send_complete = false;
 	
+	
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support 
@@ -26,6 +27,24 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	   - After a time set the bits to 0s and the last calculated values should remain.*/
 	/* - Set Bandwidth of input data. Line 172 of support */
 	
+}
+
+
+static uint8_t setBandwidth()
+{
+	// Tell spi to write GYRO_BANDWIDTH_MASK to GYRO_BANDWIDTH_REG
+
+	// Blocking send request (to write to write GYRO_BANDWIDTH_MASK to GYRO_BANDWIDTH_REG )
+
+	while( !isBandwidthSet()) {
+		//Write Bandwidth w/ blocking send request
+	}
+}
+
+static uint8_t isBandwidthSet()
+{
+	// Read bandwidth from sensor w/ blocking send request, then check if result is correct
+
 }
 
 void bmx500Gyro_Get_XYZ_Data(void)

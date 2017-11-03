@@ -20,6 +20,8 @@
 #define GYRO_SELF_TEST (0x3C)
 #define GYRO_SLOW_OFFSET (0x31)
 #define GYRO_OFFSET_VALUES (0x36) /* 0x36 to 0x39 */
+#define GYRO_BANDWIDTH_MASK (0x6) /* 0x6 -> Decimation factor = 10, ODR=200Hz, Filter Bandwidth = 64Hz */
+#define GYRO_BANDWIDTH_REG  (0x10)
 //--------------
 
 #define BYTES_PER_AXIS_SAMPLE (2)
