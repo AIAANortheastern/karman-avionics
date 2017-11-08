@@ -3,13 +3,13 @@
 #define GYROSCOPE_CS_PORT *****
 #define GYROSCOPE_CS_BM ******
 #define DEG_PER_LSB 0.0610370189519944
-BMX005_control_t gyroControl;
+gyroscope_control_t gyroControl;
 
 void bmx500Gyro_init(spi_master_t *spi_master)
 {
 	gyroControl.cs_info.csPort = &GYROSCOPE_CS_PORT;
 	gyroControl.cs_info.pinBitMask = GYROSCOPE_CS_BM;
-	gyroControl.cs_info.csPort->DIRSET = gyroControl.pinBitMask;
+	gyroControl.cs_info.csPort->DIRSET = gyroControl.cs_info.pinBitMask;
 	gyroControl.spi_master = spi_master;
 	memset((void*) gyroControl.spi_recv_buffer, 0, sizeof(gyroControl.spi_recv_buffer));
 	memset((void*) gyroControl.spi_send_buffer, 0 ,sizeof(gyroControl.spi_send_buffer));
@@ -29,24 +29,24 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	
 }
 
-
+/*
 static uint8_t setBandwidth()
 {
 	// Tell spi to write GYRO_BANDWIDTH_MASK to GYRO_BANDWIDTH_REG
 
 	// Blocking send request (to write to write GYRO_BANDWIDTH_MASK to GYRO_BANDWIDTH_REG )
 
-	while( !isBandwidthSet()) {
+//	while( !isBandwidthSet()) {
 		//Write Bandwidth w/ blocking send request
 	}
-}
-
+	*/
+/*
 static uint8_t isBandwidthSet()
 {
 	// Read bandwidth from sensor w/ blocking send request, then check if result is correct
 
 }
-
+*/
 void bmx500Gyro_Get_XYZ_Data(void)
 {
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
@@ -61,7 +61,7 @@ void bmx500Gyro_Get_XYZ_Data(void)
                                     &(gyroControl.send_complete));
 }
 
-void gyro_get_data(void);
+void gyro_get_data(void)
 {
 	/* 1. Send read code over SPI */
 	/* 2. Wait the read to finish and receive buffer is filled */
@@ -93,8 +93,8 @@ void gyro_get_data(void);
 static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 {
 	/* convert to degrees
-	/* Signed or Unsigned for send, receive buffer
-	/* In andrew's code, use of gAltimeterControl.final_vals?'*/
+	   Signed or Unsigned for send, receive buffer
+	   In andrew's code, use of gAltimeterControl.final_vals?'*/
 	int16_t rawval = (int16_t) ( ((int16_t)buff[axis] << 8) | ((int16_t)buff[axis+1]));
 	return (rawval*DEG_PER_LSB);
 }
