@@ -64,6 +64,27 @@
 #define BMM050_REP_Z                       (0x52)
 /********************************************/
 
+/* Constant Definitions */
+
+#define BMX055_REPETITIONS_XY_MAX(0xFF)
+#define BMX055_REPETITIONS_Z_MAX(0xFF)
+
+#define BMX055_DATA_RATE_10HZ(0x00 << 3)
+#define BMX055_DATA_RATE_2HZ(0x01 << 3)
+#define BMX055_DATA_RATE_6HZ(0x02 << 3)
+#define BMX055_DATA_RATE_8HZ(0x03 << 3)
+#define BMX055_DATA_RATE_15HZ(0x04 << 3)
+#define BMX055_DATA_RATE_20HZ(0x05 << 3)
+#define BMX055_DATA_RATE_25HZ(0x06 << 3)
+#define BMX055_DATA_RATE_30HZ(0x07 << 3)
+
+#define BMX055_OPERATION_MODE_NORMAL(0x00 << 1)
+#define BMX055_OPERATION_MODE_FORCED(0x01 << 1)
+#define BMX055_OPERATION_MODE_SLEEP(0x03 << 1)
+
+#define BMX055_WRITE(0x00)
+#define BMX055_READ(1 << 7)
+
 /** Final data */
 typedef struct magnotometer_data_s
 {
@@ -78,6 +99,14 @@ typedef enum
 	ENQUEUE, /**< Send SPI Request */
 	XYZH_DATA_READ        /**< Convert the data and return the final result */
 } bmx055_mag_state_t;
+
+typedef enum
+{
+	
+	BMX055_POWER_MODE_OFF,
+	BMX055_POWER_MODE_ON
+	
+} bmx055_mag_power_mode_t;
 
 typedef struct magnetometer_control_s
 {
