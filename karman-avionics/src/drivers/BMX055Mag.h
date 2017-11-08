@@ -85,6 +85,8 @@
 #define BMX055_WRITE(0x00)
 #define BMX055_READ(1 << 7)
 
+#define  BMX055_RESET(1<<2)
+
 /** Final data */
 typedef struct magnotometer_data_s
 {
@@ -96,8 +98,16 @@ typedef struct magnotometer_data_s
 
 typedef enum
 {
-	ENQUEUE, /**< Send SPI Request */
-	XYZH_DATA_READ        /**< Convert the data and return the final result */
+	
+	ENQUEUE_X,
+	READ_X_DATA,
+	ENQUEUE_Y,
+	READ_Y_DATA,
+	ENQUEUE_Z,
+	READ_Z_DATA,
+	ENQUEUE_HALL,
+	READ_HALL_DATA
+	
 } bmx055_mag_state_t;
 
 typedef enum
