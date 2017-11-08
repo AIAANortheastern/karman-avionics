@@ -1,11 +1,24 @@
+ /**
+ * @file ADXL375.h
+ *
+ * Created: 10/10/2017 8:41 PM
+ * Author: Douglas Schonholtz
+ *
+ * @brief High G Accelerometer Driver
+ *
+ * Driver for the ADXL375 High G Accelerometer module.
+ */ 
+
 #ifndef ADXL375_H_
 #define ADXL375_H_
-
-#define HIGH_G_ACCELEROMETER_BUFF_SIZE (8)
 
 #include "Spi_service.h"
 #include "SensorTask.h"
 
+/* holds current SPI input/output */
+#define HIGH_G_ACCELEROMETER_BUFF_SIZE (8)
+
+/* raw accelerometer data */
 typedef struct high_g_accel_raw_s
 {
 	uint16_t dig_x;     /**< d1 */
@@ -13,6 +26,7 @@ typedef struct high_g_accel_raw_s
 	uint16_t dig_z;         /**< dt */
 } ADXL375_raw_t;
 
+/* calculated accelerometer data */
 typedef struct high_g_accel_data_s
 {
 	uint16_t x;     /**< d1 */
@@ -20,12 +34,7 @@ typedef struct high_g_accel_data_s
 	uint16_t z;         /**< dt */
 } ADXL375_data_t;
 
-typedef enum
-{
-	ENQUEUE, /**< Send SPI Request */
-	XYZ_DATA_CONVERT        /**< Convert the data and return the final result */
-} ADXL375_state_t;
-
+/* high g accelerometer offset data */
 typedef struct high_g_accel_offset_s
 {
 	// Need to represent fractional values
@@ -35,6 +44,14 @@ typedef struct high_g_accel_offset_s
 	uint8_t z;         /**< dt */
 } ADXL375_offset_t;
 
+/* high g accelerometer state machine */
+typedef enum
+{
+	ENQUEUE, /**< Send SPI Request */
+	XYZ_DATA_CONVERT        /**< Convert the data and return the final result */
+} ADXL375_state_t;
+
+/*  control structure for high g accelerometer */
 typedef struct high_g_accel_control_s
 {
     spi_master_t        *spi_master; /**< Pointer to the task's SPI Master */
@@ -50,11 +67,17 @@ typedef struct high_g_accel_control_s
 } ADXL375_control_t;
 
 void ADXL375_init(spi_master_t *spi_master);
+
 void ADXL375_reset(void);
+
 sensor_status_t ADXL375_get_data(void);
+
 void ADXL375_get_offset_values(void);
+
 void enqueue_helper(void);
+
 void xyz_read_helper(void);
+
 void convert_helper(void);
 
 #endif
