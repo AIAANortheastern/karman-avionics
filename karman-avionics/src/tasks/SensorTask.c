@@ -38,8 +38,8 @@
 spi_master_t sensorSpiMaster;
 
 /* external control data structures for each sensor */
-extern gAltimeterControl;
-extern gHighGAccelerometer;
+extern ms5607_02ba03_control_t gAltimeterControl;
+extern ADXL375_control_t gHighGAccelerometer;
 
 /** 
  * @brief Initialize all things the radio task needs

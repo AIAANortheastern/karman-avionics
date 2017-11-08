@@ -10,7 +10,7 @@ void ADXL375_init(spi_master_t *spi_master) {
 	
 	//assign the spi_master to master struct for high g accelerometer
 	gHighGAccelerometer.cs_info.csPort = &HIGHG_ACC1_PORT;	// check this
-	gHighGAccelerometer.cs_info.pinBitMask = &HIGHG_ACC1_CS;	// check this
+	gHighGAccelerometer.cs_info.pinBitMask = HIGHG_ACC1_CS;	// check this
 	gHighGAccelerometer.spi_master = spi_master;
 	
 	// clear buffers with memset
@@ -18,9 +18,9 @@ void ADXL375_init(spi_master_t *spi_master) {
 	memset((void *)gHighGAccelerometer.spi_recv_buffer, 0, sizeof(gHighGAccelerometer.spi_recv_buffer));
 	gHighGAccelerometer.send_complete = false;
 	
-	memset((void *)gHighGAccelerometer.raw_vals, 0, sizeof(gHighGAccelerometer.raw_vals));
-	memset((void *)gHighGAccelerometer.final_vals, 0, sizeof(gHighGAccelerometer.final_vals));
-	memset((void *)gHighGAccelerometer.offset_vals, 0, sizeof(gHighGAccelerometer.offset_vals));
+	memset((void *)(&(gHighGAccelerometer).raw_vals), 0, sizeof(gHighGAccelerometer.raw_vals));
+	memset((void *)(&(gHighGAccelerometer).final_vals), 0, sizeof(gHighGAccelerometer.final_vals));
+	memset((void *)(&(gHighGAccelerometer).offset_vals), 0, sizeof(gHighGAccelerometer.offset_vals));
 	
 	ADXL375_reset();
 
