@@ -134,7 +134,7 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 
     if(gExtflashControl.task_inprog)
     {
-        retVal = true; /* BUSY yo */
+        retVal = false; /* BUSY yo */
     }
     else
     {
@@ -290,7 +290,7 @@ Bool extflash_write_enable(Bool block)
                                                    &(gExtflashControl.send_complete),
                                                    false);
 
-        /* Keep reading the status regsiter until the write enable is confirmed. No timeout. this is pretty dangerous tbh. */
+        /* Keep reading the status register until the write enable is confirmed. No timeout. this is pretty dangerous tbh. */
         do 
         {
             /* Read status register to confirm that write has been enabled. */
@@ -301,7 +301,7 @@ Bool extflash_write_enable(Bool block)
      else
      {
         /* Non-blocking not implemented yet... */
-         retVal = true;
+         retVal = false;
      }
 
      return retVal;
@@ -382,7 +382,7 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
      *      Send Read Status Register Command (CLK OUT 1 READ BYTE)
      */
 
-    Bool retVal = false; /* no issues. */
+    Bool retVal = true; /* no issues. */
     uint16_t dummy = 0;
     uint32_t curr_addr = addr;
     size_t rem_bytes = num_bytes;
