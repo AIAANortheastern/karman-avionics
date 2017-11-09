@@ -31,14 +31,12 @@
 /** The size of every SPI master's queue */
 #define SPI_MASTER_QUEUE_SIZE (SPI_MASTER_QUEUE_DEPTH*sizeof(spi_request_t))
 
-volatile static Bool raiseCS = true;
-
 /** 
- * @brief Intialize an SPI master object
+ * @brief Initialize an SPI master object
  * @return bool - Whether or not it initialized successfully.
  * 
  * @param masterObj -  Spi master object for a given SPI bus
- * @param regSet - The hardware peripheral assocaited with the SPI bus
+ * @param regSet - The hardware peripheral associated with the SPI bus
  * @param port - The port this is being initialized on.
  * @param taskName - A function to be run in the background that process its queue
  * initializes an SPI master servicer object
@@ -131,9 +129,9 @@ Bool spi_master_enqueue(spi_master_t *spi_interface,
         newRequest->csInfo.pinBitMask = csInfo->pinBitMask;
 
         if(keep_cs_low) {
-            raiseCS = false;
+            newRequest->raise_cs = false;
         }else {
-            raiseCS = true;
+            newRequest->raise_cs = true;
         }
 
         newRequest->sendBuff = sendBuff;
@@ -290,7 +288,7 @@ void spi_master_ISR(spi_master_t *spi_interface)
          * There are a few special cases (i.e. Altimeter Reset procedure) that
          * require it to be held low.
         */
-        if(raiseCS){
+        if(currRequest->raise_cs){
             spi_master_finish_request(currRequest);
         }
         /** Inform the initiator that the request has completed*/

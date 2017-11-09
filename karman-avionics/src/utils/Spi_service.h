@@ -50,9 +50,10 @@ typedef struct
   volatile uint8_t      bytesSent;  /**< How many bytes have already been sent */
   volatile void         *recvBuff;  /**< Buffer to store the result in */
   uint16_t               recvLen;   /**< How many bytes to expect from the device */
-  volatile uint8_t      bytesRecv;  /**< How many bytes have actually been recieved */
+  volatile uint8_t      bytesRecv;  /**< How many bytes have actually been received */
   volatile Bool         *complete;  /**< Complete flag */
   Bool                  valid;      /**< Valid flag. Is this a valid request? */
+  Bool                  raise_cs;   /**< */
 } spi_request_t;
 
 /** @brief Struct to define the SPI interface to use. 
