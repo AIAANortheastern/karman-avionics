@@ -6,16 +6,22 @@
  */ 
 
 #include "BMX055Mag.h"
+/* hash defines located in above header. We tried something new this time */
 
+/* initialize global magnetometer control structure */
 bmx055_mag_control_t gMagnetometer;
 
-// read-write 0 on write
-
+/**
+ * @brief Initialize the Magnetometer
+ *
+ * resets buffers and control data
+ * sends configuration data to Magnetometer, and sets it into standard operation mode
+ */
 void bmx055_mag_init(spi_master_t *spi_master)
 {
 
 	gMagnetometer.cs_info.csPort = &IMU_MAG1_PORT;
-	gMagnetometer.cs_info.pinBitMask = &IMU_MAG1_CS;
+	gMagnetometer.cs_info.pinBitMask = IMU_MAG1_CS;
 	gMagnetometer.spi_master = spi_master;
 	
 	/* clear buffers */
@@ -36,7 +42,14 @@ void bmx055_mag_init(spi_master_t *spi_master)
 	
 }
 
-// make three functions. one for set, one for verify, and one for write
+/** 
+ * @brief writes the desired value to the selected register
+ * 
+ * @param reg address of the selected register
+ * @param value desired value to be contained in the register
+ *
+ * writes data to a register until the data is confirmed to be written
+ */
 void set_init_value(uint8_t reg, uint8_t value)
 {
 	
@@ -49,6 +62,14 @@ void set_init_value(uint8_t reg, uint8_t value)
 	
 }
 
+/** 
+ * @brief checks to see if the desired value is set in the selected register
+ * 
+ * @param reg address of the selected register
+ * @param value desired value to be contained in the register
+ *
+ * checks the contents of a register and returns true if it matches the expected value
+ */
 Bool verify_init_write(uint8_t reg, uint8_t value)
 {
 	
@@ -73,9 +94,18 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 	
 }
 
+/** 
+ * @brief writes the desired value to the selected register
+ * 
+ * @param reg address of the selected register
+ * @param value desired value to be written to the register
+ *
+ * sends the request to write a value to the selected register
+ */
 void write_init_value(uint8_t reg, uint8_t value)
 {
 	
+		/* set send buffer with write code, register address and value to be written */	
 		gMagnetometer.spi_send_buffer[0] = BMX055_WRITE | reg;
 		gMagnetometer.spi_send_buffer[1] = value;
 		
@@ -163,6 +193,11 @@ void write_init_value(uint8_t reg, uint8_t value)
 	//
 //}
 
+/**
+ * @brief reset function for magnetometer
+ *
+ * sets the soft reset bit (bit 2) in the Power Control register to high, resetting the chip
+ */
 void bmx055_mag_reset(void)
 {
 	
@@ -171,7 +206,15 @@ void bmx055_mag_reset(void)
 	
 }
 
-
+/**
+ * @brief State machine for Magnetometer
+ * 
+ * This function is called repeatedly from SensorTask.c in tasks 
+ * When this is called it does its current states job and increments 
+ * this objects state to the next value. 
+ * Eventually this will return successful and the data will be pulled out of the
+ * appropriate global buffers.
+ */
 sensor_status_t bmx055_mag_get_data(void)
 {
 	
@@ -266,16 +309,24 @@ sensor_status_t bmx055_mag_get_data(void)
 	
 }
 
+/** 
+ * @brief enqueues the read request for the register address of the parameter
+ *
+ * @param reg the register address you want to read data from
+ *
+ * this enqueues a non-blocking SPI request to read 2 bytes of data, the SPI driver handles the rest
+ * 
+ */
 void enqueue_helper(uint8_t reg)
 {
 	
 	memset((void *)gMagnetometer.spi_recv_buffer, 0, sizeof(gMagnetometer.spi_recv_buffer));
 	memset((void *)gMagnetometer.spi_send_buffer, 0, sizeof(gMagnetometer.spi_send_buffer));
 	
-	// set send buffer with read code which will be some constant defined in header
+	/* set send buffer with read code and register address */
 	gMagnetometer.spi_send_buffer[0] = BMX055_READ | reg;
 	
-	// spimaster enqueue
+	/* spimaster enqueue */
 	spi_master_enqueue(gMagnetometer.spi_master,
 		&(gMagnetometer.cs_info),
 		gMagnetometer.spi_send_buffer,
@@ -286,7 +337,7 @@ void enqueue_helper(uint8_t reg)
 	
 }
 
-// need one for each x-y, z and hall
+// need one for each x, y, z and hall -> they're going to be gross too.
 void read_helper(void)
 {
 	
