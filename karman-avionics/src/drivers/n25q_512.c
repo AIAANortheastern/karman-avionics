@@ -173,8 +173,7 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
                                     EXTFLASH_CMDADDR_SIZE,
                                     (void *)buf,
                                     num_bytes,
-                                    &(gExtflashControl.send_complete),
-                                    false);
+                                    &(gExtflashControl.send_complete));
 
             gExtflashControl.task_inprog = true;
         }

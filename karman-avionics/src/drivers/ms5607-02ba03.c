@@ -135,8 +135,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     1,
     gAltimeterControl.spi_recv_buffer,
     0,
-    &gAltimeterControl.send_complete,
-    false);
+    &gAltimeterControl.send_complete);
  }
 
 /** 
@@ -158,8 +157,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
      1,
      gAltimeterControl.spi_recv_buffer,
      0,
-     &gAltimeterControl.send_complete,
-     false);
+     &gAltimeterControl.send_complete);
  }
 
  /** 
@@ -182,8 +180,7 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
         1,
         gAltimeterControl.spi_recv_buffer,
         4,
-        &gAltimeterControl.send_complete,
-        false);
+        &gAltimeterControl.send_complete);
  }
 
 /** 

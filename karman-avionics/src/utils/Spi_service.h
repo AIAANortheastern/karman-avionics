@@ -73,6 +73,8 @@ typedef struct
     volatile Bool           masterBusy; /**< Flag to indicate if the master is busy or not */
 } spi_master_t;
 
+
+
 /** 
  * @brief Intialize an SPI master object
  * @return bool - Whether or not it initialized successfully.
@@ -87,6 +89,40 @@ Bool init_spi_master_service(spi_master_t *master,
                              USART_t *regSet,
                              PORT_t *port,
                              background_func_t taskName);
+
+
+/**
+ * @brief wrapper for spi_master_enqueue internal with keep_cs_low equal to false
+ *
+ * @param spi_interface The SPI master object to use
+ * @param csInfo Chip select information for the hardware device to contact
+ * @param sendBuff Caller's buffer containing the data to be sent out
+ * @param sendLen Number of bytes to send
+ * @param[out] recvBuff Caller's buffer to store response from device into
+ * @param recvLen Number of bytes to receive
+ * @param complete Flag to set true when the transaction is complete
+ * @param keep_cs_low Flag to determine if we should disable pulling the CS high after the transaction is finished. WARNING: The caller will be required to pull the CS high again or the SPI interface will be broken!!!
+ * @return True on success, false on failure
+ *
+ * The queue is wrapping, and so the array acts like a ring buffer
+ * This makes detecting collisions a lot more fun. A lot of care is taken.
+ * If front and back are the same, this can cause issues. Adding a new entry
+ * when there is still an old entry there is bad. So, we check the valid flag
+ * of the entry indexed by back. If it's valid, we can't add a new one. back 
+ * will always point to the last entry in the queue upon entry to this function.
+ * If there are no entries, back and front are the same. If there are three entries, 
+ * then back will be the index for the last entry. So to create a new entry at the
+ * back of the queue, we check if back + 1 is empty. We only want to update back
+ * if we successfully add an entry.
+ */
+
+Bool spi_master_enqueue(spi_master_t *spi_interface,
+chip_select_info_t *csInfo,
+volatile void *sendBuff,
+uint16_t sendLen,
+volatile void *recvBuff,
+uint16_t recvLen,
+volatile Bool *complete);
 
 /**
  * @brief Push function for queue.
@@ -112,7 +148,7 @@ Bool init_spi_master_service(spi_master_t *master,
  * back of the queue, we check if back + 1 is empty. We only want to update back
  * if we successfully add an entry.
  */
-Bool spi_master_enqueue(spi_master_t *spi_interface,
+Bool spi_master_enqueue_internal(spi_master_t *spi_interface,
                         chip_select_info_t *csInfo,
                         volatile void *sendBuff,
                         uint16_t sendLen,
