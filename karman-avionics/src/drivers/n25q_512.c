@@ -1,7 +1,7 @@
 /**
  * @file n25q_512.c
  *
- * @brief External 512 Mb flash memory.
+ * @brief External 128!!!! Mb flash memory (NOT 512!!).
  *
  * Created: 3/15/2017 12:06:51 AM
  * Author: Andrew Kaster
@@ -26,7 +26,7 @@
 #define EXTFLASH_READ_DATA_CMD  (0x03) /**< Read command */
 #define EXTFLASH_READ_SR_CMD    (0x05) /**< Read Status register Command */
 #define EXTFLASH_WRITE_ENABLE   (0x06) /**< Write enable command. Write enable must be sent before page program */
-#define EXTFLASH_4BYTEMODE      (0xB7) /**< Config value for 4 byte address mode */
+/*#define EXTFLASH_4BYTEMODE      (0xB7) Config value for 4 byte address mode NOT SUPPORTED BY N25Q_128 */
 #define EXTFLASH_PAGE_PROGRAM   (0x02) /**< Page program command. i.e. actually write something. */
 
 #define EXTFLASH_CS_PORT (FLASH_PORT) /**< Internal definition of chip select port */
@@ -94,6 +94,7 @@ ISR(FLASH_SPI_INT)
 /** Initialize non-volatile control registers */
 void extflash_initialize_regs(void)
 {
+#if 0
     Bool block = true;
 
     /* Enable 4 byte addressing */
@@ -113,6 +114,8 @@ void extflash_initialize_regs(void)
                                            0,
                                            &(gExtflashControl.send_complete),
                                            false);
+#endif
+
 }
 
 /** 
@@ -138,17 +141,16 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     }
     else
     {
-        /* READ Command is 0x03 for normal read. Format: CMD ADDR[3 - 0] {DUMMY BYTES} */
+        /* READ Command is 0x03 for normal read. Format: CMD ADDR[2 - 0] {DUMMY BYTES} */
         /* We're not using any dummy clock cycles in standard SPI mode. */
-        //memset((void *)(gExtflashControl.spi_send_buffer), 0, sizeof(gExtflashControl.spi_send_buffer)/sizeof(gExtflashControl.spi_send_buffer[0]));
+        memset((void *)(gExtflashControl.spi_send_buffer), 0, sizeof(gExtflashControl.spi_send_buffer)/sizeof(gExtflashControl.spi_send_buffer[0]));
 
         /* SPI is MSB FIRST in mode 0. AVR-GCC treats larger integers as little endian. */
         gExtflashControl.spi_send_buffer[0] = EXTFLASH_READ_DATA_CMD;
         /* Ensure that our bytes are sent MSB first. */
-        gExtflashControl.spi_send_buffer[1] = (uint8_t)((num_bytes & 0xFF000000) >> 24);
-        gExtflashControl.spi_send_buffer[2] = (uint8_t)((num_bytes & 0x00FF0000) >> 16);
-        gExtflashControl.spi_send_buffer[3] = (uint8_t)((num_bytes & 0x0000FF00) >> 8);
-        gExtflashControl.spi_send_buffer[4] = (uint8_t)((num_bytes & 0x000000FF));
+        gExtflashControl.spi_send_buffer[1] = (uint8_t)((num_bytes & 0x00FF0000) >> 16);
+        gExtflashControl.spi_send_buffer[2] = (uint8_t)((num_bytes & 0x0000FF00) >> 8);
+        gExtflashControl.spi_send_buffer[3] = (uint8_t)((num_bytes & 0x000000FF));
 
         if(block)
         {
@@ -162,7 +164,7 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
                                                       &(gExtflashControl.send_complete),
                                                       false);
             /* Copy data into caller's buffer, ignoring garbage data from sending command */
-            memcpy((void *)buf, (void *)(&(gExtflashControl.spi_recv_buffer[5])), num_bytes);
+            memcpy((void *)buf, (void *)(&(gExtflashControl.spi_recv_buffer[EXTFLASH_CMDADDR_SIZE])), num_bytes);
         }
         else
         {
@@ -326,13 +328,12 @@ Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_
         /* We want a page program at the address the caller gave us. */
         gExtflashControl.spi_send_buffer[0] = EXTFLASH_PAGE_PROGRAM;
         /* Ensure that the address is MSB first */
-        gExtflashControl.spi_send_buffer[1] = (uint8_t)((addr & 0xFF000000) >> 24);
-        gExtflashControl.spi_send_buffer[2] = (uint8_t)((addr & 0x00FF0000) >> 16);
-        gExtflashControl.spi_send_buffer[3] = (uint8_t)((addr & 0x0000FF00) >> 8);
-        gExtflashControl.spi_send_buffer[4] = (uint8_t)((addr & 0x000000FF));
+        gExtflashControl.spi_send_buffer[1] = (uint8_t)((addr & 0x00FF0000) >> 16);
+        gExtflashControl.spi_send_buffer[2] = (uint8_t)((addr & 0x0000FF00) >> 8);
+        gExtflashControl.spi_send_buffer[3] = (uint8_t)((addr & 0x000000FF));
 
         /* Copy the request into the send buffer. The request can be up to 256 bytes. */
-        memcpy((void *)(&(gExtflashControl.spi_send_buffer[5])), (void *)(&(buf[buff_offset])), num_bytes);
+        memcpy((void *)(&(gExtflashControl.spi_send_buffer[EXTFLASH_CMDADDR_SIZE])), (void *)(&(buf[buff_offset])), num_bytes);
 
         /* Send up to 256 + 5 bytes, expecting none in return. */
         retVal = spi_master_blocking_send_request(&(extflashSpiMaster),
@@ -377,7 +378,7 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
      *  
      *  For each write:
      *      Send Write Enable command (RAISE CS)
-     *      Send Page program + 4 byte address (DON'T RAISE CS)
+     *      Send Page program + 3 byte address (DON'T RAISE CS)
      *      Send up to ***256*** bytes of data (RAISE CS)
      *      Send Read Status Register Command (CLK OUT 1 READ BYTE)
      */
@@ -390,7 +391,7 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     uint16_t buffer_offset = 0;
 
     /* Validate address. Not too big and won't overflow the max number of bytes. */
-    if((addr > EXTFLASH_SIZE) || ((addr + num_bytes) > EXTFLASH_SIZE))
+    if((addr >= EXTFLASH_SIZE) || ((addr + num_bytes) >= EXTFLASH_SIZE))
     {
         return false;
     }
