@@ -77,14 +77,13 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
 
     /** Send BLOCKING request as this is done during initialization */
     /** Tell SPI to NOT pull CS high after transaction to allow for reset time. */
-    spi_master_blocking_send_request(gAltimeterControl.spi_master,
+    spi_master_blocking_send_req_cslow(gAltimeterControl.spi_master,
                        &(gAltimeterControl.cs_info),
                        gAltimeterControl.spi_send_buffer,
                        1,
                        gAltimeterControl.spi_recv_buffer,
                        0,
-                       &(gAltimeterControl.send_complete),
-                       true);
+                       &(gAltimeterControl.send_complete));
  }
 
  /** 
@@ -111,8 +110,8 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
                                         1,
                                         gAltimeterControl.spi_recv_buffer,
                                         3,
-                                        &(gAltimeterControl.send_complete),
-                                        false);
+                                        &(gAltimeterControl.send_complete));
+
         *calptr = ((uint16_t)gAltimeterControl.spi_recv_buffer[1] << 8) | gAltimeterControl.spi_recv_buffer[0];
         calptr++;
     }
@@ -130,12 +129,12 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
     gAltimeterControl.spi_send_buffer[0] = ALTIMETER_CONVERT_D1;
 
     spi_master_enqueue(gAltimeterControl.spi_master,
-    &gAltimeterControl.cs_info,
-    gAltimeterControl.spi_send_buffer,
-    1,
-    gAltimeterControl.spi_recv_buffer,
-    0,
-    &gAltimeterControl.send_complete);
+                       &(gAltimeterControl.cs_info),
+                       gAltimeterControl.spi_send_buffer,
+                       1,
+                       gAltimeterControl.spi_recv_buffer,
+                       0,
+                       &(gAltimeterControl.send_complete));
  }
 
 /** 
@@ -152,12 +151,12 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
      gAltimeterControl.spi_send_buffer[0] = ALTIMETER_CONVERT_D2;
 
      spi_master_enqueue(gAltimeterControl.spi_master,
-     &gAltimeterControl.cs_info,
-     gAltimeterControl.spi_send_buffer,
-     1,
-     gAltimeterControl.spi_recv_buffer,
-     0,
-     &gAltimeterControl.send_complete);
+                        &(gAltimeterControl.cs_info),
+                        gAltimeterControl.spi_send_buffer,
+                        1,
+                        gAltimeterControl.spi_recv_buffer,
+                        0,
+                        &(gAltimeterControl.send_complete));
  }
 
  /** 
@@ -168,20 +167,20 @@ void ms5607_02ba03_init(spi_master_t *spi_master)
   *
   * 24 bits for pressure/temperature. NOTE: Always convert d1 and d2 first 
   */
- void ms5607_02ba03_read_data(void)
- {
-        memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
+void ms5607_02ba03_read_data(void)
+{
+    memset((void *)gAltimeterControl.spi_send_buffer, 0, sizeof(gAltimeterControl.spi_send_buffer));
         
-        gAltimeterControl.spi_send_buffer[0] = ALTIMETER_ADC_READ;
+    gAltimeterControl.spi_send_buffer[0] = ALTIMETER_ADC_READ;
 
-        spi_master_enqueue(gAltimeterControl.spi_master,
-        &gAltimeterControl.cs_info,
-        gAltimeterControl.spi_send_buffer,
-        1,
-        gAltimeterControl.spi_recv_buffer,
-        4,
-        &gAltimeterControl.send_complete);
- }
+    spi_master_enqueue(gAltimeterControl.spi_master,
+                       &(gAltimeterControl.cs_info),
+                       gAltimeterControl.spi_send_buffer,
+                       1,
+                       gAltimeterControl.spi_recv_buffer,
+                       4,
+                       &(gAltimeterControl.send_complete));
+}
 
 /** 
  * @brief Helper function to re-order bytes to use as a 32 bit value.
