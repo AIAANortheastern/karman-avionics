@@ -5,28 +5,15 @@
 #define DEG_PER_LSB 0.0610370189519944
 gyroscope_control_t gyroControl;
 
-void bmx500Gyro_init(spi_master_t *spi_master)
-{
-	gyroControl.cs_info.csPort = &GYROSCOPE_CS_PORT;
-	gyroControl.cs_info.pinBitMask = GYROSCOPE_CS_BM;
-	gyroControl.cs_info.csPort->DIRSET = gyroControl.cs_info.pinBitMask;
-	gyroControl.spi_master = spi_master;
-	memset((void*) gyroControl.spi_recv_buffer, 0, sizeof(gyroControl.spi_recv_buffer));
-	memset((void*) gyroControl.spi_send_buffer, 0 ,sizeof(gyroControl.spi_send_buffer));
-	gyroControl.send_complete = false;
-	
-	
 
-	/* Call initial functions to prepare gyroscope. */
-	/* - Set Power Mode "Normal". Line 162 of support 
-	- bits 7 and 5 in 0x11 have to be 0 */
-	/* - Check (rate_ok) bit: bit4 in GYR 0x3C (1 means ok) */
-	/* - Run self test: in GYR 0x3C set bit0 -> 1 to trigger
-	- bit 1 will stay 1 while running, when done bit2 will be set to 1 if failed, stay 0 if passed. */
-	/* - Measure offset by running slow compensation (GYR 0x31<0:2> slow_offset_en_x/y/z bits to enable)
-	   - After a time set the bits to 0s and the last calculated values should remain.*/
-	/* - Set Bandwidth of input data. Line 172 of support */
-	
+/******    Static Functions		*******/
+static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
+{
+	/* convert to degrees
+	   Signed or Unsigned for send, receive buffer
+	   In andrew's code, use of gAltimeterControl.final_vals?'*/
+	int16_t rawval = (int16_t) ( ((int16_t)buff[axis] << 8) | ((int16_t)buff[axis+1]));
+	return (rawval*DEG_PER_LSB);
 }
 
 /*
@@ -47,6 +34,8 @@ static uint8_t isBandwidthSet()
 
 }
 */
+
+/********	Non-static Functions	*********/
 void bmx500Gyro_Get_XYZ_Data(void)
 {
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
@@ -90,11 +79,26 @@ void gyro_get_data(void)
 	}
 }
 
-static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
+void bmx500Gyro_init(spi_master_t *spi_master)
 {
-	/* convert to degrees
-	   Signed or Unsigned for send, receive buffer
-	   In andrew's code, use of gAltimeterControl.final_vals?'*/
-	int16_t rawval = (int16_t) ( ((int16_t)buff[axis] << 8) | ((int16_t)buff[axis+1]));
-	return (rawval*DEG_PER_LSB);
+	gyroControl.cs_info.csPort = &IMU_GYRO1_PORT;
+	gyroControl.cs_info.pinBitMask = IMU_GYRO1_CS;
+	gyroControl.cs_info.csPort->DIRSET = gyroControl.cs_info.pinBitMask;
+	gyroControl.spi_master = spi_master;
+	memset((void*) gyroControl.spi_recv_buffer, 0, sizeof(gyroControl.spi_recv_buffer));
+	memset((void*) gyroControl.spi_send_buffer, 0 ,sizeof(gyroControl.spi_send_buffer));
+	gyroControl.send_complete = false;
+	
+	
+
+	/* Call initial functions to prepare gyroscope. */
+	/* - Set Power Mode "Normal". Line 162 of support 
+	- bits 7 and 5 in 0x11 have to be 0 */
+	/* - Check (rate_ok) bit: bit4 in GYR 0x3C (1 means ok) */
+	/* - Run self test: in GYR 0x3C set bit0 -> 1 to trigger
+	- bit 1 will stay 1 while running, when done bit2 will be set to 1 if failed, stay 0 if passed. */
+	/* - Measure offset by running slow compensation (GYR 0x31<0:2> slow_offset_en_x/y/z bits to enable)
+	   - After a time set the bits to 0s and the last calculated values should remain.*/
+	/* - Set Bandwidth of input data. Line 172 of support */
+	
 }

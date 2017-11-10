@@ -9,7 +9,6 @@
 #define BMX005GYRO_H
 
 #include "Spi_service.h"
-#include "bmg160.h"  // Driver for bmg160 gyroscope sensor within BMX005
 
 
 #define GYRO_SPI_BUFF_SIZE (48)
@@ -40,6 +39,25 @@ typedef struct gyroscope_cal_s
     //uint16_t temp_sens;     /* temperature coefficient of temperature */
 } BMX005_gyro_cal_t;
 
+typedef struct gyro_init_vals_s
+{
+
+} gyro_init_vals_t;
+
+typedef enum
+{
+	ENQUEUE_GYRO_XYZ_READ,
+	WAIT_XYZ_READ,
+	XYZ_DATA_CONVERT
+} gyro_state_t;
+
+typedef struct gyro_data_raw_s
+{
+	int16_t x_rot_data;     /* raw x rotation rate value */
+	int16_t y_rot_data;     /* raw y rotation rate value */
+	int16_t z_rot_data;     /* raw z rotation rate value */
+} gyro_data_raw_t;
+
 typedef struct gyroscope_control_s
 {
     spi_master_t        *spi_master;
@@ -52,18 +70,6 @@ typedef struct gyroscope_control_s
     gyro_state_t        data_state;
 } gyroscope_control_t;
 
-typedef struct gyro_init_vals_s
-{
-
-} gyro_init_vals_t;
-
-
-typedef struct gyro_data_raw_s
-{
-    int16_t x_rot_data;     /* raw x rotation rate value */
-    int16_t y_rot_data;     /* raw y rotation rate value */
-    int16_t z_rot_data;     /* raw z rotation rate value */
-} gyro_data_raw_t;
 
 // If conversion is needed
     /*typedef struct altimeter_data_s
@@ -72,16 +78,6 @@ typedef struct gyro_data_raw_s
         int32_t pressure;
     } ms5607_02ba03_data_t;
     */
-
-
-typedef enum
-{
-    ENQUEUE_GYRO_XYZ_READ,
-    WAIT_XYZ_READ,
-    XYZ_DATA_CONVERT
-} gyro_state_t;
-
-
 
 void ms5607_02ba03_init(spi_master_t *spi_master);
 
