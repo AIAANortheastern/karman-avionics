@@ -16,24 +16,25 @@ static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 	return (rawval*DEG_PER_LSB);
 }
 
-/*
-static uint8_t setBandwidth()
-{
-	// Tell spi to write GYRO_BANDWIDTH_MASK to GYRO_BANDWIDTH_REG
 
-	// Blocking send request (to write to write GYRO_BANDWIDTH_MASK to GYRO_BANDWIDTH_REG )
-
-//	while( !isBandwidthSet()) {
-		//Write Bandwidth w/ blocking send request
-	}
-	*/
-/*
-static uint8_t isBandwidthSet()
+static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 {
+	writeGyroReg(GYRO_BANDWIDTH_REG, (uint8_t)GYRO_BANDWIDTH_MASK, gyroControl);
+	return ( readGyroReg(GYRO_BANDWIDTH_REG) == GYRO_BANDWIDTH_MASK, gyroControl); 
 	// Read bandwidth from sensor w/ blocking send request, then check if result is correct
 
 }
-*/
+
+static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *gyroControl)
+{
+	
+}
+
+static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyroControl)
+{
+	
+}
+
 
 /********	Non-static Functions	*********/
 void bmx500Gyro_Get_XYZ_Data(void)
@@ -86,10 +87,11 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	gyroControl.cs_info.csPort->DIRSET = gyroControl.cs_info.pinBitMask;
 	gyroControl.spi_master = spi_master;
 	memset((void*) gyroControl.spi_recv_buffer, 0, sizeof(gyroControl.spi_recv_buffer));
-	memset((void*) gyroControl.spi_send_buffer, 0 ,sizeof(gyroControl.spi_send_buffer));
+	memset((void*) gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
 	gyroControl.send_complete = false;
 	
 	
+	while(!isBandwidthSet(&gyroControl));
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support 
