@@ -5,7 +5,6 @@
  *  Author: Adam Mirza
  */ 
 
-
 #ifndef BMX055MAG_H_
 #define BMX055MAG_H_
 
@@ -66,50 +65,56 @@
 
 /* Constant Definitions */
 
-#define BMX055_REPETITIONS_XY_MAX(0xFF)
-#define BMX055_REPETITIONS_Z_MAX(0xFF)
+#define BMX055_REPETITIONS_XY_MAX	(0xFF)	/* maximum value for xy repetitions register */
+#define BMX055_REPETITIONS_Z_MAX	(0xFF)	/* maximum value for z repetitions register */
 
-#define BMX055_DATA_RATE_10HZ(0x00 << 3)
-#define BMX055_DATA_RATE_2HZ(0x01 << 3)
-#define BMX055_DATA_RATE_6HZ(0x02 << 3)
-#define BMX055_DATA_RATE_8HZ(0x03 << 3)
-#define BMX055_DATA_RATE_15HZ(0x04 << 3)
-#define BMX055_DATA_RATE_20HZ(0x05 << 3)
-#define BMX055_DATA_RATE_25HZ(0x06 << 3)
-#define BMX055_DATA_RATE_30HZ(0x07 << 3)
+/* Data rates */	
+#define BMX055_DATA_RATE_10HZ	(0x00 << 3)	/* Data rate of 10 Hz */
+#define BMX055_DATA_RATE_2HZ	(0x01 << 3)		/* Data rate of 2 Hz */
+#define BMX055_DATA_RATE_6HZ	(0x02 << 3)		/* Data rate of 6 Hz */
+#define BMX055_DATA_RATE_8HZ	(0x03 << 3)		/* Data rate of 8 Hz */
+#define BMX055_DATA_RATE_15HZ	(0x04 << 3)	/* Data rate of 15 Hz */
+#define BMX055_DATA_RATE_20HZ	(0x05 << 3)	/* Data rate of 20 Hz */
+#define BMX055_DATA_RATE_25HZ	(0x06 << 3)	/* Data rate of 25 Hz */
+#define BMX055_DATA_RATE_30HZ	(0x07 << 3)	/* Data rate of 30 Hz (maximum) */
 
-#define BMX055_OPERATION_MODE_NORMAL(0x00 << 1)
-#define BMX055_OPERATION_MODE_FORCED(0x01 << 1)
-#define BMX055_OPERATION_MODE_SLEEP(0x03 << 1)
+/* Modes of Operation */
+#define BMX055_OPERATION_MODE_NORMAL	(0x00 << 1)	/* Normal operation mode */
+#define BMX055_OPERATION_MODE_FORCED	(0x01 << 1)	/* Forced operation mode */
+#define BMX055_OPERATION_MODE_SLEEP		(0x03 << 1)	/* Sleep operation mode */
 
-#define BMX055_WRITE(0x00)
-#define BMX055_READ(1 << 7)
+/* read/write bit constants */
+#define BMX055_WRITE	(0x00)
+#define BMX055_READ		(1 << 7)
 
-#define  BMX055_RESET(1<<2)
+/* reset bit of Power Control Register */
+#define  BMX055_RESET	(1<<2)
 
 /** Final data */
 typedef struct magnotometer_data_s
 {
-	int16_t x;           /**x data*/
-	int16_t y;       /**y data */
-	int16_t z;		/* z data*/
-	int16_t rhall;	/* hall resistance*/
+	int16_t x;           /**< x data */
+	int16_t y;       /**< y data */
+	int16_t z;		/**< z data */
+	int16_t rhall;	/**< hall resistance */
 } bmx055_mag_data_t;
 
+/** Magnetometer state machine stages */
 typedef enum
 {
 	
-	ENQUEUE_X,
-	READ_X_DATA,
-	ENQUEUE_Y,
-	READ_Y_DATA,
-	ENQUEUE_Z,
-	READ_Z_DATA,
-	ENQUEUE_HALL,
-	READ_HALL_DATA
+	ENQUEUE_X,	/**< sending SPI read request for x data */
+	READ_X_DATA,	/**< reading/waiting for x data from sensor */
+	ENQUEUE_Y,		/**< sending SPI read request for y data */
+	READ_Y_DATA,	/**< reading/waiting for y data from sensor */
+	ENQUEUE_Z,		/**< sending SPI read request for z data */
+	READ_Z_DATA,	/**< reading/waiting for z data from sensor */
+	ENQUEUE_HALL,	/**< sending SPI read request for hall resistance data */
+	READ_HALL_DATA	/**< reading/waiting for hall resistance data from sensor */
 	
 } bmx055_mag_state_t;
 
+/** Magnetometer power modes */
 typedef enum
 {
 	
@@ -118,6 +123,7 @@ typedef enum
 	
 } bmx055_mag_power_mode_t;
 
+/** Magnetometer global control structure */
 typedef struct magnetometer_control_s
 {
 	spi_master_t        *spi_master; /**< Pointer to the task's SPI Master */
@@ -132,6 +138,15 @@ typedef struct magnetometer_control_s
 	uint32_t            time_start;       /**< For keeping track of time */
 } bmx055_mag_control_t;
 
-
+void bmx055_mag_init(spi_master_t *spi_master);
+void set_init_value(uint8_t reg, uint8_t value);
+Bool verify_init_write(uint8_t reg, uint8_t value);
+void write_init_value(uint8_t reg, uint8_t value);
+void bmx055_mag_reset(void);
+sensor_status_t bmx055_mag_get_data(void);
+void enqueue_helper(uint8_t reg);
+uint16_t inline read_helper_xy(void);
+uint16_t inline read_helper_z(void);
+uint16_t inline read_helper_rhall(void);
 
 #endif /* BMX055MAG_H_ */
