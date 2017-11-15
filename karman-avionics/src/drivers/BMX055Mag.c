@@ -80,7 +80,7 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 			gMagnetometer.spi_send_buffer,
 			1,
 			gMagnetometer.spi_recv_buffer,
-			1,
+			2,
 			&(gMagnetometer.send_complete));
 	
 		if (gMagnetometer.spi_recv_buffer[1] == value)
@@ -258,23 +258,23 @@ void enqueue_helper(uint8_t reg)
 		gMagnetometer.spi_send_buffer,
 		1,
 		gMagnetometer.spi_recv_buffer,
-		2,
+		3,
 		&(gMagnetometer.send_complete));
 	
 }
 
 // need one for each x, y, z and hall -> they're going to be gross too.
-uint16_t inline read_helper_xy(void)
+inline uint16_t read_helper_xy(void)
 {
 	return (gMagnetometer.spi_recv_buffer[2] << 5)|(gMagnetometer.spi_recv_buffer[1] >> 3);
 }
 
-uint16_t inline read_helper_z(void)
+inline uint16_t read_helper_z(void)
 {
 	return (gMagnetometer.spi_recv_buffer[2] << 7)|(gMagnetometer.spi_recv_buffer[1] >> 1);	
 }
 
-uint16_t inline read_helper_rhall(void)
+inline uint16_t read_helper_rhall(void)
 {
 	return (gMagnetometer.spi_recv_buffer[2] << 6)|(gMagnetometer.spi_recv_buffer[1] >> 2);	
 }

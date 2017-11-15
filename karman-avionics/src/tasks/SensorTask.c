@@ -15,6 +15,7 @@
 #include "Tasks.h"
 
 #include "ms5607-02ba03.h"
+#include "BMX055Mag.h"
 
 #include "SensorDefs.h"
 
@@ -61,7 +62,7 @@ void init_sensor_task(void)
     SENSOR_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
     SENSOR_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
     SENSOR_SPI.CTRLB = 0x18; /* Enable RX and TX */
-    SENSOR_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
+    SENSOR_SPI.CTRLC = 0xC0; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&sensorSpiMaster, &SENSOR_SPI, &SENSOR_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&sensorSpiMaster);
@@ -81,7 +82,11 @@ void init_sensor_task(void)
     /* init_si7021-a20() */
 
     /* altimeter/pressure */
-    ms5607_02ba03_init(&sensorSpiMaster);
+    //ms5607_02ba03_init(&sensorSpiMaster);
+	
+	/* magnetometer */
+	bmx055_mag_init(&sensorSpiMaster);
+	
 }
 
 /**
@@ -94,12 +99,20 @@ void sensor_task_func(void)
 {
     sensor_status_t curr_status;
 
-    curr_status = ms5607_02ba03_run();
+    //curr_status = ms5607_02ba03_run();
+//
+    //if (curr_status == SENSOR_COMPLETE)
+    //{
+        ///* Do fancy things with current temp/pressure data */
+        //ms5607_02ba03_get_data(&(gCurrSensorValues.altimeter));
+    //}
+
+	curr_status = bmx055_mag_get_data();
 
     if (curr_status == SENSOR_COMPLETE)
     {
-        /* Do fancy things with current temp/pressure data */
-        ms5607_02ba03_get_data(&(gCurrSensorValues.altimeter));
+        /* Do fancy things with current magnetometer data */
+        
     }
 
     /* ----TEMPLATE----
