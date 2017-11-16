@@ -73,6 +73,8 @@ typedef struct
     volatile Bool           masterBusy; /**< Flag to indicate if the master is busy or not */
 } spi_master_t;
 
+
+
 /** 
  * @brief Intialize an SPI master object
  * @return bool - Whether or not it initialized successfully.
@@ -87,6 +89,32 @@ Bool init_spi_master_service(spi_master_t *master,
                              USART_t *regSet,
                              PORT_t *port,
                              background_func_t taskName);
+
+
+/**
+ * @brief wrapper for spi_master_enqueue_internal with keep_cs_low equal to false
+ *
+ */
+
+Bool spi_master_enqueue(spi_master_t *spi_interface,
+                        chip_select_info_t *csInfo,
+                        volatile void *sendBuff,
+                        uint16_t sendLen,
+                        volatile void *recvBuff,
+                        uint16_t recvLen,
+                        volatile Bool *complete);
+
+/**
+ * @brief wrapper for spi_master_enqueue_internal with keep_cs_low equal to true
+ *
+ */
+Bool spi_master_enqueue_cslow(spi_master_t *spi_interface,
+                              chip_select_info_t *csInfo,
+                              volatile void *sendBuff,
+                              uint16_t sendLen,
+                              volatile void *recvBuff,
+                              uint16_t recvLen,
+                              volatile Bool *complete);
 
 /**
  * @brief Push function for queue.
@@ -112,7 +140,7 @@ Bool init_spi_master_service(spi_master_t *master,
  * back of the queue, we check if back + 1 is empty. We only want to update back
  * if we successfully add an entry.
  */
-Bool spi_master_enqueue(spi_master_t *spi_interface,
+Bool spi_master_enqueue_internal(spi_master_t *spi_interface,
                         chip_select_info_t *csInfo,
                         volatile void *sendBuff,
                         uint16_t sendLen,
@@ -165,7 +193,6 @@ Bool spi_master_initate_request(spi_master_t *spi_interface);
  * @param[out] recvBuff Caller's buffer to store response from device into
  * @param recvLen Number of bytes to receive
  * @param complete Flag to set true when the transaction is complete
- * @param keep_cs_low Flag to determine if we should disable pulling the CS high after the transaction is finished. WARNING: The caller will be required to pull the CS high again or the SPI interface will be broken!!!
  * @return True on success, false on failure
  *
  *
@@ -179,8 +206,35 @@ Bool spi_master_blocking_send_request(spi_master_t *spi_interface,
                                  uint16_t sendLen,
                                  volatile void *recvBuff,
                                  uint16_t recvLen,
-                                 volatile Bool *complete,
-                                 Bool keep_cs_low);
+                                 volatile Bool *complete);
+
+/**
+ * @brief Send a request, but block the whole time while waiting for it to finish
+ *
+ * @param spi_interface The SPI master object to use
+ * @param csInfo Chip select information for the hardware device to contact
+ * @param sendBuff Caller's buffer containing the data to be sent out
+ * @param sendLen Number of bytes to send
+ * @param[out] recvBuff Caller's buffer to store response from device into
+ * @param recvLen Number of bytes to receive
+ * @param complete Flag to set true when the transaction is complete
+ * @return True on success, false on failure
+ *
+ * WARNING: This function will set the flag keep_cs_low that determines if we should
+ * disable pulling the CS high after the transaction is finished.
+ * WARNING: The caller is required to pull the CS high again or the SPI interface will be broken!!!
+ *
+ * Instead of enqueueing a request and waiting for the SPI Background routine to
+ * start it up, enqueue a request, start it up yourself, and then sit and wait for the
+ * complete boolean to indicate it's done.
+*/
+Bool spi_master_blocking_send_req_cslow(spi_master_t *spi_interface,
+                                 chip_select_info_t *csInfo,
+                                 volatile void *sendBuff,
+                                 uint16_t sendLen,
+                                 volatile void *recvBuff,
+                                 uint16_t recvLen,
+                                 volatile Bool *complete);
 
 /** Pull the chip select pin high to de-select the device */
 #define spi_master_finish_request(reqPtr)       (reqPtr->csInfo.csPort->OUTSET = reqPtr->csInfo.pinBitMask)
