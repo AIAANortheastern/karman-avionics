@@ -19,8 +19,8 @@
 #define EXTFLASH_MOSI (FLASH_MOSI) /**< Internal definition of flash MOSI */
 #define EXTFLASH_MISO (FLASH_MISO) /**< Internal definition of flash MISO */
 #define EXTFLASH_SCK  (FLASH_SCLK) /**< Internal definition of flash SCLK */
-#define EXTFLASH_SPI (FLASH_SPI)   /**< Internal definition of flash SPI intstance (actually UART) */
-#define EXTFLASH_SPI_PORT (FLASH_PORT) /**< Internal defintion of flash SPI port */
+#define EXTFLASH_SPI (FLASH_SPI)   /**< Internal definition of flash SPI instance (actually UART) */
+#define EXTFLASH_SPI_PORT (FLASH_PORT) /**< Internal definition of flash SPI port */
 
 #define EXTFLASH_PAGE_MASK      (0x000000FF) /**< Mask to know if data fits in one page. Page size 256 bytes */
 #define EXTFLASH_READ_DATA_CMD  (0x03) /**< Read command */
@@ -29,7 +29,7 @@
 #define EXTFLASH_4BYTEMODE      (0xB7) /**< Config value for 4 byte address mode */
 #define EXTFLASH_PAGE_PROGRAM   (0x02) /**< Page program command. i.e. actually write something. */
 
-#define EXTFLASH_CS_PORT (FLASH_PORT) /**< Internal defintion of chip select port */
+#define EXTFLASH_CS_PORT (FLASH_PORT) /**< Internal definition of chip select port */
 #define EXTFLASH_CS_BM   (FLASH_CS)   /**< Internal definition of chip select pin */
 
 #define EXTFLASH_WREN_LATCH  (1 << 1) /**< Status register mask for write enable */
@@ -41,7 +41,7 @@
 #endif
 
 /**
- * @brief Calcualte Baud control value for USART.
+ * @brief Calculate Baud control value for USART.
  * 
  * See https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h 
  */
@@ -69,7 +69,7 @@ void init_extflash(void)
     EXTFLASH_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
     EXTFLASH_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
     EXTFLASH_SPI.CTRLB = 0x18; /* Enable RX and TX */
-    EXTFLASH_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
+    EXTFLASH_SPI.CTRLC = 0xC0; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&extflashSpiMaster, &EXTFLASH_SPI, &EXTFLASH_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&extflashSpiMaster);

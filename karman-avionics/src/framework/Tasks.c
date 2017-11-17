@@ -27,27 +27,27 @@
 simple_task_t TaskList[] =
 {
     /** Task to maintain connection with USB host */
-    {
-        .taskFreq = TASK_FREQ_1500us,
+    /*{
+        .taskFreq = TASK_FREQ_2ms,
         .lastCount = INITIAL_COUNT,
         .task = USB_task_func,
-    },
+    },*/
     /** Task to check status of global sensor data to see if it's time to
     * perform Pyrotechnics activities */
-    { 
+    /*{ 
         .taskFreq = TASK_FREQ_10ms,
         .lastCount = INITIAL_COUNT,
         .task = check_pyro_task_func,
-    },
+    },*/
     /** Radio task to manage reciept and transfer of messages to and from the RF modules */
-    {
+   /* {
         .taskFreq = TASK_FREQ_10ms,
         .lastCount = INITIAL_COUNT,
         .task = radio_task_func,
-    },
+    },*/
     /** Sensor task to keep track of timings for all sensors and when they need called */
     {
-        .taskFreq = TASK_FREQ_1500us,
+        .taskFreq = TASK_FREQ_2ms,
         .lastCount = INITIAL_COUNT,
         .task = sensor_task_func,
     },

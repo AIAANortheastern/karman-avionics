@@ -61,7 +61,7 @@ void init_sensor_task(void)
     SENSOR_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
     SENSOR_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
     SENSOR_SPI.CTRLB = 0x18; /* Enable RX and TX */
-    SENSOR_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
+    SENSOR_SPI.CTRLC = 0xC0; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&sensorSpiMaster, &SENSOR_SPI, &SENSOR_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&sensorSpiMaster);
