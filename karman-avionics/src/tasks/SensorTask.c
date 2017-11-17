@@ -5,7 +5,7 @@
  *
  * Created: 12/1/2016 7:19:19 PM
  *  Author: Andrew Kaster
- */ 
+ */
 
 #include <compiler.h>
 #include <asf.h>
@@ -41,9 +41,9 @@ spi_master_t sensorSpiMaster;
 /** Contains all current sensor values for use in ... TBD. Processing. */
 sensor_data_t gCurrSensorValues;
 
-/** 
+/**
  * @brief Initialize all things the radio task needs
- * 
+ *
  * Setup USART in SPI Master Mode.
  * Setup SPI master
  * Intialize all sensor drivers
@@ -75,13 +75,11 @@ void init_sensor_task(void)
     /* init_fxls8471qr1() */
 
     /* 3 axis gyro */
-    /* init_i3g4250d() */
+    bmx500Gyro_init(&sensorSpiMaster);
 
     /* temp/humidity */
     /* init_si7021-a20() */
 
-    /* altimeter/pressure */
-    ms5607_02ba03_init(&sensorSpiMaster);
 }
 
 /**
@@ -94,13 +92,13 @@ void sensor_task_func(void)
 {
     sensor_status_t curr_status;
 
-    curr_status = ms5607_02ba03_run();
-
-    if (curr_status == SENSOR_COMPLETE)
-    {
-        /* Do fancy things with current temp/pressure data */
-        ms5607_02ba03_get_data(&(gCurrSensorValues.altimeter));
+    curr_status = gyro_get_data();
+    if (curr_status == SENSOR_COMPLETE) {
+        volatile int stop = 1;
+        while(stop);
     }
+
+
 
     /* ----TEMPLATE----
      * curr_status = <foo>_run();
@@ -117,5 +115,5 @@ void sensor_task_func(void)
 /** Interrupt service routine for the USART RXC interrupt on port D. */
 ISR(SENSOR_SPI_INT)
 {
-    spi_master_ISR(&sensorSpiMaster);   
+    spi_master_ISR(&sensorSpiMaster);
 }

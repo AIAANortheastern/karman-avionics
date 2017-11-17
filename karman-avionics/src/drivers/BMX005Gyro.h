@@ -3,7 +3,7 @@
  *
  * Created: 2/14/2017 10:32 PM
  *  Author: Alex Mendola
- */ 
+ */
 
 #ifndef BMX005GYRO_H
 #define BMX005GYRO_H
@@ -81,7 +81,7 @@ typedef struct gyroscope_control_s
 
 void ms5607_02ba03_init(spi_master_t *spi_master);
 
-void gyro_get_data(void);
+sensor_status_t gyro_get_data(void);
 
 void ms5607_02ba03_reset(void);
 
