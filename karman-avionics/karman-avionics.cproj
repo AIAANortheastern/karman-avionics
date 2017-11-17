@@ -5,7 +5,7 @@
     <ProjectVersion>7.0</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.C</ToolchainName>
     <ProjectGuid>dce6c7e3-ee26-4d79-826b-08594b9ad897</ProjectGuid>
-    <avrdevice>ATxmega128A3U</avrdevice>
+    <avrdevice>ATxmega256A3U</avrdevice>
     <avrdeviceseries>xmegaau</avrdeviceseries>
     <OutputType>Executable</OutputType>
     <Language>C</Language>
@@ -137,9 +137,9 @@
         <board id="board.user_board.xmegaau" value="Add" config="" content-id="Atmel.ASF" />
       </framework-data>
     </AsfFrameworkConfig>
-    <avrtool>custom</avrtool>
-    <avrtoolserialnumber />
-    <avrdeviceexpectedsignature>0x1E9742</avrdeviceexpectedsignature>
+    <avrtool>com.atmel.avrdbg.tool.atmelice</avrtool>
+    <avrtoolserialnumber>J41800026976</avrtoolserialnumber>
+    <avrdeviceexpectedsignature>0x1E9842</avrdeviceexpectedsignature>
     <com_atmel_avrdbg_tool_simulator>
       <ToolOptions>
         <InterfaceProperties>
@@ -152,7 +152,7 @@
       </ToolNumber>
       <ToolName>Simulator</ToolName>
     </com_atmel_avrdbg_tool_simulator>
-    <avrtoolinterface />
+    <avrtoolinterface>PDI</avrtoolinterface>
     <custom>
       <ToolOptions xmlns="">
         <InterfaceProperties>
@@ -165,11 +165,23 @@
       </ToolNumber>
       <ToolName xmlns="">Custom Programming Tool</ToolName>
     </custom>
+    <com_atmel_avrdbg_tool_atmelice>
+      <ToolOptions>
+        <InterfaceProperties>
+          <PdiClock>4000000</PdiClock>
+        </InterfaceProperties>
+        <InterfaceName>PDI</InterfaceName>
+      </ToolOptions>
+      <ToolType>com.atmel.avrdbg.tool.atmelice</ToolType>
+      <ToolNumber>J41800026976</ToolNumber>
+      <ToolName>Atmel-ICE</ToolName>
+    </com_atmel_avrdbg_tool_atmelice>
+    <avrtoolinterfaceclock>4000000</avrtoolinterfaceclock>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <AvrGcc>
-        <avrgcc.common.Device>-mmcu=atxmega128a3u -B "%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u"</avrgcc.common.Device>
+        <avrgcc.common.Device>-mmcu=atxmega256a3u -B "%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega256a3u"</avrgcc.common.Device>
         <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
         <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
         <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
@@ -205,7 +217,6 @@
             <Value>../src/ASF/common/services/sleepmgr</Value>
             <Value>../src/ASF/xmega/drivers/twi</Value>
             <Value>../src/ASF/xmega/drivers/usart</Value>
-            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
             <Value>../src/ASF/common/services/hugemem</Value>
             <Value>../src/ASF/xmega/drivers/dma</Value>
             <Value>../src/ASF/common/services/usb</Value>
@@ -213,6 +224,7 @@
             <Value>../src/ASF/common/services/usb/class/cdc/device</Value>
             <Value>../src/ASF/common/services/usb/udc</Value>
             <Value>../src/ASF/xmega/drivers/usb</Value>
+            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
           </ListValues>
         </avrgcc.compiler.directories.IncludePaths>
         <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
@@ -249,7 +261,6 @@
             <Value>../src/ASF/common/services/sleepmgr</Value>
             <Value>../src/ASF/xmega/drivers/twi</Value>
             <Value>../src/ASF/xmega/drivers/usart</Value>
-            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
             <Value>../src/ASF/common/services/hugemem</Value>
             <Value>../src/ASF/xmega/drivers/dma</Value>
             <Value>../src/ASF/common/services/usb</Value>
@@ -257,6 +268,7 @@
             <Value>../src/ASF/common/services/usb/class/cdc/device</Value>
             <Value>../src/ASF/common/services/usb/udc</Value>
             <Value>../src/ASF/xmega/drivers/usb</Value>
+            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
           </ListValues>
         </avrgcc.assembler.general.IncludePaths>
       </AvrGcc>
@@ -265,7 +277,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <AvrGcc>
-        <avrgcc.common.Device>-mmcu=atxmega128a3u -B "%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega128a3u"</avrgcc.common.Device>
+        <avrgcc.common.Device>-mmcu=atxmega256a3u -B "%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\gcc\dev\atxmega256a3u"</avrgcc.common.Device>
         <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
         <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
         <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
@@ -305,7 +317,6 @@
             <Value>../src/ASF/common/services/sleepmgr</Value>
             <Value>../src/ASF/xmega/drivers/twi</Value>
             <Value>../src/ASF/xmega/drivers/usart</Value>
-            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
             <Value>../src/ASF/common/services/hugemem</Value>
             <Value>../src/ASF/xmega/drivers/dma</Value>
             <Value>../src/ASF/common/services/usb</Value>
@@ -313,9 +324,10 @@
             <Value>../src/ASF/common/services/usb/class/cdc/device</Value>
             <Value>../src/ASF/common/services/usb/udc</Value>
             <Value>../src/ASF/xmega/drivers/usb</Value>
+            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
           </ListValues>
         </avrgcc.compiler.directories.IncludePaths>
-        <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
+        <avrgcc.compiler.optimization.level>Optimize debugging experience (-Og)</avrgcc.compiler.optimization.level>
         <avrgcc.compiler.optimization.OtherFlags>-fdata-sections</avrgcc.compiler.optimization.OtherFlags>
         <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
         <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
@@ -350,7 +362,6 @@
             <Value>../src/ASF/common/services/sleepmgr</Value>
             <Value>../src/ASF/xmega/drivers/twi</Value>
             <Value>../src/ASF/xmega/drivers/usart</Value>
-            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
             <Value>../src/ASF/common/services/hugemem</Value>
             <Value>../src/ASF/xmega/drivers/dma</Value>
             <Value>../src/ASF/common/services/usb</Value>
@@ -358,6 +369,7 @@
             <Value>../src/ASF/common/services/usb/class/cdc/device</Value>
             <Value>../src/ASF/common/services/usb/udc</Value>
             <Value>../src/ASF/xmega/drivers/usb</Value>
+            <Value>%24(PackRepoDir)\atmel\XMEGAA_DFP\1.1.68\include</Value>
           </ListValues>
         </avrgcc.assembler.general.IncludePaths>
         <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
@@ -691,12 +703,6 @@
     <Compile Include="src\tasks\Spi_bg_task.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\utils\CC2500_regdefs.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\utils\CC2500_regvalues.c">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\utils\FlashMem.c">
       <SubType>compile</SubType>
     </Compile>
@@ -713,9 +719,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\utils\Spi_service.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\utils\tc_fixes.h">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\asf.h">
@@ -772,13 +775,7 @@
     <None Include="src\ASF\xmega\utils\compiler.h">
       <SubType>compile</SubType>
     </None>
-    <None Include="src\drivers\README.md">
-      <SubType>compile</SubType>
-    </None>
     <None Include="src\README.md">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="src\tasks\README.md">
       <SubType>compile</SubType>
     </None>
   </ItemGroup>

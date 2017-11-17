@@ -1,8 +1,12 @@
-/*
- * FlashMem.c
+/**
+ * @file FlashMem.c
  *
  * Created: 3/16/2017 7:22:59 PM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
+ * 
+ * @brief Flash Memory API
+ *
+ *
  */ 
 
 #include "FlashMem.h"
@@ -10,66 +14,76 @@
 
 #include <string.h>
 
+/** Address for the first data entry. 0 + sizeof header */
 #define INITIAL_DATA_ADDR (0x00000010L)
 
-
-/* This variable is truly global */
+/** Flash memory control data */
 flashmem_ctrl_t gFlashmemCtrl;
 
-/* Initialize the flash memory module */
+/**
+ * @brief Initialize the flash memory module 
+ */
 void init_flashmem(void)
 {
-    /* Setup default number of entries */
+    /** Setup default number of entries */
     gFlashmemCtrl.data_addr = INITIAL_DATA_ADDR;
     gFlashmemCtrl.header.entry_size = sizeof(flash_data_entry_t);
     gFlashmemCtrl.header.magic = MAGIC_NUMBER;
     gFlashmemCtrl.header.num_entries = 0;
     sprintf(gFlashmemCtrl.header.version_str, VERSION_STRING);
 
-    /* Initialize flash memory driver */
+    /** Initialize flash memory driver */
     init_extflash();
 
-    /* Parse flash memory header */
+    /** Parse flash memory header */
     flashmem_hdrstatus_t headerStatus;
     flash_data_hdr_t header;
 
     headerStatus = flashmem_verify_header(&header);
 
-    /* try once again on read failure */
+    /** try once again on read failure */
     if(headerStatus == HDR_READFAIL)
     {
         headerStatus = flashmem_verify_header(&header);
-        /* If we failed again, just write it off as a loss */
+        /** If we failed again, just write it off as a loss */
         if(headerStatus == HDR_READFAIL)
         {
             headerStatus = HDR_INVALID;
         }
     }
 
-    /* If the header is invalid, write the one we formed at the top of the function */
+    /** If the header is invalid, write the one we formed at the top of the function */
     if(headerStatus != HDR_VALID)
     {
-        /* Try to write the default header twice */
+        /** Try to write the default header twice */
         flashmem_write_header();
         
-        /* If what we read isn't what we wrote, try again... */
+        /** If what we read isn't what we wrote, try again... */
         if(HDR_VALID != flashmem_verify_header(&header))
         {
-            /* If this fails we're kinda screwed as far as flash memory goes. */
+            /** If this fails we're kinda screwed as far as flash memory goes. */
             flashmem_write_header();
         }
     }
     else
     {
-        /* Use the value we found already on the flash memory to inform where to write data */
-        /* This means that any new data will be written following the pre-exisiting entries. */
-        /* In order to ignore the previous entries, the size of entries or the version string */
-        /* must be different from what the code expects. Or the magic number is not correct. */
+        /** Use the value we found already on the flash memory to inform where to write data
+         * This means that any new data will be written following the pre-exisiting entries.
+         * In order to ignore the previous entries, the size of entries or the version string
+         * must be different from what the code expects. Or the magic number is not correct.
+         */
         memcpy((void *)&gFlashmemCtrl.header, (void *)&header, sizeof(flash_data_hdr_t));
     }
+
+    /* FOR DEBUG ONLY */
+    headerStatus = flashmem_verify_header(&header);
 }
 
-/* Write the data header stored in gFlashmemCtrl.header to the flash memory */
+/** @brief Write the header to flash
+ *  @return True on failure, false on success
+ * 
+ * Write the data header stored in gFlashmemCtrl.header to the flash memory 
+ */
 Bool flashmem_write_header(void)
 {
     Bool retVal = false;
@@ -81,63 +95,73 @@ Bool flashmem_write_header(void)
     return retVal;
 }
 
-/* Determine the validity of the flash memory data header */
+/** 
+ * @brief Determine the validity of the flash memory data header
+ *
+ * @param header The header to verify
+ * @return flashmem_hdrstatus_t indicating success/failure
+ */
 flashmem_hdrstatus_t flashmem_verify_header(flash_data_hdr_t *header)
 {
     flashmem_hdrstatus_t retVal = HDR_INVALID;
     Bool block = true;
 
-    /* read sizeof(data_hdr) bytes from flash memory starting at byte 0x0000_0000 */
+    /** read sizeof(data_hdr) bytes from flash memory starting at byte 0x0000_0000 */
     if(true == extflash_read( 0x00000000L,  sizeof(flash_data_hdr_t), (uint8_t *)&header, block))
     {
         retVal = HDR_READFAIL;
     }
     
-    /* If we successfully read the data from the flash memory, verify the information we read */
+    /** If we successfully read the data from the flash memory, verify the information we read */
     if(retVal != HDR_READFAIL)
     {
-        /* Check the magic number */
+        /** Check the magic number */
         switch(header->magic)
         {
             case 0:
-                /* If it's zero, there's no data at the header location. */
+                /** If it's zero, there's no data at the header location. */
                 retVal = HDR_ZERO;
                 break;
             case MAGIC_NUMBER:
-                /* If we found the magic number, we're halfway there. Check the data entry size and version string next */
+                /** If we found the magic number, we're halfway there. Check the data entry size and version string next */
                 if((header->entry_size == sizeof(flash_data_entry_t)) && (0 == strcmp(header->version_str, gFlashmemCtrl.header.version_str)))
                 {
-                    /* If there is a pre-existing header, write new entries starting at the existing entry address */
+                    /** If there is a pre-existing header, record address for new entries based off existing entry address */
                     gFlashmemCtrl.data_addr += (header->num_entries * sizeof(flash_data_entry_t));
                     /* The header is valid */
                     retVal = HDR_VALID;
                 }
                 break;
             default:
-                /* If we found a garbage magic number, the retVal will be HDR_INVAID */
+                /** If we found a garbage magic number, the retVal will be HDR_INVAID */
                 break;
         }
     }
     return retVal;
 }
 
-/* Write a data entry to the flash memory */
+/**
+ * @brief Write a data entry to the flash memory
+ * 
+ * @param entry Pointer to the data entry to write
+ * @returns True on failure, false on success
+ */
 Bool flashmem_write_entry(flash_data_entry_t *entry)
 {
     Bool retVal = false;
     Bool block = true;
 
-    /* Increment the number of entries */
+    /** Increment the number of entries */
     gFlashmemCtrl.header.num_entries++;
-    /* Write the new number of entries to the data header at the beginning of the flash memory */
+    /** Write the new number of entries to the data header at the beginning of the flash memory */
     retVal = extflash_write(FLASHMEM_ENTRIES_ADDR, 2, (uint8_t *)(gFlashmemCtrl.header.num_entries), block);
 
-    /* If no bad things happened, go ahead and write the data. */
+    /** If no bad things happened, go ahead and write the data. */
     if(retVal == false)
     {
-        /* Write to the current data address. This might fail if the data memory is full (i.e. already 512Mb of data on it) */
+        /** Write to the current data address. This might fail if the data memory is full (i.e. already 512Mb of data on it) */
         retVal = extflash_write(gFlashmemCtrl.data_addr, sizeof(flash_data_entry_t), (uint8_t *)entry, block);
-        /* If there were still no bad things that happend, increment the data addresss. */
+        /** If there were still no bad things that happend, increment the data addresss. */
         if(retVal == false)
         {
             gFlashmemCtrl.data_addr+= sizeof(flash_data_entry_t);
@@ -146,7 +170,15 @@ Bool flashmem_write_entry(flash_data_entry_t *entry)
     return retVal;
 }
 
-/* Read the entry addressed by index and put it in the caller's struct. */
+/**
+ * @brief Read the entry addressed by index
+ *
+ * @param[out] entry Pointer to write the entry to
+ * @param index Data entry to read
+ * @return True on failure, false on success
+ *
+ * Read the entry addressed by index and put it in the caller's struct.
+ */
 Bool flashmem_read_entry(flash_data_entry_t *entry, uint32_t index)
 {
     Bool retVal = false;

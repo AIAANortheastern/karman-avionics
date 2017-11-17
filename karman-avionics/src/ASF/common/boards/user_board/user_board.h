@@ -23,7 +23,7 @@
 // Uncomment and set correct values if external oscillator is used.
 
 // External oscillator frequency
-//#define BOARD_XOSC_HZ          8000000
+//#define BOARD_XOSC_HZ          32768
 
 // External oscillator type.
 //!< External clock signal

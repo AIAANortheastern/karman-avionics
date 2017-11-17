@@ -1,10 +1,10 @@
-/*
- * n25q_512.c
+/**
+ * @file n25q_512.c
  *
- * External 512 Mb flash memory.
+ * @brief External 512 Mb flash memory.
  *
  * Created: 3/15/2017 12:06:51 AM
- *  Author: Andrew Kaster
+ * Author: Andrew Kaster
  */ 
 
 #include <compiler.h>
@@ -16,41 +16,49 @@
 #include "Spi_bg_task.h"
 #include "ISRUtils.h"
 
-#define EXTFLASH_MOSI (FLASH_MOSI) /* 0x20 */
-#define EXTFLASH_MISO (FLASH_MISO) /* 0x40 */
-#define EXTFLASH_SCK  (FLASH_SCLK) /* 0x80 */
-#define EXTFLASH_SPI (FLASH_SPI)
-#define EXTFLASH_SPI_PORT (FLASH_PORT)
+#define EXTFLASH_MOSI (FLASH_MOSI) /**< Internal definition of flash MOSI */
+#define EXTFLASH_MISO (FLASH_MISO) /**< Internal definition of flash MISO */
+#define EXTFLASH_SCK  (FLASH_SCLK) /**< Internal definition of flash SCLK */
+#define EXTFLASH_SPI (FLASH_SPI)   /**< Internal definition of flash SPI instance (actually UART) */
+#define EXTFLASH_SPI_PORT (FLASH_PORT) /**< Internal definition of flash SPI port */
 
-#define EXTFLASH_PAGE_MASK      (0x000000FF)
-#define EXTFLASH_READ_DATA_CMD  (0x03)
-#define EXTFLASH_READ_SR_CMD    (0x05)
-#define EXTFLASH_WRITE_ENABLE   (0x06)
-#define EXTFLASH_4BYTEMODE      (0xB7)
-#define EXTFLASH_PAGE_PROGRAM   (0x02)
+#define EXTFLASH_PAGE_MASK      (0x000000FF) /**< Mask to know if data fits in one page. Page size 256 bytes */
+#define EXTFLASH_READ_DATA_CMD  (0x03) /**< Read command */
+#define EXTFLASH_READ_SR_CMD    (0x05) /**< Read Status register Command */
+#define EXTFLASH_WRITE_ENABLE   (0x06) /**< Write enable command. Write enable must be sent before page program */
+#define EXTFLASH_4BYTEMODE      (0xB7) /**< Config value for 4 byte address mode */
+#define EXTFLASH_PAGE_PROGRAM   (0x02) /**< Page program command. i.e. actually write something. */
 
-#define EXTFLASH_CS_PORT (FLASH_PORT)
-#define EXTFLASH_CS_BM   (FLASH_CS)
+#define EXTFLASH_CS_PORT (FLASH_PORT) /**< Internal definition of chip select port */
+#define EXTFLASH_CS_BM   (FLASH_CS)   /**< Internal definition of chip select pin */
 
-#define EXTFLASH_WREN_LATCH  (1 << 1)
+#define EXTFLASH_WREN_LATCH  (1 << 1) /**< Status register mask for write enable */
 
-#define SPI_BAUD_RATE (1000000) /* 1MHz */
+#define SPI_BAUD_RATE (1000000) /**< 1MHz */
 
 #ifndef F_CPU
-#define F_CPU (sysclk_get_per_hz())
+#define F_CPU (sysclk_get_per_hz()) /**< CPU Frequency */
 #endif
 
-/* https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h */
+/**
+ * @brief Calculate Baud control value for USART.
+ * 
+ * See https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h 
+ */
 #define SPI_BAUDCTRLVAL(Baud)       ((Baud < (F_CPU / 2)) ? ((F_CPU / (2 * Baud)) - 1) : 0)
 
+/** SPI Master instance. */
 spi_master_t extflashSpiMaster;
 
+/** Control structure */
 extflash_ctrl_t gExtflashControl;
 
-/* Initialize all things the external flash needs.*/
+/** 
+ * Initialize all things the external flash needs.
+*/
 void init_extflash(void)
 {
-    /* Initialize SPI interface on port C */
+    /** Initialize USART in SPI Master Mode */
     /* See XMEGA AU Manual page 146, page 280 */
     /* NOTE PINS ARE SETUP TO USE USART IN SPI MASTER MODE! */
 
@@ -61,7 +69,7 @@ void init_extflash(void)
     EXTFLASH_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
     EXTFLASH_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
     EXTFLASH_SPI.CTRLB = 0x18; /* Enable RX and TX */
-    EXTFLASH_SPI.CTRLC = 0xC6; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
+    EXTFLASH_SPI.CTRLC = 0xC0; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
 
     init_spi_master_service(&extflashSpiMaster, &EXTFLASH_SPI, &EXTFLASH_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&extflashSpiMaster);
@@ -77,19 +85,19 @@ void init_extflash(void)
     extflash_initialize_regs();
 }
 
-/* Interrupt service routine for the SPI interrupt on port C. */
+/** Interrupt service routine for the USART interrupt. */
 ISR(FLASH_SPI_INT)
 {
     spi_master_ISR(&extflashSpiMaster);
 }
 
-/* Initialize non-volatile control registers */
+/** Initialize non-volatile control registers */
 void extflash_initialize_regs(void)
 {
-    /* Enable 4 byte addressing */
-    /* WRITE ENABLE 06h --> ENTER 4-BYTE ADDRESS MODE B7h  */
     Bool block = true;
 
+    /* Enable 4 byte addressing */
+    /* WRITE ENABLE 06h --> ENTER 4-BYTE ADDRESS MODE B7h  */
     /* Send write enable command to allow writing to registers */
     extflash_write_enable(block);
 
@@ -106,11 +114,19 @@ void extflash_initialize_regs(void)
                                            &(gExtflashControl.send_complete));
 }
 
-/* NOTE: Using 4 byte address mode
-         http://www.micron.com/~/media/Documents/Products/Data%20Sheet/NOR%20Flash/Serial%20NOR/N25Q/n25q_512mb_1ce_3v_65nm.pdf
-*/
-
-/* Read num_bytes from the flash memory starting at address addr and store them in buf */
+/** 
+ * @brief Read a value from the flash memory
+ *
+ * @param addr Address to read from
+ * @param num_bytes How many bytes to read
+ * @param[out] buf Buffer to store the data in
+ * @param block Use blocking/nonblocking path
+ * @return false--No error, true--error
+ *
+ * Read num_bytes from the flash memory starting at address addr and store them in buf
+ * NOTE: Using 4 byte address mode -- 
+ *        http://www.micron.com/~/media/Documents/Products/Data%20Sheet/NOR%20Flash/Serial%20NOR/N25Q/n25q_512mb_1ce_3v_65nm.pdf
+ */
 Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 {
     Bool retVal = false; /* False means no error! */
@@ -163,8 +179,13 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     return retVal;
 } 
 
-/* Get the status of the module in non-blocking mode. */
-/* NOTE: In non-blocking mode there are a lot more responsiblities on the CALLER's buffer! */
+/** @brief Get the status of the module in non-blocking mode.
+ * 
+ * @return false -- not busy, true -- busy
+ *
+ * Use to check if the transfer is complete
+ *
+ * NOTE: In non-blocking mode there are a lot more responsiblities on the CALLER's buffer! */
 Bool extflash_get_status(void)
 {
     Bool retVal = false; /* False means NOT busy! */
@@ -189,14 +210,20 @@ Bool extflash_get_status(void)
 }
 
 
-/* Before writing to any register or any memory, the write enable command must be sent.
+/** 
+   @brief Read the status register of the flash memory. 
+ 
+   @param[out] buf Place to store status register value
+   @param block Use blocking/nonblocking path
+
+   Before writing to any register or any memory, the write enable command must be sent.
    After writing, the read status register command must be sent.
    That means 3 separate SPI transactions with CS being driven high after each one.
-   Maximum number of bytes per write operation is 256 bytes. Therefore, 
-*/
+   Maximum number of bytes per write operation is 256 bytes. 
 
-/* Read the status register of the flash memory. Required before writing to a lot of places is considered "done" */
-/* NOTE: Result will be in most significant byte of buf. i.e. to access you need to look at ((buf & 0xFF00) >> 8) */
+   Required before writing to a lot of places is considered "done"
+   NOTE: Result will be in most significant byte of buf. i.e. to access you need to look at ((buf & 0xFF00) >> 8) 
+*/
 Bool extflash_read_status_reg(uint16_t *buf, Bool block)
 {
     Bool retVal = false;
@@ -227,8 +254,11 @@ Bool extflash_read_status_reg(uint16_t *buf, Bool block)
     return retVal;
 }
 
-/* Enable writing to the flash memory module. This is finished when a read of the status regsiter shows that the write enable latch */
-/* Is clear */
+/** @brief Enable writing to the flash memory module. 
+ *
+ * This is finished when a read of the status regsiter shows that the write enable latch
+ *  Is clear
+*/
 Bool extflash_write_enable(Bool block)
 {
      Bool retVal = false;
@@ -268,8 +298,11 @@ Bool extflash_write_enable(Bool block)
      return retVal;
 }
 
-/* Send a valid number of bytes to the flash memeory. The caller is responsible for write enable and for read status register */
-/* For internal use only! use extflash_write instead! It has the proper error checking*/
+/** @brief Send a valid number of bytes to the flash memory.
+ *
+ * The caller is responsible for write enable and for read status register
+ * NOTE: For internal use only! use extflash_write instead! It has the proper error checking
+*/
 Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_t buff_offset, Bool block)
 {
     Bool retVal = false; /* no issues */
@@ -308,10 +341,19 @@ Bool extflash_write_one(uint16_t num_bytes, uint32_t addr, uint8_t *buf, uint16_
     return retVal;
 }
 
-/* write any number of bytes to the flash memory. Cannot write more than 65536 bytes. Why we would ever need to write that many is a mystery.*/
+/** @brief Write any number of bytes to the flash memory. 
+ * 
+ * @param addr Address to write to
+ * @param num_bytes Number of bytes to write
+ * @param buf Buffer to send bytes from 
+ * @param block Use blocking/nonblocking path
+ * @return True on failure, false on success 
+ *
+ * Cannot write more than 65536 bytes. Why we would ever need to write that many is a mystery.
+*/
 Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
 {
-    /* ALL WRITES MUST BE 256 BYTE ALIGNED
+    /** ALL WRITES MUST BE 256 BYTE ALIGNED
      *  This means that if the address you want to write to is 0xXXXXXXF0 and you want to write more than more than 8 bytes, you must use more than one write operation.
      *  Any write that goes over the 256 byte page boundary will reset to the beginning of the 256 byte page. (NOT GOOD).
      *
@@ -336,7 +378,7 @@ Bool extflash_write(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
     uint16_t buffer_offset = 0;
 
     /* Validate address. Not too big and won't overflow the max number of bytes. */
-    if((addr > 0x4000000) || ((addr + num_bytes) > 0x4000000))
+    if((addr > EXTFLASH_SIZE) || ((addr + num_bytes) > EXTFLASH_SIZE))
     {
         return true;
     }

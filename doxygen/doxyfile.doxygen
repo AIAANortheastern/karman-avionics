@@ -6,11 +6,10 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Project Karman Avionics"
 PROJECT_NUMBER         =
-PROJECT_BRIEF          =
+PROJECT_BRIEF          = "Avionics System for the AIAA Northeastern Karman Line Project"
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       =
 CREATE_SUBDIRS         = NO
-ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
@@ -39,24 +38,22 @@ SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
 ALIASES                =
 TCL_SUBST              =
-OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = NO
 OPTIMIZE_OUTPUT_VHDL   = NO
 EXTENSION_MAPPING      =
 MARKDOWN_SUPPORT       = YES
-TOC_INCLUDE_HEADINGS   = 0
 AUTOLINK_SUPPORT       = YES
 BUILTIN_STL_SUPPORT    = NO
 CPP_CLI_SUPPORT        = NO
 SIP_SUPPORT            = NO
 IDL_PROPERTY_SUPPORT   = YES
 DISTRIBUTE_GROUP_DOC   = NO
-GROUP_NESTED_COMPOUNDS = NO
 SUBGROUPING            = YES
 INLINE_GROUPED_CLASSES = NO
 INLINE_SIMPLE_STRUCTS  = NO
-TYPEDEF_HIDES_STRUCT   = NO
+TYPEDEF_HIDES_STRUCT   = YES
 LOOKUP_CACHE_SIZE      = 0
 #---------------------------------------------------------------------------
 # Build related configuration options
@@ -64,7 +61,7 @@ LOOKUP_CACHE_SIZE      = 0
 EXTRACT_ALL            = NO
 EXTRACT_PRIVATE        = NO
 EXTRACT_PACKAGE        = NO
-EXTRACT_STATIC         = NO
+EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = NO
 EXTRACT_ANON_NSPACES   = NO
@@ -75,7 +72,6 @@ HIDE_IN_BODY_DOCS      = NO
 INTERNAL_DOCS          = NO
 CASE_SENSE_NAMES       = NO
 HIDE_SCOPE_NAMES       = NO
-HIDE_COMPOUND_REFERENCE= NO
 SHOW_INCLUDE_FILES     = YES
 SHOW_GROUPED_MEMB_INC  = NO
 FORCE_LOCAL_INCLUDES   = NO
@@ -106,9 +102,8 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
-WARN_AS_ERROR          = NO
 WARN_FORMAT            = "$file:$line: $text"
-WARN_LOGFILE           =
+WARN_LOGFILE           = doxygen_warnings.txt
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
@@ -171,7 +166,7 @@ INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
 FILTER_SOURCE_PATTERNS =
-USE_MDFILE_AS_MAINPAGE =
+USE_MDFILE_AS_MAINPAGE = README.md
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
 #---------------------------------------------------------------------------
@@ -260,7 +255,6 @@ PAPER_TYPE             = a4
 EXTRA_PACKAGES         =
 LATEX_HEADER           =
 LATEX_FOOTER           =
-LATEX_EXTRA_STYLESHEET =
 LATEX_EXTRA_FILES      =
 PDF_HYPERLINKS         = YES
 USE_PDFLATEX           = YES
@@ -268,7 +262,6 @@ LATEX_BATCHMODE        = NO
 LATEX_HIDE_INDICES     = NO
 LATEX_SOURCE_CODE      = NO
 LATEX_BIB_STYLE        = plain
-LATEX_TIMESTAMP        = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the RTF output
 #---------------------------------------------------------------------------
@@ -278,14 +271,12 @@ COMPACT_RTF            = NO
 RTF_HYPERLINKS         = NO
 RTF_STYLESHEET_FILE    =
 RTF_EXTENSIONS_FILE    =
-RTF_SOURCE_CODE        = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the man page output
 #---------------------------------------------------------------------------
 GENERATE_MAN           = NO
 MAN_OUTPUT             = man
 MAN_EXTENSION          = .3
-MAN_SUBDIR             =
 MAN_LINKS              = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the XML output
@@ -298,7 +289,6 @@ XML_PROGRAMLISTING     = YES
 #---------------------------------------------------------------------------
 GENERATE_DOCBOOK       = NO
 DOCBOOK_OUTPUT         = docbook
-DOCBOOK_PROGRAMLISTING = NO
 #---------------------------------------------------------------------------
 # Configuration options for the AutoGen Definitions output
 #---------------------------------------------------------------------------
@@ -361,9 +351,6 @@ DOT_PATH               =
 DOTFILE_DIRS           =
 MSCFILE_DIRS           =
 DIAFILE_DIRS           =
-PLANTUML_JAR_PATH      =
-PLANTUML_CFG_FILE      =
-PLANTUML_INCLUDE_PATH  =
 DOT_GRAPH_MAX_NODES    = 50
 MAX_DOT_GRAPH_DEPTH    = 0
 DOT_TRANSPARENT        = NO
