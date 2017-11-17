@@ -100,7 +100,7 @@ void board_init(void)
     //init_radio_task();
 
     /* Initializes SPI for External Flash Memory, sets up CS pin for it */
-    init_flashmem();
+    //init_flashmem();
 
     /* Initializes the USB CDC interface */
     //init_usb();
