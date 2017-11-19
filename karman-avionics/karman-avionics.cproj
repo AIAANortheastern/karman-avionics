@@ -430,10 +430,22 @@
     <Compile Include="src\ASF\common\boards\user_board\init.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\drivers\Xbee.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\Xbee.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\tasks\USBTask.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\tasks\USBTask.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\utils\ringbuf.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\utils\ringbuf.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\utils\USBUtils.c">

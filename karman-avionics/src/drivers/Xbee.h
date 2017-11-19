@@ -11,6 +11,9 @@
 #ifndef XBEE_H_
 #define XBEE_H_
 
+#include "ringbuf.h"
+#include "asf.h"
+
 /** List of TX Frame names */
 #define XBEE_API_CMD (0x08)
 #define XBEE_AT_CMD (0x09)
@@ -44,13 +47,14 @@ typedef struct
 //
 
 #define TX_HDR_SIZE (14)
+
 typedef struct
 {
     uint8_t frame_type; /**< Frame type == 0x10 */
     uint8_t frame_id;   /**< incrementing per packet */
     union
     {
-        typedef struct 
+        struct
         {
             uint8_t byte7;
             uint8_t byte6;
@@ -106,7 +110,7 @@ typedef struct
     uint8_t frame_type; /**< 0x90 */
     union
     {
-        typedef struct
+        struct bytes
         {
             uint8_t byte7;
             uint8_t byte6;
@@ -124,11 +128,19 @@ typedef struct
     uint8_t payload[MAX_FRAME_SIZE - RX_HDR_SIZE]; /**< Payload goes here */
 } xbee_rx_inidcator_t;
 
-Bool xbee_handleRxAPIFrame();
+typedef union
+{
+    uint8_t frame_type;
+    xbee_rx_inidcator_t rx;
+    xbee_tx_sts_t tx_sts;
+} xbee_rx_frame_u;
 
-// TODO implement circular buffer
-typedef uint32_t circBuf_t;
-extern circBuf_t Xbee_RXCircBuff;
+RINGBUF_DECL(xbee, (2*MAX_FRAME_SIZE));
 
+extern volatile xbee_ringbuf_t xbee_RingBuf;
+
+void xbee_init(void);
+
+Bool xbee_handleRxAPIFrame(xbee_rx_frame_u *frame);
 
 #endif /* XBEE_H_ */

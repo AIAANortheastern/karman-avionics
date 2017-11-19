@@ -12,6 +12,7 @@
 #include <asf.h>
 #include "Spi_service.h"
 #include "Spi_bg_task.h"
+#include "Xbee.h"
 
 /* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
 /*#define RADIO_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
@@ -39,7 +40,7 @@ spi_master_t radioSpiMaster;
  * 
  * Setup USART in SPI Master Mode.
  * Setup SPI master
- * Intialize radio driver
+ * Initialize radio driver
  *
  */
 void init_radio_task(void)
@@ -61,7 +62,7 @@ void init_radio_task(void)
     spi_bg_add_master(&radioSpiMaster);
 
     /* run initialization for radio driver */
-    /* init_xbee(); */
+    xbee_init();
 }
 
 /**
