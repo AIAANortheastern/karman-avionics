@@ -73,15 +73,6 @@ typedef struct
     uint8_t payload[MAX_FRAME_SIZE - TX_HDR_SIZE]; /**< Payload goes here */
 } xbee_tx_req;
 
-typedef struct  
-{
-    uint8_t frame_type; /**< 0x8B */
-    uint8_t frame_id; /**< frame_id for the just-sent frame */
-    uint16_t reserved; /**< 0xFFFE */
-    uint8_t deliv_status; /**< see xbee_deliv_sts_t */
-    uint8_t discov_sts; /**< 0 = none, 2 = discovery */
-} xbee_tx_sts_t;
-
 typedef enum
 {
     XBEE_STS_SUCCESS = 0x00,        /**< Success */
@@ -95,6 +86,14 @@ typedef enum
     XBEE_STS_NOT_REQ = 0x75         /**< Indirect message unrequested */
 } xbee_deliv_sts_t;
 
+typedef struct  
+{
+    uint8_t frame_type; /**< 0x8B */
+    uint8_t frame_id; /**< frame_id for the just-sent frame */
+    uint16_t reserved; /**< 0xFFFE */
+    xbee_deliv_sts_t deliv_status; /**< see xbee_deliv_sts_t */
+    uint8_t discov_sts; /**< 0 = none, 2 = discovery */
+} xbee_tx_sts_t;
 
 #define RX_HDR_SIZE (12)
 typedef struct
