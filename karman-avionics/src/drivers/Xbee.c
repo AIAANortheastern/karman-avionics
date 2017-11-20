@@ -7,14 +7,14 @@
 
 #include "Xbee.h"
 #include <conf_board.h>
+#include "Spi_service.h"
 
-volatile xbee_ringbuf_t xbee_RingBuf;
-
-volatile Bool xbee_atten_asserted;
+volatile Bool gXbeeAttenAsserted ;
+xbee_ctrl_t gXbeeCtrl;
 
 void xbee_init(void)
 {
-    xbee_ringbuf_init(&xbee_RingBuf);
+    xbee_ringbuf_init(&(gXbeeCtrl.curr_pkt.framebuf));
 
     /* setup both edges interrupt on RADIO_ATTEN  pin (see conf_board.h) */
     /* setup RADIO_ATTEN with both direction interrupt, totem configuration (external pullup and pulldown)
@@ -35,13 +35,116 @@ ISR(PORTF_INT0_vect)
 
     if(pinval)
     {
-        xbee_atten_asserted = false;
+        gXbeeAttenAsserted  = false;
     }
     else
     {
         /* ATTEN is active low */
-        xbee_atten_asserted = true;
+        gXbeeAttenAsserted  = true;
     }
+}
+
+/** @brief Custom ISR for Xbee
+ * @param spi_interface The SPI master object that controls the bus.
+ *
+ * The interrupt service routine should be called on a data receive interrupt.
+ * NOTE: This function must be re-entrant from multiple iterrupts. If one
+ * SPI interrupt is higher than another, it could pre-empt in the middle
+ * Of processing. (But please don't do that, keep them the same level...)
+ */
+void xbee_SPI_ISR(spi_master_t *spi_interface)
+{
+    volatile uint8_t *dataSent;
+    uint16_t dataToSend;
+    Bool moreToDo;
+    uint8_t currByte;
+
+    /** Look at the front of the queue for transmit data */
+    volatile spi_request_t *currRequest = &spi_interface->requestQueue[spi_interface->front];
+    dataSent = &(currRequest->bytesSent);
+    dataToSend = currRequest->sendLen;
+
+    currByte = spi_interface->master->DATA;
+
+    switch(gXbeeCtrl.rx_state)
+    {
+        case XBEE_NO_START:
+            if(currByte == XBEE_FRAME_DELIM)
+            {
+                gXbeeCtrl.rx_state = XBEE_LEN1;
+            }
+            break;
+        case XBEE_LEN1:
+            gXbeeCtrl.curr_pkt.len = ((uint16_t)currByte << 8);
+            gXbeeCtrl.rx_state = XBEE_LEN2;
+            break;
+        case XBEE_LEN2:
+            gXbeeCtrl.curr_pkt.len |= currByte;
+            if(gXbeeCtrl.curr_pkt.len <= 0 || gXbeeCtrl.curr_pkt.len >= MAX_FRAME_SIZE)
+            {
+                gXbeeCtrl.rx_state = XBEE_NO_START;
+            }
+            else
+            {
+                gXbeeCtrl.rx_state = XBEE_PAYLOAD;
+                gXbeeCtrl.bytesRecv = 0;
+            }
+            break;
+        case XBEE_PAYLOAD:
+            if(gXbeeCtrl.curr_pkt.len < gXbeeCtrl.bytesRecv)
+            {
+                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf), currByte);
+                gXbeeCtrl.bytesRecv++;
+            }
+            else
+            {
+                gXbeeCtrl.curr_pkt.checksum = currByte;
+                gXbeeCtrl.pkt_rdy = true;
+                gXbeeCtrl.rx_state = XBEE_NO_START;
+            }
+            break;
+        default:
+            gXbeeCtrl.rx_state = XBEE_NO_START;
+            break;
+    }
+
+    /** If there's still bytes to send, keep sending them*/
+    if((*dataSent) < dataToSend)
+    {
+        spi_interface->master->DATA = ((uint8_t *)(currRequest->sendBuff))[(*dataSent)];
+        (*dataSent)++;
+    }
+    /** Otherwise, if  want to receive more data but we don't have any more to send... */
+    else if(gXbeeAttenAsserted)
+    {
+        /** Send a dummy byte to clock out the next bits of data. */
+        spi_interface->master->DATA = 0x00;
+    }
+
+    /** Check if are we done */
+    moreToDo = (*dataSent < dataToSend) ? true : false;
+    moreToDo |= gXbeeAttenAsserted;
+
+    if(!moreToDo)
+    {
+        /** If we're done, raise chip select again. NOTE: This is enabled by default. 
+         * There are a few special cases (i.e. Altimeter Reset procedure) that
+         * require it to be held low.
+        */
+        if(currRequest->raise_cs){
+            spi_master_finish_request(currRequest);
+        }
+        /** Inform the initiator that the request has completed*/
+        spi_interface->masterBusy = false;
+        spi_master_request_complete(spi_interface);
+        /** Dequeue the request from the list*/
+        spi_master_dequeue(spi_interface);
+    }
+}
+
+Bool is_xbee_pkt_rdy(void)
+{ 
+    return gXbeeCtrl.pkt_rdy;
 }
 
 /**
@@ -64,6 +167,7 @@ Bool xbee_handleRxAPIFrame(xbee_rx_frame_u *frame)
             /* Ignore unhandled frames */
             break;
     }
+    gXbeeCtrl.pkt_rdy = false;
     return retVal;
 }
 

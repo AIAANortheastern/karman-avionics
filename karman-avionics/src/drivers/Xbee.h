@@ -12,7 +12,8 @@
 #define XBEE_H_
 
 #include "ringbuf.h"
-#include "asf.h"
+#include <asf.h>
+#include "Spi_service.h"
 
 /** List of TX Frame names */
 #define XBEE_API_CMD (0x08)
@@ -30,15 +31,9 @@
 #define XBEE_NODE_ID_IND (0x95)
 #define XBEE_REM_CMD_RESP (0x97)
 
+#define XBEE_FRAME_DELIM (0x7E) /**< Start of frame byte */
 
 #define MAX_FRAME_SIZE (256)
-
-typedef struct
-{
-    uint16_t    len; /* length of frame */
-    uint8_t     checksum; /* Actually from the END of the packet! :) */
-    uint8_t     frame[MAX_FRAME_SIZE];
-} xbee_rx_packet_t;
 
 //
 // Frame structure:
@@ -134,11 +129,38 @@ typedef union
     xbee_tx_sts_t tx_sts;
 } xbee_rx_frame_u;
 
+typedef enum
+{
+    XBEE_NO_START,
+    XBEE_LEN1,
+    XBEE_LEN2,
+    XBEE_PAYLOAD
+} xbee_rx_state_t;
+
 RINGBUF_DECL(xbee, (2*MAX_FRAME_SIZE));
 
-extern volatile xbee_ringbuf_t xbee_RingBuf;
+typedef struct
+{
+    uint16_t        len; /**< length of frame */
+    uint8_t         checksum; /**< Actually from the END of the packet! :) */
+    xbee_ringbuf_t  framebuf; /**< frame goes here */
+} xbee_rx_packet_t;
+
+typedef struct
+{
+    volatile uint16_t bytesRecv;
+    xbee_rx_state_t   rx_state;
+    volatile xbee_rx_packet_t  curr_pkt;
+    Bool              pkt_rdy;
+} xbee_ctrl_t;
+
+extern xbee_ctrl_t gXbeeCtrl;
 
 void xbee_init(void);
+
+void xbee_SPI_ISR(spi_master_t *spi_interface);
+
+Bool is_xbee_pkt_rdy(void);
 
 Bool xbee_handleRxAPIFrame(xbee_rx_frame_u *frame);
 

@@ -80,5 +80,5 @@ void radio_task_func(void)
 /** Interrupt service routine for the USART RXC interrupt on port E. */
 ISR(RADIO_SPI_INT)
 {
-    spi_master_ISR(&radioSpiMaster);
+    xbee_SPI_ISR(&radioSpiMaster);
 }
