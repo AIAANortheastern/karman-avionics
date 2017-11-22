@@ -21,6 +21,7 @@
 #define GYRO_OFFSET_VALUES (0x36) /* 0x36 to 0x39 */
 #define GYRO_BANDWIDTH_MASK (0x6) /* 0x6 -> Decimation factor = 10, ODR=200Hz, Filter Bandwidth = 64Hz */
 #define GYRO_BANDWIDTH_REG  (0x10)
+#define GYRO_SPI_READ_BIT (1 << 7)
 //--------------
 
 #define BYTES_PER_AXIS_SAMPLE (2)

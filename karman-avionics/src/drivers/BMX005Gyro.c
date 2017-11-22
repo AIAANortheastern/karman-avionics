@@ -1,20 +1,43 @@
 #include "BMX005Gyro.h"
 
-#define GYROSCOPE_CS_PORT *****
-#define GYROSCOPE_CS_BM ******
-#define DEG_PER_LSB 0.0610370189519944
+#define DEG_PER_LSB 0.0610370189519944 
 gyroscope_control_t gyroControl;
 
 
 /******    Static Functions		*******/
-static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *gyroControl)
+static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *gyro)
 {
-
+	volatile uint8_t sendBuf[2];
+	volatile uint8_t recvBuf[2];
+	volatile bool writeComplete = 0;
+	
+	sendBuf[0] = (addr & ~(GYRO_SPI_READ_BIT));
+	sendBuf[1] = val;
+	spi_master_blocking_send_request(gyro->spi_master,
+									&gyro->cs_info,
+									sendBuf,
+									2,
+									recvBuf,
+									2,
+									&writeComplete);
 }
 
-static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyroControl)
+static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyro)
 {
-
+	volatile uint8_t *sendBuf;
+	volatile uint8_t recvBuf[2];
+	volatile bool readComplete = 0;
+	
+	sendBuf[0] = (addr | GYRO_SPI_READ_BIT);
+	
+	spi_master_blocking_send_request(gyro->spi_master,
+									&gyro->cs_info,
+									sendBuf,
+									1,
+									recvBuf,
+									2,
+									&readComplete);
+	return recvBuf[1];
 }
 
 static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
@@ -23,7 +46,13 @@ static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 	   Signed or Unsigned for send, receive buffer
 	   In andrew's code, use of gAltimeterControl.final_vals?'*/
 	int16_t rawval = (int16_t) ( ((int16_t)buff[axis] << 8) | ((int16_t)buff[axis+1]));
-	return (rawval*DEG_PER_LSB);
+	
+	/* This conversion:   realval = rawval * 1/16 
+	   The above conversion has an error of + 2.5% from the accurate conversion of:
+				realval = rawval * 2000 / 32767, but I think we might need some tricks to
+				do this computation (or FPU) */ 
+	rawval = rawval >> 4; 
+	return rawval;
 }
 
 
@@ -76,8 +105,6 @@ sensor_status_t gyro_state_machine(void)
 			gyroControl.data_state = ENQUEUE_GYRO_XYZ_READ;
 			returnStatus = SENSOR_COMPLETE;
 			break;
-
-
 	}
 	return returnStatus;
 }
