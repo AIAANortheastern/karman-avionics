@@ -15,6 +15,7 @@
 #include "Tasks.h"
 
 #include "ms5607-02ba03.h"
+#include "BMX005Gyro.h"
 
 #include "SensorDefs.h"
 
@@ -92,7 +93,7 @@ void sensor_task_func(void)
 {
     sensor_status_t curr_status;
 
-    curr_status = gyro_get_data();
+    curr_status = gyro_state_machine();
     if (curr_status == SENSOR_COMPLETE) {
         volatile int stop = 1;
         while(stop);

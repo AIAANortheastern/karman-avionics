@@ -7,6 +7,16 @@ gyroscope_control_t gyroControl;
 
 
 /******    Static Functions		*******/
+static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *gyroControl)
+{
+
+}
+
+static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyroControl)
+{
+
+}
+
 static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 {
 	/* convert to degrees
@@ -20,20 +30,11 @@ static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 {
 	writeGyroReg(GYRO_BANDWIDTH_REG, (uint8_t)GYRO_BANDWIDTH_MASK, gyroControl);
-	return ( readGyroReg(GYRO_BANDWIDTH_REG) == GYRO_BANDWIDTH_MASK, gyroControl);
+	return readGyroReg(GYRO_BANDWIDTH_REG == GYRO_BANDWIDTH_MASK, gyroControl);
 	// Read bandwidth from sensor w/ blocking send request, then check if result is correct
 
 }
 
-static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *gyroControl)
-{
-
-}
-
-static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyroControl)
-{
-
-}
 
 
 /********	Non-static Functions	*********/
@@ -51,7 +52,7 @@ void bmx500Gyro_Get_XYZ_Data(void)
                                     &(gyroControl.send_complete));
 }
 
-sensor_status_t gyro_get_data(void)
+sensor_status_t gyro_state_machine(void)
 {
 
 	sensor_status_t returnStatus = SENSOR_BUSY;
@@ -72,6 +73,7 @@ sensor_status_t gyro_get_data(void)
 			gyroControl.raw_data.x_rot_data = get_data_from_buffer(gyroControl.spi_recv_buffer,1);
 			gyroControl.raw_data.y_rot_data = get_data_from_buffer(gyroControl.spi_recv_buffer,3);
 			gyroControl.raw_data.z_rot_data = get_data_from_buffer(gyroControl.spi_recv_buffer,5);
+			gyroControl.data_state = ENQUEUE_GYRO_XYZ_READ;
 			returnStatus = SENSOR_COMPLETE;
 			break;
 

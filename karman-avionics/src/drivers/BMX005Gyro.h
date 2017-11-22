@@ -9,7 +9,7 @@
 #define BMX005GYRO_H
 
 #include "Spi_service.h"
-
+#include "SensorTask.h"
 
 #define GYRO_SPI_BUFF_SIZE (48)
 #define GYRO_SEND_READ_CODE (0x82)
@@ -81,7 +81,7 @@ typedef struct gyroscope_control_s
 
 void ms5607_02ba03_init(spi_master_t *spi_master);
 
-sensor_status_t gyro_get_data(void);
+sensor_status_t gyro_state_machine(void);
 
 void ms5607_02ba03_reset(void);
 
