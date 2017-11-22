@@ -143,10 +143,12 @@ void set_init_value(uint8_t reg, uint8_t value);
 Bool verify_init_write(uint8_t reg, uint8_t value);
 void write_init_value(uint8_t reg, uint8_t value);
 void bmx055_mag_reset(void);
-sensor_status_t bmx055_mag_get_data(void);
+sensor_status_t bmx055_mag_run(void);
 void enqueue_helper(uint8_t reg);
 uint16_t inline read_helper_xy(void);
 uint16_t inline read_helper_z(void);
 uint16_t inline read_helper_rhall(void);
+void bmx055_mag_get_data(bmx055_mag_data_t *out_data);
+uint8_t read_pwr_reg(void);
 
 #endif /* BMX055MAG_H_ */

@@ -6,6 +6,7 @@
  */ 
 
 #include "BMX055Mag.h"
+#include "Timer.h"
 /* hash defines located in above header. We tried something new this time */
 
 /* initialize global magnetometer control structure */
@@ -31,8 +32,10 @@ void bmx055_mag_init(spi_master_t *spi_master)
 	
 	memset((void *)(&(gMagnetometer).final_vals), 0, sizeof(gMagnetometer.final_vals));
 	
+	uint8_t pwr_reg_value;
+	pwr_reg_value = read_pwr_reg();
 	/* set power control bit to 1  */
-	set_init_value(BMM050_POWER_CONTROL ,BMX055_POWER_MODE_ON);
+	set_init_value(BMM050_POWER_CONTROL ,pwr_reg_value | BMX055_POWER_MODE_ON);
 	/* set repetitions xy */
 	set_init_value(BMM050_REP_XY ,BMX055_REPETITIONS_XY_MAX);
 	/* set repetitions z */
@@ -53,12 +56,13 @@ void bmx055_mag_init(spi_master_t *spi_master)
 void set_init_value(uint8_t reg, uint8_t value)
 {
 	
-	while(!verify_init_write(reg, value))
+	do
 	{
 		
 		write_init_value(reg, value);
+		timer_delay_ms(2);
 		
-	}
+	}while(!verify_init_write(reg, value));
 	
 }
 
@@ -92,6 +96,21 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 			return false;
 		}
 	
+}
+
+uint8_t read_pwr_reg(void)
+{
+		gMagnetometer.spi_send_buffer[0] = BMX055_READ | BMM050_POWER_CONTROL;
+		
+		spi_master_blocking_send_request(gMagnetometer.spi_master,
+			&(gMagnetometer.cs_info),
+			gMagnetometer.spi_send_buffer,
+			1,
+			gMagnetometer.spi_recv_buffer,
+			2,
+			&(gMagnetometer.send_complete));
+			
+		return gMagnetometer.spi_recv_buffer[1];
 }
 
 /** 
@@ -141,7 +160,7 @@ void bmx055_mag_reset(void)
  * Eventually this will return successful and the data will be pulled out of the
  * appropriate global buffers.
  */
-sensor_status_t bmx055_mag_get_data(void)
+sensor_status_t bmx055_mag_run(void)
 {
 	
 		/*
@@ -277,4 +296,12 @@ inline uint16_t read_helper_z(void)
 inline uint16_t read_helper_rhall(void)
 {
 	return (gMagnetometer.spi_recv_buffer[2] << 6)|(gMagnetometer.spi_recv_buffer[1] >> 2);	
+}
+
+void bmx055_mag_get_data(bmx055_mag_data_t *out_data)
+{
+	out_data->x = gMagnetometer.final_vals.x;
+	out_data->y = gMagnetometer.final_vals.y;
+	out_data->z = gMagnetometer.final_vals.z;
+	out_data->rhall = gMagnetometer.final_vals.rhall;
 }
