@@ -137,7 +137,7 @@ typedef enum
     XBEE_PAYLOAD
 } xbee_rx_state_t;
 
-RINGBUF_DECL(xbee, (2*MAX_FRAME_SIZE));
+RINGBUF_DECL(xbee, (2*MAX_FRAME_SIZE + 6));
 
 typedef struct
 {

@@ -58,7 +58,24 @@ uint32_t ringbuf_get(volatile ringbuf_t *rbuf, uint8_t *getbuf, uint32_t numbyte
             bytescopied = rbuf->count;
         }
 
-        memcpy((void *)getbuf, (void *)(&(rbuf->buf[rbuf->tail])), bytescopied);
+        uint8_t *tail = &(rbuf->buf[rbuf->tail]);
+        uint8_t *end_read = rbuf->buf + ((rbuf->tail + bytescopied) % rbuf->size);
+
+        if(end_read <= tail)
+        {
+            uint8_t *end = rbuf->buf + rbuf->size;
+
+            uint8_t first_read = end - tail;
+            memcpy((void *)getbuf, (void *)tail, first_read);
+
+            uint8_t second_read = bytescopied - first_read;
+            memcpy((void *)(getbuf + first_read), (void *)(rbuf->buf), second_read);
+        }
+        else
+        {
+            memcpy((void *)getbuf, (void *)(&(rbuf->buf[rbuf->tail])), bytescopied);
+        }
+
         rbuf->tail = (rbuf->tail + bytescopied) % (rbuf->size);
         rbuf->count -= bytescopied;
     }

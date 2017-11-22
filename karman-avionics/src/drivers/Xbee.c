@@ -86,6 +86,10 @@ void xbee_SPI_ISR(spi_master_t *spi_interface)
             }
             else
             {
+                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf),
+                            ((gXbeeCtrl.curr_pkt.len & 0xFF00) >> 8));
+                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf),
+                            (gXbeeCtrl.curr_pkt.len & 0xFF));
                 gXbeeCtrl.rx_state = XBEE_PAYLOAD;
                 gXbeeCtrl.bytesRecv = 0;
             }
@@ -98,7 +102,8 @@ void xbee_SPI_ISR(spi_master_t *spi_interface)
             }
             else
             {
-                gXbeeCtrl.curr_pkt.checksum = currByte;
+                /** put the checksum at the end */
+                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf), currByte);
                 gXbeeCtrl.pkt_rdy = true;
                 gXbeeCtrl.rx_state = XBEE_NO_START;
             }
