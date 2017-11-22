@@ -79,7 +79,7 @@
 #define BMX055_DATA_RATE_30HZ	(0x07 << 3)	/* Data rate of 30 Hz (maximum) */
 
 /* Modes of Operation */
-#define BMX055_OPERATION_MODE_NORMAL	(0x00 << 1)	/* Normal operation mode */
+#define BMX055_OPERATION_MODE_NORMAL	(0x00)	/* Normal operation mode */
 #define BMX055_OPERATION_MODE_FORCED	(0x01 << 1)	/* Forced operation mode */
 #define BMX055_OPERATION_MODE_SLEEP		(0x03 << 1)	/* Sleep operation mode */
 
@@ -149,6 +149,6 @@ uint16_t inline read_helper_xy(void);
 uint16_t inline read_helper_z(void);
 uint16_t inline read_helper_rhall(void);
 void bmx055_mag_get_data(bmx055_mag_data_t *out_data);
-uint8_t read_pwr_reg(void);
+void read_pwr_reg(void);
 
 #endif /* BMX055MAG_H_ */
