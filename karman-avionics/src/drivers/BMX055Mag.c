@@ -32,12 +32,9 @@ void bmx055_mag_init(spi_master_t *spi_master)
 	
 	memset((void *)(&(gMagnetometer).final_vals), 0, sizeof(gMagnetometer.final_vals));
 	
-	//uint8_t pwr_reg_value;
-	//pwr_reg_value = read_pwr_reg();
 	/* set power control bit to 1  */
 	set_init_value(BMM050_POWER_CONTROL, BMX055_POWER_MODE_ON);
 	/* set repetitions xy */
-	//read_pwr_reg();
 	set_init_value(BMM050_REP_XY, BMX055_REPETITIONS_XY_MAX);
 	/* set repetitions z */
 	set_init_value(BMM050_REP_Z, BMX055_REPETITIONS_Z_MAX);
@@ -103,21 +100,6 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 	
 }
 
-void read_pwr_reg(void)
-{
-		gMagnetometer.spi_send_buffer[0] = BMX055_READ | BMM050_CHIP_ID;
-		
-		spi_master_blocking_send_request(gMagnetometer.spi_master,
-			&(gMagnetometer.cs_info),
-			gMagnetometer.spi_send_buffer,
-			1,
-			gMagnetometer.spi_recv_buffer,
-			2,
-			&(gMagnetometer.send_complete));
-			
-		//return gMagnetometer.spi_recv_buffer[1];
-}
-
 /** 
  * @brief writes the desired value to the selected register
  * 
@@ -158,6 +140,21 @@ void bmx055_mag_reset(void)
 	/* set soft reset bit to high in power control register */
 	set_init_value(BMM050_POWER_CONTROL, BMX055_RESET);
 	
+}
+
+static inline uint16_t read_helper_xy(void)
+{
+	return (gMagnetometer.spi_recv_buffer[2] << 5)|(gMagnetometer.spi_recv_buffer[1] >> 3);
+}
+
+static inline uint16_t read_helper_z(void)
+{
+	return (gMagnetometer.spi_recv_buffer[2] << 7)|(gMagnetometer.spi_recv_buffer[1] >> 1);
+}
+
+static inline uint16_t read_helper_rhall(void)
+{
+	return (gMagnetometer.spi_recv_buffer[2] << 6)|(gMagnetometer.spi_recv_buffer[1] >> 2);
 }
 
 /**
@@ -289,22 +286,6 @@ void enqueue_helper(uint8_t reg)
 		3,
 		&(gMagnetometer.send_complete));
 	
-}
-
-// need one for each x, y, z and hall -> they're going to be gross too.
-inline uint16_t read_helper_xy(void)
-{
-	return (gMagnetometer.spi_recv_buffer[2] << 5)|(gMagnetometer.spi_recv_buffer[1] >> 3);
-}
-
-inline uint16_t read_helper_z(void)
-{
-	return (gMagnetometer.spi_recv_buffer[2] << 7)|(gMagnetometer.spi_recv_buffer[1] >> 1);	
-}
-
-inline uint16_t read_helper_rhall(void)
-{
-	return (gMagnetometer.spi_recv_buffer[2] << 6)|(gMagnetometer.spi_recv_buffer[1] >> 2);	
 }
 
 void bmx055_mag_get_data(bmx055_mag_data_t *out_data)

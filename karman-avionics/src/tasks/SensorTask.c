@@ -103,7 +103,7 @@ void sensor_task_func(void)
 
     if (curr_status == SENSOR_COMPLETE)
     {
-        /* Do fancy things with current temp/pressure data *//*
+         Do fancy things with current temp/pressure data 
         ms5607_02ba03_get_data(&(gCurrSensorValues.altimeter));
     }
 	*/
