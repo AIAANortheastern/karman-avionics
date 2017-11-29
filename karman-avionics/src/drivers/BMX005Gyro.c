@@ -9,7 +9,7 @@ static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *g
 {
 	volatile uint8_t sendBuf[2];
 	volatile uint8_t recvBuf[2];
-	volatile bool writeComplete = 0;
+	volatile Bool writeComplete = 0;
 	
 	sendBuf[0] = (addr & ~(GYRO_SPI_READ_BIT));
 	sendBuf[1] = val;
@@ -24,9 +24,9 @@ static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *g
 
 static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyro)
 {
-	volatile uint8_t *sendBuf;
+	volatile uint8_t sendBuf[1];
 	volatile uint8_t recvBuf[2];
-	volatile bool readComplete = 0;
+	volatile Bool readComplete = 0;
 	
 	sendBuf[0] = (addr | GYRO_SPI_READ_BIT);
 	
@@ -64,22 +64,23 @@ static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 
 }
 
-
-
-/********	Non-static Functions	*********/
-void bmx500Gyro_Get_XYZ_Data(void)
+static void bmx500Gyro_Get_XYZ_Data(void)
 {
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
 	gyroControl.spi_send_buffer[0] = GYRO_SEND_READ_CODE;
 
 	spi_master_enqueue(gyroControl.spi_master,
-                                    &(gyroControl.cs_info),
-                                    gyroControl.spi_send_buffer,
-                                    1,
-                                    gyroControl.spi_recv_buffer,
-                                    7,
-                                    &(gyroControl.send_complete));
+	&(gyroControl.cs_info),
+	gyroControl.spi_send_buffer,
+	1,
+	gyroControl.spi_recv_buffer,
+	7,
+	&(gyroControl.send_complete));
 }
+
+
+/********	Non-static Functions	*********/
+
 
 sensor_status_t gyro_state_machine(void)
 {
