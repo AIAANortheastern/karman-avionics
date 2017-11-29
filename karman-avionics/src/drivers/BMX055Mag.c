@@ -32,6 +32,7 @@ void bmx055_mag_init(spi_master_t *spi_master)
 	
 	memset((void *)(&(gMagnetometer).final_vals), 0, sizeof(gMagnetometer.final_vals));
 	
+	
 	/* set power control bit to 1  */
 	set_init_value(BMM050_POWER_CONTROL, BMX055_POWER_MODE_ON);
 	/* set repetitions xy */
@@ -89,6 +90,16 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 		
 		gMagnetometer.cs_info.csPort->OUTSET = gMagnetometer.cs_info.pinBitMask;
 	
+		/*
+		spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
+			&(gMagnetometer.cs_info),
+			gMagnetometer.spi_send_buffer,
+			1,
+			gMagnetometer.spi_recv_buffer,
+			2,
+			&(gMagnetometer.send_complete));
+		*/
+		
 		if (gMagnetometer.spi_recv_buffer[1] == value)
 		{
 			return true;
@@ -100,6 +111,40 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 	
 }
 
+/*Bool verify_init_write_non_blocking(uint8_t reg, uint8_t value)
+{
+	
+		gMagnetometer.spi_send_buffer[0] = BMX055_READ | reg;
+		
+		spi_master_enqueue_cslow(gMagnetometer.spi_master,
+			&(gMagnetometer.cs_info),
+			gMagnetometer.spi_send_buffer,
+			1,
+			gMagnetometer.spi_recv_buffer,
+			2,
+			&(gMagnetometer.send_complete));
+	*/
+		/*
+		spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
+			&(gMagnetometer.cs_info),
+			gMagnetometer.spi_send_buffer,
+			1,
+			gMagnetometer.spi_recv_buffer,
+			2,
+			&(gMagnetometer.send_complete));
+		*//*
+		
+		if (gMagnetometer.spi_recv_buffer[1] == value)
+		{
+			return true;
+		} 
+		else
+		{
+			return false;
+		}
+	
+}
+*/
 /** 
  * @brief writes the desired value to the selected register
  * 
@@ -126,7 +171,16 @@ void write_init_value(uint8_t reg, uint8_t value)
 		timer_delay_ms(3);
 		
 		gMagnetometer.cs_info.csPort->OUTSET = gMagnetometer.cs_info.pinBitMask;
-	
+		
+		/*
+		spi_master_blocking_send_request(gMagnetometer.spi_master,
+			&(gMagnetometer.cs_info),
+			gMagnetometer.spi_send_buffer,
+			2,
+			gMagnetometer.spi_recv_buffer,
+			0,
+			&(gMagnetometer.send_complete));
+		*/
 }
 
 /**
@@ -142,19 +196,32 @@ void bmx055_mag_reset(void)
 	
 }
 
-static inline uint16_t read_helper_xy(void)
+static inline uint16_t read_helper_x(void)
 {
 	return (gMagnetometer.spi_recv_buffer[2] << 5)|(gMagnetometer.spi_recv_buffer[1] >> 3);
 }
 
+static inline uint16_t read_helper_y(void)
+{
+	return (gMagnetometer.spi_recv_buffer[4] << 5)|(gMagnetometer.spi_recv_buffer[3] >> 3);
+}
+
 static inline uint16_t read_helper_z(void)
 {
-	return (gMagnetometer.spi_recv_buffer[2] << 7)|(gMagnetometer.spi_recv_buffer[1] >> 1);
+	return (gMagnetometer.spi_recv_buffer[6] << 7)|(gMagnetometer.spi_recv_buffer[5] >> 1);
 }
 
 static inline uint16_t read_helper_rhall(void)
 {
-	return (gMagnetometer.spi_recv_buffer[2] << 6)|(gMagnetometer.spi_recv_buffer[1] >> 2);
+	return (gMagnetometer.spi_recv_buffer[8] << 6)|(gMagnetometer.spi_recv_buffer[7] >> 2);
+}
+
+void read_helper(void)
+{
+	gMagnetometer.final_vals.x = read_helper_x();
+	gMagnetometer.final_vals.y = read_helper_y();
+	gMagnetometer.final_vals.z = read_helper_z();
+	gMagnetometer.final_vals.rhall = read_helper_rhall();
 }
 
 /**
@@ -186,74 +253,22 @@ sensor_status_t bmx055_mag_run(void)
 
 		switch(gMagnetometer.get_data_state) {
 			
-			case ENQUEUE_X:
+			case ENQUEUE:
 				enqueue_helper(BMM050_DATA_X_LSB);
-				gMagnetometer.get_data_state = READ_X_DATA;
+				gMagnetometer.get_data_state = READ_DATA;
 				return_status = SENSOR_WAITING;
 				break;
 			
-			case READ_X_DATA:
+			case READ_DATA:
 				if(gMagnetometer.send_complete){
 					
-					gMagnetometer.final_vals.x = read_helper_xy();
+					read_helper();
 					
-					gMagnetometer.get_data_state = ENQUEUE_Y;
-					return_status = SENSOR_WAITING;
-					
-				}
-				break;
-			
-			case ENQUEUE_Y:
-				enqueue_helper(BMM050_DATA_Y_LSB);
-				gMagnetometer.get_data_state = READ_Y_DATA;
-				return_status = SENSOR_WAITING;
-				break;
-			
-			case READ_Y_DATA:
-				if(gMagnetometer.send_complete){
-					
-					gMagnetometer.final_vals.y = read_helper_xy();
-					
-					gMagnetometer.get_data_state = ENQUEUE_Z;
-					return_status = SENSOR_WAITING;
-					
-				}
-				break;
-			
-			case ENQUEUE_Z:
-				enqueue_helper(BMM050_DATA_Z_LSB);
-				gMagnetometer.get_data_state = READ_Z_DATA;
-				return_status = SENSOR_WAITING;
-				break;
-			
-			case READ_Z_DATA:
-				if(gMagnetometer.send_complete){
-					
-					gMagnetometer.final_vals.z = read_helper_z();
-					
-					gMagnetometer.get_data_state = ENQUEUE_HALL;
-					return_status = SENSOR_WAITING;
-					
-				}
-				break;
-				
-			case ENQUEUE_HALL:
-				enqueue_helper(BMM050_DATA_R_LSB);
-				gMagnetometer.get_data_state = READ_HALL_DATA;
-				return_status = SENSOR_WAITING;
-				break;
-			
-			case READ_HALL_DATA:
-				if(gMagnetometer.send_complete){
-					
-					gMagnetometer.final_vals.rhall = read_helper_rhall();
-					
-					gMagnetometer.get_data_state = ENQUEUE_X;
+					gMagnetometer.get_data_state = ENQUEUE;
 					return_status = SENSOR_COMPLETE;
 					
 				}
 				break;
-				
 		}
 		
 		return return_status;
@@ -278,14 +293,33 @@ void enqueue_helper(uint8_t reg)
 	gMagnetometer.spi_send_buffer[0] = BMX055_READ | reg;
 	
 	/* spimaster enqueue */
-	spi_master_enqueue_cslow(gMagnetometer.spi_master,
+	spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
 		&(gMagnetometer.cs_info),
 		gMagnetometer.spi_send_buffer,
 		1,
 		gMagnetometer.spi_recv_buffer,
-		3,
+		9,
 		&(gMagnetometer.send_complete));
 	
+	//timer_delay_ms(3);
+	
+	gMagnetometer.cs_info.csPort->OUTSET = gMagnetometer.cs_info.pinBitMask;
+	/*spi_master_enqueue_cslow(gMagnetometer.spi_master,
+		&(gMagnetometer.cs_info),
+		gMagnetometer.spi_send_buffer,
+		1,
+		gMagnetometer.spi_recv_buffer,
+		9,
+		&(gMagnetometer.send_complete));*/
+	/*	
+	spi_master_enqueue(gMagnetometer.spi_master,
+		&(gMagnetometer.cs_info),
+		gMagnetometer.spi_send_buffer,
+		1,
+		gMagnetometer.spi_recv_buffer,
+		9,
+		&(gMagnetometer.send_complete));
+	*/
 }
 
 void bmx055_mag_get_data(bmx055_mag_data_t *out_data)

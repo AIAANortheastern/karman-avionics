@@ -13,7 +13,7 @@
 #include "SensorTask.h"
 
 /** Holds the current SPI input/output */
-#define MAGNETOMETER_SPI_BUFF_SIZE (8)
+#define MAGNETOMETER_SPI_BUFF_SIZE (9)
 
 /********************************************/
 /**\name	CHIP ID       */
@@ -103,14 +103,8 @@ typedef struct magnotometer_data_s
 typedef enum
 {
 	
-	ENQUEUE_X,	/**< sending SPI read request for x data */
-	READ_X_DATA,	/**< reading/waiting for x data from sensor */
-	ENQUEUE_Y,		/**< sending SPI read request for y data */
-	READ_Y_DATA,	/**< reading/waiting for y data from sensor */
-	ENQUEUE_Z,		/**< sending SPI read request for z data */
-	READ_Z_DATA,	/**< reading/waiting for z data from sensor */
-	ENQUEUE_HALL,	/**< sending SPI read request for hall resistance data */
-	READ_HALL_DATA	/**< reading/waiting for hall resistance data from sensor */
+	ENQUEUE,	/**< sending SPI read request for x data */
+	READ_DATA,	/**< reading/waiting for x data from sensor */
 	
 } bmx055_mag_state_t;
 
@@ -143,9 +137,12 @@ void set_init_value(uint8_t reg, uint8_t value);
 Bool verify_init_write(uint8_t reg, uint8_t value);
 void write_init_value(uint8_t reg, uint8_t value);
 void bmx055_mag_reset(void);
+void read_helper(void);
 sensor_status_t bmx055_mag_run(void);
 void enqueue_helper(uint8_t reg);
 void bmx055_mag_get_data(bmx055_mag_data_t *out_data);
 void read_pwr_reg(void);
+
+Bool verify_init_write_non_blocking(uint8_t reg, uint8_t value);
 
 #endif /* BMX055MAG_H_ */
