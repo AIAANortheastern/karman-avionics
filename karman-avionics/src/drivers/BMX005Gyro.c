@@ -13,7 +13,7 @@ static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *g
 	
 	sendBuf[0] = (addr & ~(GYRO_SPI_READ_BIT));
 	sendBuf[1] = val;
-	spi_master_blocking_send_request(gyro->spi_master,
+	spi_master_blocking_send_req_cslow(gyro->spi_master,
 									&gyro->cs_info,
 									sendBuf,
 									2,
@@ -30,7 +30,7 @@ static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyro)
 	
 	sendBuf[0] = (addr | GYRO_SPI_READ_BIT);
 	
-	spi_master_blocking_send_request(gyro->spi_master,
+	spi_master_blocking_send_req_cslow(gyro->spi_master,
 									&gyro->cs_info,
 									sendBuf,
 									1,
@@ -121,7 +121,7 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	gyroControl.send_complete = false;
 
 
-/*	while(!isBandwidthSet(&gyroControl)); */
+	while(!isBandwidthSet(&gyroControl)); 
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support
