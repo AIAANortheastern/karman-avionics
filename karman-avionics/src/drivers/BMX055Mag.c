@@ -78,6 +78,7 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 	
 		gMagnetometer.spi_send_buffer[0] = BMX055_READ | reg;
 		
+		/* this is a temporary fix, comment out and uncomment code block below once spi is fixed */
 		spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
 			&(gMagnetometer.cs_info),
 			gMagnetometer.spi_send_buffer,
@@ -90,8 +91,8 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 		
 		gMagnetometer.cs_info.csPort->OUTSET = gMagnetometer.cs_info.pinBitMask;
 	
-		/*
-		spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
+		/*  uncomment this when spi is fixed
+		spi_master_blocking_send_request(gMagnetometer.spi_master,
 			&(gMagnetometer.cs_info),
 			gMagnetometer.spi_send_buffer,
 			1,
@@ -111,40 +112,6 @@ Bool verify_init_write(uint8_t reg, uint8_t value)
 	
 }
 
-/*Bool verify_init_write_non_blocking(uint8_t reg, uint8_t value)
-{
-	
-		gMagnetometer.spi_send_buffer[0] = BMX055_READ | reg;
-		
-		spi_master_enqueue_cslow(gMagnetometer.spi_master,
-			&(gMagnetometer.cs_info),
-			gMagnetometer.spi_send_buffer,
-			1,
-			gMagnetometer.spi_recv_buffer,
-			2,
-			&(gMagnetometer.send_complete));
-	*/
-		/*
-		spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
-			&(gMagnetometer.cs_info),
-			gMagnetometer.spi_send_buffer,
-			1,
-			gMagnetometer.spi_recv_buffer,
-			2,
-			&(gMagnetometer.send_complete));
-		*//*
-		
-		if (gMagnetometer.spi_recv_buffer[1] == value)
-		{
-			return true;
-		} 
-		else
-		{
-			return false;
-		}
-	
-}
-*/
 /** 
  * @brief writes the desired value to the selected register
  * 
@@ -160,6 +127,7 @@ void write_init_value(uint8_t reg, uint8_t value)
 		gMagnetometer.spi_send_buffer[0] = BMX055_WRITE | reg;
 		gMagnetometer.spi_send_buffer[1] = value;
 		
+		/* comment this out when spi is fixed */
 		spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
 			&(gMagnetometer.cs_info),
 			gMagnetometer.spi_send_buffer,
@@ -172,7 +140,7 @@ void write_init_value(uint8_t reg, uint8_t value)
 		
 		gMagnetometer.cs_info.csPort->OUTSET = gMagnetometer.cs_info.pinBitMask;
 		
-		/*
+		/* uncomment this when spi is fixed
 		spi_master_blocking_send_request(gMagnetometer.spi_master,
 			&(gMagnetometer.cs_info),
 			gMagnetometer.spi_send_buffer,
@@ -237,14 +205,8 @@ sensor_status_t bmx055_mag_run(void)
 {
 	
 		/*
-			1. Enqueue x data
-			2. Read x data
-			3. Enqueue y data
-			4. Read y data
-			5. Enqueue z data
-			6. Read z data
-			7. Enqueue hall data
-			8. Read hall data		
+			1. Enqueue data read request
+			2. Read data	
 		*/
 	
 		sensor_status_t return_status;
@@ -263,7 +225,7 @@ sensor_status_t bmx055_mag_run(void)
 				if(gMagnetometer.send_complete){
 					
 					read_helper();
-					
+					/* convert values using constants from bosch driver */
 					gMagnetometer.get_data_state = ENQUEUE;
 					return_status = SENSOR_COMPLETE;
 					
@@ -293,6 +255,7 @@ void enqueue_helper(uint8_t reg)
 	gMagnetometer.spi_send_buffer[0] = BMX055_READ | reg;
 	
 	/* spimaster enqueue */
+	/* this is really bad, but it works for now. fix this as soon as possible */
 	spi_master_blocking_send_req_cslow(gMagnetometer.spi_master,
 		&(gMagnetometer.cs_info),
 		gMagnetometer.spi_send_buffer,
@@ -304,6 +267,8 @@ void enqueue_helper(uint8_t reg)
 	//timer_delay_ms(3);
 	
 	gMagnetometer.cs_info.csPort->OUTSET = gMagnetometer.cs_info.pinBitMask;
+	
+	/* the below code was a temporary fix, hopefully the real spi fix make this unnecessary */
 	/*spi_master_enqueue_cslow(gMagnetometer.spi_master,
 		&(gMagnetometer.cs_info),
 		gMagnetometer.spi_send_buffer,
@@ -311,7 +276,8 @@ void enqueue_helper(uint8_t reg)
 		gMagnetometer.spi_recv_buffer,
 		9,
 		&(gMagnetometer.send_complete));*/
-	/*	
+	
+	/*	 this is the real spi code, uncomment when spi is fixed 
 	spi_master_enqueue(gMagnetometer.spi_master,
 		&(gMagnetometer.cs_info),
 		gMagnetometer.spi_send_buffer,
