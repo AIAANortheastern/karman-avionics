@@ -69,7 +69,7 @@ static void bmx500Gyro_Get_XYZ_Data(void)
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
 	gyroControl.spi_send_buffer[0] = GYRO_SEND_READ_CODE;
 
-	spi_master_enqueue(gyroControl.spi_master,
+	spi_master_blocking_send_req_cslow(gyroControl.spi_master,
 	&(gyroControl.cs_info),
 	gyroControl.spi_send_buffer,
 	1,
