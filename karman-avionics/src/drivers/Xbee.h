@@ -181,4 +181,6 @@ uint8_t xbee_calculate_checksum(uint8_t *buf, uint16_t len);
 
 Bool xbee_tx_payload(void *buf, uint16_t len);
 
+Bool is_xbee_tx_done(void);
+
 #endif /* XBEE_H_ */

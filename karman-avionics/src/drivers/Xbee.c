@@ -36,6 +36,7 @@ void xbee_init(spi_master_t *master)
     gXbeeCtrl.master = master;
     gXbeeCtrl.cs_info.csPort = &RADIO_GPIO_PORT;
     gXbeeCtrl.cs_info.pinBitMask = RADIO_CS;
+    gXbeeCtrl.is_tx_complete = true;
 
     /* setup both edges interrupt on RADIO_ATTEN  pin (see conf_board.h) */
     /* setup RADIO_ATTEN with both direction interrupt, totem configuration (external pullup and pulldown)
@@ -240,7 +241,7 @@ Bool xbee_handleRxAPIFrame(void)
 /** @return false on failure, true on success */
 Bool xbee_tx_payload(void *buf, uint16_t len)
 {
-    if(!buf || (len > (MAX_FRAME_SIZE - TX_HDR_SIZE)))
+    if(!buf || (len > (MAX_FRAME_SIZE - TX_HDR_SIZE)) || !(is_xbee_tx_done()))
     {
         return false;
     }
@@ -282,6 +283,11 @@ Bool xbee_tx_payload(void *buf, uint16_t len)
                               0,
                               &(gXbeeCtrl.is_tx_complete));
 }
+
+Bool is_xbee_tx_done(void)
+{
+    return gXbeeCtrl.is_tx_complete;
+};
 
 /** See page 63 of datasheet */
 uint8_t xbee_calculate_checksum(uint8_t *buf, uint16_t len)
