@@ -66,7 +66,7 @@ typedef struct
     uint8_t bcast_radius; /**< 0 = max hops */
     uint8_t tx_options;   /**< 0x00 = use TO config param */
     uint8_t payload[MAX_FRAME_SIZE - TX_HDR_SIZE]; /**< Payload goes here */
-} xbee_tx_req;
+} xbee_tx_req_t;
 
 typedef enum
 {
@@ -146,22 +146,34 @@ typedef struct
     xbee_ringbuf_t  framebuf; /**< frame goes here */
 } xbee_rx_packet_t;
 
+#define XBEE_PREFRAME_SIZE (3)
+
 typedef struct
 {
-    volatile uint16_t bytesRecv;
-    xbee_rx_state_t   rx_state;
-    volatile xbee_rx_packet_t  curr_pkt;
-    Bool              pkt_rdy;
+    volatile uint16_t           bytesRecv;
+    xbee_rx_state_t             rx_state;
+    volatile xbee_rx_packet_t   curr_pkt;
+    Bool                        pkt_rdy;
+    spi_master_t               *master;
+    chip_select_info_t          cs_info;     /**< Chip select info for the device */
+    uint8_t                     tx_buffer[XBEE_PREFRAME_SIZE + MAX_FRAME_SIZE + 1]; /* extra is for checksum */
+    volatile Bool               is_tx_complete;
 } xbee_ctrl_t;
 
 extern xbee_ctrl_t gXbeeCtrl;
 
-void xbee_init(void);
+void xbee_init(spi_master_t *master);
 
 void xbee_SPI_ISR(spi_master_t *spi_interface);
+
+void xbee_rx_statemach_run(uint8_t currByte);
 
 Bool is_xbee_pkt_rdy(void);
 
 Bool xbee_handleRxAPIFrame(xbee_rx_frame_u *frame);
+
+uint8_t xbee_calculate_checksum(uint8_t *buf, uint16_t len);
+
+Bool xbee_tx_payload(void *buf, uint16_t len);
 
 #endif /* XBEE_H_ */

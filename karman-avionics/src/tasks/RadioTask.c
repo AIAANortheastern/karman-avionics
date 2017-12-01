@@ -62,7 +62,7 @@ void init_radio_task(void)
     spi_bg_add_master(&radioSpiMaster);
 
     /* run initialization for radio driver */
-    xbee_init();
+    xbee_init(&radioSpiMaster);
 }
 
 /**

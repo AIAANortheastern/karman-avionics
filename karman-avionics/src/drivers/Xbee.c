@@ -11,23 +11,48 @@
 
 volatile Bool gXbeeAttenAsserted ;
 xbee_ctrl_t gXbeeCtrl;
+uint8_t xbeePktCnt;
 
-void xbee_init(void)
+static volatile Bool xb_dummyBool = false;
+static volatile uint8_t xb_dummyInt = false;
+
+#ifndef XBEE_TX_ADDRESS
+    #define XBEE_TX_ADDRESS (0x000000000000FFFF) /**< Broadcast address is 0xFFFF */
+#endif
+
+typedef struct 
 {
+    uint8_t reserved : 4;
+    uint8_t int1     : 2;
+    uint8_t int0     : 2;
+} port_intctrl_t;
+
+void xbee_init(spi_master_t *master)
+{
+    uint8_t temp;
+
     xbee_ringbuf_init(&(gXbeeCtrl.curr_pkt.framebuf));
+
+    gXbeeCtrl.master = master;
+    gXbeeCtrl.cs_info.csPort = &RADIO_GPIO_PORT;
+    gXbeeCtrl.cs_info.pinBitMask = RADIO_CS;
 
     /* setup both edges interrupt on RADIO_ATTEN  pin (see conf_board.h) */
     /* setup RADIO_ATTEN with both direction interrupt, totem configuration (external pullup and pulldown)
      * No slew rate enable, and no invert Input/output 
      */
     RADIO_GPIO_PORT.RADIO_ATTEN_PINCTRL = 0x00;
-    /* Enable INT0 with LOW priority, disable INT1. */
-    /* NOTE! If we use IMU_ACC2_INT this will need to change!*/
-    RADIO_GPIO_PORT.INTCTRL = 0x01;
+
+    /* Set INT0 to low priority. Top 4 bits reserved, 0. Ignore INT1 */
+    temp = RADIO_GPIO_PORT.INTCTRL;
+    (*((port_intctrl_t *)&temp)).int0 = PORT_INT0LVL_LO_gc;
+    RADIO_GPIO_PORT.INTCTRL = temp;
+
     /* Setup RADIO_ATTEN as interrupt pin */
     RADIO_GPIO_PORT.INT0MASK = RADIO_ATTEN;
 }
 
+/* RADIO_ATTEN interrupt. Active low */
 ISR(PORTF_INT0_vect)
 {
     uint8_t pinval = RADIO_GPIO_PORT.IN & RADIO_ATTEN;
@@ -41,6 +66,23 @@ ISR(PORTF_INT0_vect)
     {
         /* ATTEN is active low */
         gXbeeAttenAsserted  = true;
+        /* Xbee has something to say, let's hear it */
+        if(!(gXbeeCtrl.master->masterBusy))
+        {
+            /* If there's nothing in the request queue, just send some garbage */
+            if(gXbeeCtrl.master->requestQueue[gXbeeCtrl.master->front].valid == false)
+            {
+                spi_master_enqueue(gXbeeCtrl.master,
+                                   &(gXbeeCtrl.cs_info),
+                                   &xb_dummyInt,
+                                   0,
+                                   NULL,
+                                   0,
+                                   &xb_dummyBool);
+            }
+            /* Begin the current request so we can  */
+            spi_master_initate_request(gXbeeCtrl.master);
+        }
     }
 }
 
@@ -66,51 +108,9 @@ void xbee_SPI_ISR(spi_master_t *spi_interface)
 
     currByte = spi_interface->master->DATA;
 
-    switch(gXbeeCtrl.rx_state)
+    if(gXbeeAttenAsserted)
     {
-        case XBEE_NO_START:
-            if(currByte == XBEE_FRAME_DELIM)
-            {
-                gXbeeCtrl.rx_state = XBEE_LEN1;
-            }
-            break;
-        case XBEE_LEN1:
-            gXbeeCtrl.curr_pkt.len = ((uint16_t)currByte << 8);
-            gXbeeCtrl.rx_state = XBEE_LEN2;
-            break;
-        case XBEE_LEN2:
-            gXbeeCtrl.curr_pkt.len |= currByte;
-            if(gXbeeCtrl.curr_pkt.len <= 0 || gXbeeCtrl.curr_pkt.len >= MAX_FRAME_SIZE)
-            {
-                gXbeeCtrl.rx_state = XBEE_NO_START;
-            }
-            else
-            {
-                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf),
-                            ((gXbeeCtrl.curr_pkt.len & 0xFF00) >> 8));
-                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf),
-                            (gXbeeCtrl.curr_pkt.len & 0xFF));
-                gXbeeCtrl.rx_state = XBEE_PAYLOAD;
-                gXbeeCtrl.bytesRecv = 0;
-            }
-            break;
-        case XBEE_PAYLOAD:
-            if(gXbeeCtrl.curr_pkt.len < gXbeeCtrl.bytesRecv)
-            {
-                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf), currByte);
-                gXbeeCtrl.bytesRecv++;
-            }
-            else
-            {
-                /** put the checksum at the end */
-                ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf), currByte);
-                gXbeeCtrl.pkt_rdy = true;
-                gXbeeCtrl.rx_state = XBEE_NO_START;
-            }
-            break;
-        default:
-            gXbeeCtrl.rx_state = XBEE_NO_START;
-            break;
+        xbee_rx_statemach_run(currByte);
     }
 
     /** If there's still bytes to send, keep sending them*/
@@ -147,6 +147,59 @@ void xbee_SPI_ISR(spi_master_t *spi_interface)
     }
 }
 
+void xbee_rx_statemach_run(uint8_t currByte)
+{
+    switch(gXbeeCtrl.rx_state)
+    {
+    case XBEE_NO_START:
+        if(currByte == XBEE_FRAME_DELIM)
+        {
+            gXbeeCtrl.rx_state = XBEE_LEN1;
+        }
+        break;
+    case XBEE_LEN1:
+        gXbeeCtrl.curr_pkt.len = ((uint16_t)currByte << 8);
+        gXbeeCtrl.rx_state = XBEE_LEN2;
+        break;
+    case XBEE_LEN2:
+        gXbeeCtrl.curr_pkt.len |= currByte;
+        if(gXbeeCtrl.curr_pkt.len <= 0 || gXbeeCtrl.curr_pkt.len >= MAX_FRAME_SIZE)
+        {
+            gXbeeCtrl.rx_state = XBEE_NO_START;
+        }
+        else
+        {
+            ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf),
+                        ((gXbeeCtrl.curr_pkt.len & 0xFF00) >> 8));
+            ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf),
+                        (gXbeeCtrl.curr_pkt.len & 0xFF));
+            gXbeeCtrl.rx_state = XBEE_PAYLOAD;
+            gXbeeCtrl.bytesRecv = 0;
+        }
+        break;
+    case XBEE_PAYLOAD:
+        if(gXbeeCtrl.curr_pkt.len < gXbeeCtrl.bytesRecv)
+        {
+            ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf), currByte);
+            gXbeeCtrl.bytesRecv++;
+        }
+        else
+        {
+            /** put the checksum at the end */
+            ringbuf_put((volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf), currByte);
+            gXbeeCtrl.pkt_rdy = true;
+            gXbeeCtrl.rx_state = XBEE_NO_START;
+        }
+        break;
+    default:
+        /* Error case, results in dropping a byte */
+        gXbeeCtrl.rx_state = XBEE_NO_START;
+        break;
+    }
+
+    return;
+}
+
 Bool is_xbee_pkt_rdy(void)
 { 
     return gXbeeCtrl.pkt_rdy;
@@ -176,3 +229,61 @@ Bool xbee_handleRxAPIFrame(xbee_rx_frame_u *frame)
     return retVal;
 }
 
+/** @return false on failure, true on success */
+Bool xbee_tx_payload(void *buf, uint16_t len)
+{
+    if(!buf || (len > (MAX_FRAME_SIZE - TX_HDR_SIZE)))
+    {
+        return false;
+    }
+
+    xbee_tx_req_t *req = (xbee_tx_req_t *)(&(gXbeeCtrl.tx_buffer[XBEE_PREFRAME_SIZE]));
+    uint8_t checksum = 0;
+
+    gXbeeCtrl.tx_buffer[0] = XBEE_FRAME_DELIM;
+    gXbeeCtrl.tx_buffer[1] = len << 8;
+    gXbeeCtrl.tx_buffer[2] = len & 0xFF;
+
+    req->frame_type = 0x10;
+    req->frame_id = xbeePktCnt;
+
+    xbeePktCnt++;
+
+    req->dest_addr.qword = XBEE_TX_ADDRESS;
+    req->reserved = 0xFFFE;
+    req->bcast_radius = 0;
+    req->tx_options = 0;
+
+    memcpy((void *)(req->payload), buf, len);
+
+    checksum = xbee_calculate_checksum(&(gXbeeCtrl.tx_buffer[XBEE_PREFRAME_SIZE]), len);
+
+    gXbeeCtrl.tx_buffer[XBEE_PREFRAME_SIZE + len] = checksum;
+
+    return spi_master_enqueue(gXbeeCtrl.master,
+                              &(gXbeeCtrl.cs_info),
+                              gXbeeCtrl.tx_buffer,
+                              len,
+                              NULL,
+                              0,
+                              &(gXbeeCtrl.is_tx_complete));
+}
+
+/** See page 63 of datasheet */
+uint8_t xbee_calculate_checksum(uint8_t *buf, uint16_t len)
+{
+    if(!buf || (len > (MAX_FRAME_SIZE - TX_HDR_SIZE)))
+    {
+        return 0;
+    }
+
+    uint16_t i;
+    uint8_t sum;
+
+    for(i = 0; i < len; i++)
+    {
+        sum += buf[i];
+    }
+
+    return 0xFF - sum;
+}
