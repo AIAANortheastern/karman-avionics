@@ -83,7 +83,7 @@ void radio_task_func(void)
    }
 
    /* Debug!!! */
-   if(radio_timer % 100 == 0)
+   if(radio_timer % 10 == 0)
    {
        xbee_tx_payload((void *)radio_debug_payload, 12);
    }
