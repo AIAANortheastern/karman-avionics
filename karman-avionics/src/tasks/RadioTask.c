@@ -74,11 +74,19 @@ void init_radio_task(void)
  */
 void radio_task_func(void)
 {
+    static uint32_t radio_timer = 0;
+    static uint8_t radio_debug_payload[12] = "Hello World";
+
    if(is_xbee_pkt_rdy())
    {
         xbee_handleRxAPIFrame();
    }
 
+   /* Debug!!! */
+   if(radio_timer % 100 == 0)
+   {
+       xbee_tx_payload((void *)radio_debug_payload, 12);
+   }
    /* Handle sensor tx queue */
    /* Handle control loop tx queue */
 }

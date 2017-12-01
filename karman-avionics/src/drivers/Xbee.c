@@ -210,12 +210,12 @@ Bool is_xbee_pkt_rdy(void)
  *
  * @param frame the frame to handle
  */
-Bool xbee_handleRxAPIFrame(void);
+Bool xbee_handleRxAPIFrame(void)
 {
     Bool retVal = false;
 
-    volatile ringbuf_t *rbuf = (volatile ringbuf_t *)(gXbeeCtrl.curr_pkt.framebuf);
-    xbee_rx_frame_t *curr_frame = gXbeeCtrl.proc_frame;
+    volatile ringbuf_t *rbuf = (volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf);
+    xbee_rx_frame_t *curr_frame = &(gXbeeCtrl.proc_frame);
 
     ringbuf_get(rbuf, &(curr_frame->frame_type), 1);
     ringbuf_get(rbuf, (uint8_t *)&(curr_frame->length), 2);

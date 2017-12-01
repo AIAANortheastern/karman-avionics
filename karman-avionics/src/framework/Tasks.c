@@ -40,17 +40,17 @@ simple_task_t TaskList[] =
         .task = check_pyro_task_func,
     },*/
     /** Radio task to manage reciept and transfer of messages to and from the RF modules */
-   /* {
+    {
         .taskFreq = TASK_FREQ_10ms,
         .lastCount = INITIAL_COUNT,
         .task = radio_task_func,
-    },*/
+    },
     /** Sensor task to keep track of timings for all sensors and when they need called */
-    {
+    /*{
         .taskFreq = TASK_FREQ_2ms,
         .lastCount = INITIAL_COUNT,
         .task = sensor_task_func,
-    },
+    },*/
      /** ALWAYS Keep background task last! */
     { 
         .taskFreq = TASK_FREQ_BACKGROUND,
