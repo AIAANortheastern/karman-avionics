@@ -277,7 +277,7 @@ Bool xbee_tx_payload(void *buf, uint16_t len)
     return spi_master_enqueue(gXbeeCtrl.master,
                               &(gXbeeCtrl.cs_info),
                               gXbeeCtrl.tx_buffer,
-                              len,
+                              XBEE_PREFRAME_SIZE + len + 1,
                               NULL,
                               0,
                               &(gXbeeCtrl.is_tx_complete));
