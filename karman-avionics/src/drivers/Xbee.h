@@ -122,12 +122,16 @@ typedef struct
     uint8_t payload[MAX_FRAME_SIZE - RX_HDR_SIZE]; /**< Payload goes here */
 } xbee_rx_inidcator_t;
 
-typedef union
+typedef struct
 {
     uint8_t frame_type;
-    xbee_rx_inidcator_t rx;
-    xbee_tx_sts_t tx_sts;
-} xbee_rx_frame_u;
+    uint16_t length;
+    union
+    {
+        xbee_rx_inidcator_t rx;
+        xbee_tx_sts_t tx_sts;
+    } frame;
+} xbee_rx_frame_t;
 
 typedef enum
 {
@@ -158,6 +162,7 @@ typedef struct
     chip_select_info_t          cs_info;     /**< Chip select info for the device */
     uint8_t                     tx_buffer[XBEE_PREFRAME_SIZE + MAX_FRAME_SIZE + 1]; /* extra is for checksum */
     volatile Bool               is_tx_complete;
+    xbee_rx_frame_t             proc_frame;
 } xbee_ctrl_t;
 
 extern xbee_ctrl_t gXbeeCtrl;
@@ -170,7 +175,7 @@ void xbee_rx_statemach_run(uint8_t currByte);
 
 Bool is_xbee_pkt_rdy(void);
 
-Bool xbee_handleRxAPIFrame(xbee_rx_frame_u *frame);
+Bool xbee_handleRxAPIFrame(void);
 
 uint8_t xbee_calculate_checksum(uint8_t *buf, uint16_t len);
 

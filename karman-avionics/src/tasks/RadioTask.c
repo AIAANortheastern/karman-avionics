@@ -74,7 +74,13 @@ void init_radio_task(void)
  */
 void radio_task_func(void)
 {
-   /* Do the stuff*/
+   if(is_xbee_pkt_rdy())
+   {
+        xbee_handleRxAPIFrame();
+   }
+
+   /* Handle sensor tx queue */
+   /* Handle control loop tx queue */
 }
 
 /** Interrupt service routine for the USART RXC interrupt on port E. */
