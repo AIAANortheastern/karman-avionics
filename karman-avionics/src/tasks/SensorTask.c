@@ -94,10 +94,10 @@ void sensor_task_func(void)
     sensor_status_t curr_status;
 
     curr_status = gyro_state_machine();
-    if (curr_status == SENSOR_COMPLETE) {
+   /* if (curr_status == SENSOR_COMPLETE) {
         volatile int stop = 1;
         while(stop);
-    }
+    } */
 
 
 

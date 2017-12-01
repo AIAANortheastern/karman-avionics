@@ -13,7 +13,7 @@ static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *g
 	
 	sendBuf[0] = (addr & ~(GYRO_SPI_READ_BIT));
 	sendBuf[1] = val;
-	spi_master_blocking_send_req_cslow(gyro->spi_master,
+	spi_master_blocking_send_request(gyro->spi_master,
 									&gyro->cs_info,
 									sendBuf,
 									2,
@@ -30,7 +30,7 @@ static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyro)
 	
 	sendBuf[0] = (addr | GYRO_SPI_READ_BIT);
 	
-	spi_master_blocking_send_req_cslow(gyro->spi_master,
+	spi_master_blocking_send_request(gyro->spi_master,
 									&gyro->cs_info,
 									sendBuf,
 									1,
@@ -58,8 +58,10 @@ static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 
 static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 {
+	uint8_t val;
 	writeGyroReg(GYRO_BANDWIDTH_REG, (uint8_t)GYRO_BANDWIDTH_MASK, gyroControl);
-	return readGyroReg(GYRO_BANDWIDTH_REG == GYRO_BANDWIDTH_MASK, gyroControl);
+	val = readGyroReg(GYRO_BANDWIDTH_REG, gyroControl);
+	return (val == GYRO_BANDWIDTH_MASK);
 	// Read bandwidth from sensor w/ blocking send request, then check if result is correct
 
 }
@@ -69,7 +71,7 @@ static void bmx500Gyro_Get_XYZ_Data(void)
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
 	gyroControl.spi_send_buffer[0] = GYRO_SEND_READ_CODE;
 
-	spi_master_blocking_send_req_cslow(gyroControl.spi_master,
+	spi_master_blocking_send_request(gyroControl.spi_master,
 	&(gyroControl.cs_info),
 	gyroControl.spi_send_buffer,
 	1,
@@ -121,7 +123,7 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	gyroControl.send_complete = false;
 
 
-	while(!isBandwidthSet(&gyroControl)); 
+	/* while(!isBandwidthSet(&gyroControl));  */
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support
