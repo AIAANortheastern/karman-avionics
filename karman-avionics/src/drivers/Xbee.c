@@ -244,10 +244,16 @@ Bool xbee_tx_payload(void *buf, uint16_t len)
     gXbeeCtrl.tx_buffer[1] = len << 8;
     gXbeeCtrl.tx_buffer[2] = len & 0xFF;
 
+    xbeePktCnt++; /* Frame ID 0 will not return a TX status message, so pre-increment count */
+
     req->frame_type = 0x10;
     req->frame_id = xbeePktCnt;
 
-    xbeePktCnt++;
+    /* Avoid ID 0 */
+    if(xbeePktCnt == 0xFF)
+    {
+        xbeePktCnt = 0;
+    }
 
     req->dest_addr.qword = XBEE_TX_ADDRESS;
     req->reserved = 0xFFFE;
