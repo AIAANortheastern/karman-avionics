@@ -214,25 +214,31 @@ Bool is_xbee_pkt_rdy(void)
 Bool xbee_handleRxAPIFrame(void)
 {
     Bool retVal = false;
-
+    uint8_t checksum;
     volatile ringbuf_t *rbuf = (volatile ringbuf_t *)&(gXbeeCtrl.curr_pkt.framebuf);
     xbee_rx_frame_t *curr_frame = &(gXbeeCtrl.proc_frame);
+    uint8_t bytes_rx = 0;
 
-    ringbuf_get(rbuf, &(curr_frame->frame_type), 1);
-    ringbuf_get(rbuf, (uint8_t *)&(curr_frame->length), 2);
-    ringbuf_get(rbuf, (uint8_t *)&(curr_frame->frame), curr_frame->length);
+    bytes_rx += ringbuf_get(rbuf, &(curr_frame->frame_type), 1);
+    bytes_rx += ringbuf_get(rbuf, (uint8_t *)&(curr_frame->length), 2);
+    bytes_rx += ringbuf_get(rbuf, (uint8_t *)&(curr_frame->frame), curr_frame->length);
+    bytes_rx += ringbuf_get(rbuf, &checksum, 1);
 
-    switch (curr_frame->frame_type)
+    if((bytes_rx == (4 + curr_frame->length)) &&
+       (checksum == xbee_calculate_checksum((uint8_t *)(&(curr_frame->frame)), curr_frame->length)))
     {
-        case XBEE_RX_IND:
-            /* Handle frame->rx */
-    	    break;
-        case XBEE_TX_STS:
-            /* Handle frame->tx_sts */
-            break;
-        default:
-            /* Ignore unhandled frames */
-            break;
+        switch (curr_frame->frame_type)
+        {
+            case XBEE_RX_IND:
+                /* Handle frame->rx */
+    	        break;
+            case XBEE_TX_STS:
+                /* Handle frame->tx_sts */
+                break;
+            default:
+                /* Ignore unhandled frames */
+                break;
+        }
     }
     gXbeeCtrl.pkt_rdy = false;
     return retVal;
