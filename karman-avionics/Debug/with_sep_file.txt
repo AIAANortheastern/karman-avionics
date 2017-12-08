@@ -1,0 +1,208 @@
+000007d4 <spi_master_ISR>:
+     7d4:   af 92           push    r10
+     7d6:   bf 92           push    r11
+     7d8:   df 92           push    r13
+     7da:   ef 92           push    r14
+     7dc:   ff 92           push    r15
+     7de:   0f 93           push    r16
+     7e0:   1f 93           push    r17
+     7e2:   cf 93           push    r28
+     7e4:   df 93           push    r29
+     7e6:   fc 01           movw    r30, r24
+     7e8:   9c 01           movw    r18, r24
+     7ea:   2c 55           subi    r18, 0x5C   ; 92
+     7ec:   3f 4f           sbci    r19, 0xFF   ; 255
+     7ee:   e9 01           movw    r28, r18
+     7f0:   a8 81           ld  r26, Y
+     7f2:   d0 e1           ldi r29, 0x10   ; 16
+     7f4:   ad 9f           mul r26, r29
+     7f6:   50 01           movw    r10, r0
+     7f8:   11 24           eor r1, r1
+     7fa:   ec 01           movw    r28, r24
+     7fc:   ca 0d           add r28, r10
+     7fe:   db 1d           adc r29, r11
+     800:   09 85           ldd r16, Y+9    ; 0x09
+     802:   1a 85           ldd r17, Y+10   ; 0x0a
+     804:   4e 85           ldd r20, Y+14   ; 0x0e
+     806:   5f 85           ldd r21, Y+15   ; 0x0f
+     808:   88 89           ldd r24, Y+16   ; 0x10
+     80a:   90 e0           ldi r25, 0x00   ; 0
+     80c:   60 81           ld  r22, Z
+     80e:   71 81           ldd r23, Z+1    ; 0x01
+     810:   84 17           cp  r24, r20
+     812:   95 07           cpc r25, r21
+     814:   68 f4           brcc    .+26        ; 0x830 <spi_master_ISR+0x5c>
+     816:   8c 85           ldd r24, Y+12   ; 0x0c
+     818:   9d 85           ldd r25, Y+13   ; 0x0d
+     81a:   f8 88           ldd r15, Y+16   ; 0x10
+     81c:   db 01           movw    r26, r22
+     81e:   6c 91           ld  r22, X
+     820:   8f 0d           add r24, r15
+     822:   91 1d           adc r25, r1
+     824:   dc 01           movw    r26, r24
+     826:   6c 93           st  X, r22
+     828:   88 89           ldd r24, Y+16   ; 0x10
+     82a:   8f 5f           subi    r24, 0xFF   ; 255
+     82c:   88 8b           std Y+16, r24   ; 0x10
+     82e:   02 c0           rjmp    .+4         ; 0x834 <spi_master_ISR+0x60>
+     830:   db 01           movw    r26, r22
+     832:   8c 91           ld  r24, X
+     834:   cf 01           movw    r24, r30
+     836:   8a 0d           add r24, r10
+     838:   9b 1d           adc r25, r11
+     83a:   dc 01           movw    r26, r24
+     83c:   1b 96           adiw    r26, 0x0b   ; 11
+     83e:   6c 91           ld  r22, X
+     840:   1b 97           sbiw    r26, 0x0b   ; 11
+     842:   70 e0           ldi r23, 0x00   ; 0
+     844:   60 17           cp  r22, r16
+     846:   71 07           cpc r23, r17
+     848:   b0 f4           brcc    .+44        ; 0x876 <spi_master_ISR+0xa2>
+     84a:   e0 80           ld  r14, Z
+     84c:   f1 80           ldd r15, Z+1    ; 0x01
+     84e:   17 96           adiw    r26, 0x07   ; 7
+     850:   6d 91           ld  r22, X+
+     852:   7c 91           ld  r23, X
+     854:   18 97           sbiw    r26, 0x08   ; 8
+     856:   1b 96           adiw    r26, 0x0b   ; 11
+     858:   dc 90           ld  r13, X
+     85a:   6d 0d           add r22, r13
+     85c:   71 1d           adc r23, r1
+     85e:   db 01           movw    r26, r22
+     860:   6c 91           ld  r22, X
+     862:   d7 01           movw    r26, r14
+     864:   6c 93           st  X, r22
+     866:   dc 01           movw    r26, r24
+     868:   1b 96           adiw    r26, 0x0b   ; 11
+     86a:   6c 91           ld  r22, X
+     86c:   1b 97           sbiw    r26, 0x0b   ; 11
+     86e:   6f 5f           subi    r22, 0xFF   ; 255
+     870:   1b 96           adiw    r26, 0x0b   ; 11
+     872:   6c 93           st  X, r22
+     874:   09 c0           rjmp    .+18        ; 0x888 <spi_master_ISR+0xb4>
+     876:   88 89           ldd r24, Y+16   ; 0x10
+     878:   90 e0           ldi r25, 0x00   ; 0
+     87a:   84 17           cp  r24, r20
+     87c:   95 07           cpc r25, r21
+     87e:   20 f4           brcc    .+8         ; 0x888 <spi_master_ISR+0xb4>
+     880:   80 81           ld  r24, Z
+     882:   91 81           ldd r25, Z+1    ; 0x01
+     884:   dc 01           movw    r26, r24
+     886:   1c 92           st  X, r1
+     888:   d5 01           movw    r26, r10
+     88a:   ae 0f           add r26, r30
+     88c:   bf 1f           adc r27, r31
+     88e:   1b 96           adiw    r26, 0x0b   ; 11
+     890:   6c 91           ld  r22, X
+     892:   1b 97           sbiw    r26, 0x0b   ; 11
+     894:   88 89           ldd r24, Y+16   ; 0x10
+     896:   70 e0           ldi r23, 0x00   ; 0
+     898:   60 17           cp  r22, r16
+     89a:   71 07           cpc r23, r17
+     89c:   a8 f1           brcs    .+106       ; 0x908 <spi_master_ISR+0x134>
+     89e:   90 e0           ldi r25, 0x00   ; 0
+     8a0:   84 17           cp  r24, r20
+     8a2:   95 07           cpc r25, r21
+     8a4:   88 f1           brcs    .+98        ; 0x908 <spi_master_ISR+0x134>
+     8a6:   14 96           adiw    r26, 0x04   ; 4
+     8a8:   cd 91           ld  r28, X+
+     8aa:   dc 91           ld  r29, X
+     8ac:   15 97           sbiw    r26, 0x05   ; 5
+     8ae:   16 96           adiw    r26, 0x06   ; 6
+     8b0:   8c 91           ld  r24, X
+     8b2:   8d 83           std Y+5, r24    ; 0x05
+     8b4:   df 01           movw    r26, r30
+     8b6:   aa 55           subi    r26, 0x5A   ; 90
+     8b8:   bf 4f           sbci    r27, 0xFF   ; 255
+     8ba:   1c 92           st  X, r1
+     8bc:   e9 01           movw    r28, r18
+     8be:   88 81           ld  r24, Y
+     8c0:   df 01           movw    r26, r30
+     8c2:   d0 e1           ldi r29, 0x10   ; 16
+     8c4:   8d 9f           mul r24, r29
+     8c6:   a0 0d           add r26, r0
+     8c8:   b1 1d           adc r27, r1
+     8ca:   11 24           eor r1, r1
+     8cc:   51 96           adiw    r26, 0x11   ; 17
+     8ce:   0d 90           ld  r0, X+
+     8d0:   bc 91           ld  r27, X
+     8d2:   a0 2d           mov r26, r0
+     8d4:   81 e0           ldi r24, 0x01   ; 1
+     8d6:   8c 93           st  X, r24
+     8d8:   d9 01           movw    r26, r18
+     8da:   9c 91           ld  r25, X
+     8dc:   df 01           movw    r26, r30
+     8de:   ab 55           subi    r26, 0x5B   ; 91
+     8e0:   bf 4f           sbci    r27, 0xFF   ; 255
+     8e2:   8c 91           ld  r24, X
+     8e4:   98 17           cp  r25, r24
+     8e6:   11 f0           breq    .+4         ; 0x8ec <spi_master_ISR+0x118>
+     8e8:   81 e0           ldi r24, 0x01   ; 1
+     8ea:   89 0f           add r24, r25
+     8ec:   8a 30           cpi r24, 0x0A   ; 10
+     8ee:   08 f0           brcs    .+2         ; 0x8f2 <spi_master_ISR+0x11e>
+     8f0:   80 e0           ldi r24, 0x00   ; 0
+     8f2:   b0 e1           ldi r27, 0x10   ; 16
+     8f4:   9b 9f           mul r25, r27
+     8f6:   e0 0d           add r30, r0
+     8f8:   f1 1d           adc r31, r1
+     8fa:   11 24           eor r1, r1
+     8fc:   93 89           ldd r25, Z+19   ; 0x13
+     8fe:   99 23           and r25, r25
+     900:   19 f0           breq    .+6         ; 0x908 <spi_master_ISR+0x134>
+     902:   13 8a           std Z+19, r1    ; 0x13
+     904:   e9 01           movw    r28, r18
+     906:   88 83           st  Y, r24
+     908:   df 91           pop r29
+     90a:   cf 91           pop r28
+     90c:   1f 91           pop r17
+     90e:   0f 91           pop r16
+     910:   ff 90           pop r15
+     912:   ef 90           pop r14
+     914:   df 90           pop r13
+     916:   bf 90           pop r11
+     918:   af 90           pop r10
+     91a:   08 95           ret
+
+0000091c <__vector_28>:
+     91c:   1f 92           push    r1
+     91e:   0f 92           push    r0
+     920:   0f b6           in  r0, 0x3f    ; 63
+     922:   0f 92           push    r0
+     924:   11 24           eor r1, r1
+     926:   0b b6           in  r0, 0x3b    ; 59
+     928:   0f 92           push    r0
+     92a:   2f 93           push    r18
+     92c:   3f 93           push    r19
+     92e:   4f 93           push    r20
+     930:   5f 93           push    r21
+     932:   6f 93           push    r22
+     934:   7f 93           push    r23
+     936:   8f 93           push    r24
+     938:   9f 93           push    r25
+     93a:   af 93           push    r26
+     93c:   bf 93           push    r27
+     93e:   ef 93           push    r30
+     940:   ff 93           push    r31
+     942:   8e e2           ldi r24, 0x2E   ; 46
+     944:   99 e2           ldi r25, 0x29   ; 41
+     946:   46 df           rcall   .-372       ; 0x7d4 <spi_master_ISR>
+     948:   ff 91           pop r31
+     94a:   ef 91           pop r30
+     94c:   bf 91           pop r27
+     94e:   af 91           pop r26
+     950:   9f 91           pop r25
+     952:   8f 91           pop r24
+     954:   7f 91           pop r23
+     956:   6f 91           pop r22
+     958:   5f 91           pop r21
+     95a:   4f 91           pop r20
+     95c:   3f 91           pop r19
+     95e:   2f 91           pop r18
+     960:   0f 90           pop r0
+     962:   0b be           out 0x3b, r0    ; 59
+     964:   0f 90           pop r0
+     966:   0f be           out 0x3f, r0    ; 63
+     968:   0f 90           pop r0
+     96a:   1f 90           pop r1
+     96c:   18 95           reti
