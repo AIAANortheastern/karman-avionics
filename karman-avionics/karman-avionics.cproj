@@ -328,7 +328,7 @@
           </ListValues>
         </avrgcc.compiler.directories.IncludePaths>
         <avrgcc.compiler.optimization.level>Optimize debugging experience (-Og)</avrgcc.compiler.optimization.level>
-        <avrgcc.compiler.optimization.OtherFlags>-fdata-sections</avrgcc.compiler.optimization.OtherFlags>
+        <avrgcc.compiler.optimization.OtherFlags>-fdata-sections -g3</avrgcc.compiler.optimization.OtherFlags>
         <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
         <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
         <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
@@ -430,10 +430,16 @@
     <Compile Include="src\ASF\common\boards\user_board\init.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\drivers\Xbee.c">
+    <Compile Include="src\drivers\BMX005Gyro.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\drivers\Xbee.h">
+    <Compile Include="src\drivers\BMX005Gyro.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\BMX055Mag.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\BMX055Mag.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\tasks\USBTask.c">
