@@ -46,11 +46,11 @@ simple_task_t TaskList[] =
         .task = radio_task_func,
     },
     /** Sensor task to keep track of timings for all sensors and when they need called */
-    /*{
+    {
         .taskFreq = TASK_FREQ_2ms,
         .lastCount = INITIAL_COUNT,
         .task = sensor_task_func,
-    },*/
+    },
      /** ALWAYS Keep background task last! */
     { 
         .taskFreq = TASK_FREQ_BACKGROUND,

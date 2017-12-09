@@ -11,12 +11,18 @@
 #include <compiler.h>
 #include <asf.h>
 #include "Xbee.h"
+#include "SensorDefs.h"
 
 #define USART_SERIAL                     &RADIO_USART
 #define USART_SERIAL_BAUDRATE            9600
 #define USART_SERIAL_CHAR_LENGTH         USART_CHSIZE_8BIT_gc
 #define USART_SERIAL_PARITY              USART_PMODE_DISABLED_gc
 #define USART_SERIAL_STOP_BIT            false
+
+extern sensor_data_t gCurrSensorValues;
+xbee_tx_data_t xbeeSensorData;
+
+
 
 /** 
  * @brief Initialize all things the radio task needs
@@ -55,12 +61,15 @@ void init_radio_task(void)
 void radio_task_func(void)
 {
     static uint32_t radio_timer = 0;
-    static uint8_t radio_debug_payload[13] = "Hello World\n";
+    //static uint8_t radio_debug_payload[13] = "Hello World\n\r";
+	xbeeSensorData.header = 'A';
+	xbeeSensorData.sensorData = *(&gCurrSensorValues);
+	xbeeSensorData.checksum = '\n';
 
    /* Debug!!! */
    if(radio_timer % 200 == 0)
    {
-       xbee_tx_payload((void *)radio_debug_payload, 13);
+       xbee_tx_payload((void *)(&xbeeSensorData), sizeof(xbeeSensorData));
    }
 
    radio_timer++;

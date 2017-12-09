@@ -94,7 +94,7 @@ void board_init(void)
 
 
     /* Initializes SPI for sensors, and sets up CS pins for all sensors */
-    //init_sensor_task();
+    init_sensor_task();
 
     /* Initializes SPI for radio module, sets up cs pin for it */
     init_radio_task();
