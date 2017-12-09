@@ -448,6 +448,12 @@
     <Compile Include="src\tasks\USBTask.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\utils\ringbuf.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\utils\ringbuf.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\utils\USBUtils.c">
       <SubType>compile</SubType>
     </Compile>
