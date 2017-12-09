@@ -20,7 +20,7 @@
 #define RADIO_ATTEN_PINCTRL PIN5CTRL /**< Config w/rising/falling edge. DO NOT add parentheses! */
 
 #define RADIO_SPI_PORT (PORTE) /**< See schematic */
-#define RADIO_SPI (USARTE1) /**< USARTE1 */
+#define RADIO_USART (USARTE1) /**< USARTE1 */
 #define RADIO_MOSI (1 << 7) /**< Output */
 #define RADIO_MISO (1 << 6) /**< Input  */
 #define RADIO_SCLK (1 << 5) /**< Output */ 

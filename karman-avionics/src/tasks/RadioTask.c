@@ -10,59 +10,39 @@
 #include "RadioTask.h"
 #include <compiler.h>
 #include <asf.h>
-#include "Spi_service.h"
-#include "Spi_bg_task.h"
 #include "Xbee.h"
 
-/* See XMEGA AU manual page 146 and XMEGA 128A4U datasheet page 59*/
-/*#define RADIO_SPI_CTRL_VALUE (SPI_MODE_0_gc | SPI_PRESCALER_DIV4_gc | SPI_ENABLE_bm | SPI_MASTER_bm)
- Using USART in SPI master mode instead */
-
-#define SPI_BAUD_RATE (1000000) /**< 1MHz */
-
-#ifndef F_CPU
-#define F_CPU (sysclk_get_per_hz()) /**< System clock speed */
-#endif
-
-/**
- * @brief Control value to write to USART baud control regs
- *
- *  Ref https://github.com/abcminiuser/lufa/blob/master/LUFA/Drivers/Peripheral/XMEGA/SerialSPI_XMEGA.h
- */
-#define SPI_BAUDCTRLVAL(Baud)       ((Baud < (F_CPU / 2)) ? ((F_CPU / (2 * Baud)) - 1) : 0)
-
-/** SPI Master object for the radio bus */
-spi_master_t radioSpiMaster;
-
+#define USART_SERIAL                     &RADIO_USART
+#define USART_SERIAL_BAUDRATE            9600
+#define USART_SERIAL_CHAR_LENGTH         USART_CHSIZE_8BIT_gc
+#define USART_SERIAL_PARITY              USART_PMODE_DISABLED_gc
+#define USART_SERIAL_STOP_BIT            false
 
 /** 
  * @brief Initialize all things the radio task needs
  * 
- * Setup USART in SPI Master Mode.
- * Setup SPI master
+ * Setup USART
  * Initialize radio driver
  *
  */
 void init_radio_task(void)
 {
-    /* Initialize SPI interface on port E*/
+    /* Initialize USART interface on port E*/
     /* See XMEGA AU Manual page 146, page 280 */
-    /* NOTE PINS ARE SETUP TO USE USART IN SPI MASTER MODE! */
 
-    uint16_t baudrate = SPI_BAUDCTRLVAL(SPI_BAUD_RATE);
+    static usart_rs232_options_t USART_SERIAL_OPTIONS = {
+        .baudrate = USART_SERIAL_BAUDRATE,
+        .charlength = USART_SERIAL_CHAR_LENGTH,
+        .paritytype = USART_SERIAL_PARITY,
+        .stopbits = USART_SERIAL_STOP_BIT
+    };
 
-    sysclk_enable_peripheral_clock(&RADIO_SPI);
-    RADIO_SPI.BAUDCTRLB = (uint8_t)((baudrate) >> 8); /* MSBs of Baud rate value. */
-    RADIO_SPI.BAUDCTRLA = (uint8_t)(baudrate & 0xFF); /* LSBs of Baud rate value. */
-    RADIO_SPI.CTRLA = 0x10; /* RXCINTLVL = 1, other 2 disabled */
-    RADIO_SPI.CTRLB = 0x18; /* Enable RX and TX */
-    RADIO_SPI.CTRLC = 0xC0; /* MSB first, mode 0. PMODE, SBMODE, CHSIZE ignored by SPI */
-
-    init_spi_master_service(&radioSpiMaster, &RADIO_SPI, &RADIO_SPI_PORT, spi_bg_task);
-    spi_bg_add_master(&radioSpiMaster);
-
+    sysclk_enable_module(SYSCLK_PORT_E, PR_USART1_bm); 
+    usart_init_rs232(USART_SERIAL, &USART_SERIAL_OPTIONS);
+    usart_set_rx_interrupt_level(USART_SERIAL, USART_INT_LVL_LO);
+    
     /* run initialization for radio driver */
-    xbee_init(&radioSpiMaster);
+    xbee_init();
 }
 
 /**
@@ -75,24 +55,21 @@ void init_radio_task(void)
 void radio_task_func(void)
 {
     static uint32_t radio_timer = 0;
-    static uint8_t radio_debug_payload[12] = "Hello World";
-
-   if(is_xbee_pkt_rdy())
-   {
-        xbee_handleRxAPIFrame();
-   }
+    static uint8_t radio_debug_payload[13] = "Hello World\n";
 
    /* Debug!!! */
-   if(radio_timer % 10 == 0)
+   if(radio_timer % 200 == 0)
    {
-       xbee_tx_payload((void *)radio_debug_payload, 12);
+       xbee_tx_payload((void *)radio_debug_payload, 13);
    }
+
+   radio_timer++;
    /* Handle sensor tx queue */
-   /* Handle control loop tx queue */
+   /* Handle control loop tx queue */ 
 }
 
 /** Interrupt service routine for the USART RXC interrupt on port E. */
 ISR(RADIO_SPI_INT)
 {
-    xbee_SPI_ISR(&radioSpiMaster);
+    xbee_RX_ISR();
 }
