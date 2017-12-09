@@ -226,6 +226,7 @@ sensor_status_t bmx055_mag_run(void)
 					
 					read_helper();
 					/* convert values using constants from bosch driver */
+					//convert_data();
 					gMagnetometer.get_data_state = ENQUEUE;
 					return_status = SENSOR_COMPLETE;
 					
@@ -295,3 +296,32 @@ void bmx055_mag_get_data(bmx055_mag_data_t *out_data)
 	out_data->z = gMagnetometer.final_vals.z;
 	out_data->rhall = gMagnetometer.final_vals.rhall;
 }
+/*
+void convert_data(void)
+{
+	gMagnetometer.final_vals.x = convert_x();
+	gMagnetometer.final_vals.y = convert_y();
+	gMagnetometer.final_vals.z = convert_z();
+	gMagnetometer.final_vals.rhall = convert_rhall();
+}
+
+int32_t convert_x(void)
+{
+	
+}
+
+int32_t convert_y(void)
+{
+	
+}
+
+int32_t convert_z(void)
+{
+	
+}
+
+int32_t convert_rhall(void)
+{
+	return gMagnetometer.raw_vals.rhall;
+}
+*/

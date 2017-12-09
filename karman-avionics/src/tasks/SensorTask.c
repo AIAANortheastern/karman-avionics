@@ -16,6 +16,7 @@
 
 #include "ms5607-02ba03.h"
 #include "BMX055Mag.h"
+#include "BMX005Gyro.h"
 
 #include "SensorDefs.h"
 
@@ -82,10 +83,13 @@ void init_sensor_task(void)
     /* init_si7021-a20() */
 
     /* altimeter/pressure */
-    //ms5607_02ba03_init(&sensorSpiMaster);
+    ms5607_02ba03_init(&sensorSpiMaster);
 	
 	/* magnetometer */
 	bmx055_mag_init(&sensorSpiMaster);
+	
+	/* gyro */
+	bmx500Gyro_init(&sensorSpiMaster);
 
 }
 
@@ -98,15 +102,15 @@ void init_sensor_task(void)
 void sensor_task_func(void)
 {
     sensor_status_t curr_status;
-	/*
+	
     curr_status = ms5607_02ba03_run();
 
     if (curr_status == SENSOR_COMPLETE)
     {
-         Do fancy things with current temp/pressure data 
+        /* Do fancy things with current temp/pressure data */
         ms5607_02ba03_get_data(&(gCurrSensorValues.altimeter));
     }
-	*/
+	
 	
 	/* make this fit the new template scheme */
 	curr_status = bmx055_mag_run();
@@ -116,6 +120,8 @@ void sensor_task_func(void)
 		/* do stuff with mag data */
 		bmx055_mag_get_data(&(gCurrSensorValues.magnetometer));	
 	}
+	
+	curr_status = gyro_state_machine();
 
     /* ----TEMPLATE----
      * curr_status = <foo>_run();
