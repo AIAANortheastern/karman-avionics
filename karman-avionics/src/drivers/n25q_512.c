@@ -148,9 +148,9 @@ Bool extflash_read(uint32_t addr, size_t num_bytes, uint8_t *buf, Bool block)
         /* SPI is MSB FIRST in mode 0. AVR-GCC treats larger integers as little endian. */
         gExtflashControl.spi_send_buffer[0] = EXTFLASH_READ_DATA_CMD;
         /* Ensure that our bytes are sent MSB first. */
-        gExtflashControl.spi_send_buffer[1] = (uint8_t)((num_bytes & 0x00FF0000) >> 16);
-        gExtflashControl.spi_send_buffer[2] = (uint8_t)((num_bytes & 0x0000FF00) >> 8);
-        gExtflashControl.spi_send_buffer[3] = (uint8_t)((num_bytes & 0x000000FF));
+        gExtflashControl.spi_send_buffer[1] = (uint8_t)((addr & 0x00FF0000) >> 16);
+        gExtflashControl.spi_send_buffer[2] = (uint8_t)((addr & 0x0000FF00) >> 8);
+        gExtflashControl.spi_send_buffer[3] = (uint8_t)((addr & 0x000000FF));
 
         if(block)
         {
