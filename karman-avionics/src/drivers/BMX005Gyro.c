@@ -66,6 +66,7 @@ static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 
 }
 
+
 static void bmx500Gyro_Get_XYZ_Data(void)
 {
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
@@ -112,6 +113,13 @@ sensor_status_t gyro_state_machine(void)
 	return returnStatus;
 }
 
+void gyro_get_data(gyro_data_raw_t *outdata)
+{
+	outdata->x_rot_data = gyroControl.raw_data.x_rot_data;
+	outdata->y_rot_data = gyroControl.raw_data.y_rot_data;
+	outdata->z_rot_data = gyroControl.raw_data.z_rot_data;
+}
+
 void bmx500Gyro_init(spi_master_t *spi_master)
 {
 	gyroControl.cs_info.csPort = &IMU_GYRO1_PORT;
@@ -123,7 +131,7 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	gyroControl.send_complete = false;
 
 
-	/* while(!isBandwidthSet(&gyroControl));  */
+	// while(!isBandwidthSet(&gyroControl)); 
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support

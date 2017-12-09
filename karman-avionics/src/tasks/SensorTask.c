@@ -123,6 +123,11 @@ void sensor_task_func(void)
 	
 	curr_status = gyro_state_machine();
 
+	if(curr_status == SENSOR_COMPLETE)
+	{
+		gyro_get_data(&(gCurrSensorValues.gyro));
+	}
+
     /* ----TEMPLATE----
      * curr_status = <foo>_run();
      * if (curr_status == SENSOR_COMPLETE)
