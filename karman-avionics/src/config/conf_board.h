@@ -17,9 +17,10 @@
 #define RADIO_RTS   (1 << 6) /**< Output. https://www.digi.com/support/forum/3314/hardware-flow-control-of-xbee-module */
 #define RADIO_CS    (1 << 5) /**< Output */
 #define RADIO_ATTEN (1 << 4) /**< Input */
+#define RADIO_ATTEN_PINCTRL PIN5CTRL /**< Config w/rising/falling edge. DO NOT add parentheses! */
 
 #define RADIO_SPI_PORT (PORTE) /**< See schematic */
-#define RADIO_SPI (USARTE1) /**< USARTE1 */
+#define RADIO_USART (USARTE1) /**< USARTE1 */
 #define RADIO_MOSI (1 << 7) /**< Output */
 #define RADIO_MISO (1 << 6) /**< Input  */
 #define RADIO_SCLK (1 << 5) /**< Output */ 

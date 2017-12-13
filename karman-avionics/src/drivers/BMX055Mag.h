@@ -91,12 +91,20 @@
 #define  BMX055_RESET	(1<<2)
 
 /** Final data */
-typedef struct magnotometer_data_s
+typedef struct magnotometer_raw_data_s
 {
 	int16_t x;           /**< x data */
 	int16_t y;       /**< y data */
 	int16_t z;		/**< z data */
 	int16_t rhall;	/**< hall resistance */
+} bmx055_mag_raw_t;
+
+typedef struct magnotometer_final_data_s
+{
+	int32_t x;           /**< x data */
+	int32_t y;       /**< y data */
+	int32_t z;		/**< z data */
+	int32_t rhall;  /**< rhall data */
 } bmx055_mag_data_t;
 
 /** Magnetometer state machine stages */
@@ -126,7 +134,7 @@ typedef struct magnetometer_control_s
 	volatile uint8_t    spi_recv_buffer[MAGNETOMETER_SPI_BUFF_SIZE]; /**< Data received by the device */
 	volatile Bool       send_complete; /**< Boolean to know when transaction complete */
 	//bmx055_mag_cal_t calibration_vals; /**< PROM calibration values */
-	//bmm055_mag_raw_t raw_vals;         /**< Raw ADC Values */
+	bmx055_mag_raw_t raw_vals;         /**< Raw ADC Values */
 	bmx055_mag_data_t final_vals;      /**< Usable values */
 	bmx055_mag_state_t get_data_state; /**< state machine */
 	uint32_t            time_start;       /**< For keeping track of time */
@@ -141,8 +149,10 @@ void read_helper(void);
 sensor_status_t bmx055_mag_run(void);
 void enqueue_helper(uint8_t reg);
 void bmx055_mag_get_data(bmx055_mag_data_t *out_data);
+void convert_data(void);
 void read_pwr_reg(void);
 
 Bool verify_init_write_non_blocking(uint8_t reg, uint8_t value);
+
 
 #endif /* BMX055MAG_H_ */
