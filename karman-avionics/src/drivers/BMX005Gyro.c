@@ -11,7 +11,7 @@ static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *g
 	volatile uint8_t recvBuf[2];
 	volatile Bool writeComplete = 0;
 	
-	sendBuf[0] = (addr & ~(GYRO_SPI_READ_BIT));
+	sendBuf[0] = (addr & ~((uint8_t)GYRO_SPI_READ_BIT));
 	sendBuf[1] = val;
 	spi_master_blocking_send_request(gyro->spi_master,
 									&gyro->cs_info,
@@ -24,16 +24,16 @@ static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *g
 
 static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyro)
 {
-	volatile uint8_t sendBuf[1];
+	volatile uint8_t sendBuf[2];
 	volatile uint8_t recvBuf[2];
 	volatile Bool readComplete = 0;
 	
-	sendBuf[0] = (addr | GYRO_SPI_READ_BIT);
+	sendBuf[0] = (addr | (uint8_t)GYRO_SPI_READ_BIT);
 	
 	spi_master_blocking_send_request(gyro->spi_master,
 									&gyro->cs_info,
 									sendBuf,
-									1,
+									2,
 									recvBuf,
 									2,
 									&readComplete);
@@ -59,9 +59,10 @@ static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 {
 	uint8_t val;
-	writeGyroReg(GYRO_BANDWIDTH_REG, (uint8_t)GYRO_BANDWIDTH_MASK, gyroControl);
+	writeGyroReg(GYRO_BANDWIDTH_REG, (uint8_t)GYRO_BANDWIDTH, gyroControl);
+	/*writeGyroReg(GYRO_BANDWIDTH_REG, (uint8_t)GYRO_BANDWIDTH, gyroControl); */
 	val = readGyroReg(GYRO_BANDWIDTH_REG, gyroControl);
-	return (val == GYRO_BANDWIDTH_MASK);
+	return ((GYRO_BANDWIDTH_MASK & val) == GYRO_BANDWIDTH);
 	// Read bandwidth from sensor w/ blocking send request, then check if result is correct
 
 }
@@ -131,7 +132,7 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	gyroControl.send_complete = false;
 
 
-	// while(!isBandwidthSet(&gyroControl)); 
+	 while(!isBandwidthSet(&gyroControl)); 
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support
