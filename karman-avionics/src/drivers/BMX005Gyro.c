@@ -1,6 +1,6 @@
 #include "BMX005Gyro.h"
 
-#define DEG_PER_LSB 0.0610370189519944 
+#define DEG_PER_LSB 0.0610370189519944
 gyroscope_control_t gyroControl;
 
 
@@ -10,7 +10,7 @@ static void writeGyroReg(const uint8_t addr, uint8_t val, gyroscope_control_t *g
 	volatile uint8_t sendBuf[2];
 	volatile uint8_t recvBuf[2];
 	volatile Bool writeComplete = 0;
-	
+
 	sendBuf[0] = (addr & ~(GYRO_SPI_READ_BIT));
 	sendBuf[1] = val;
 	spi_master_blocking_send_request(gyro->spi_master,
@@ -27,9 +27,9 @@ static uint8_t readGyroReg(const uint8_t addr, gyroscope_control_t *gyro)
 	volatile uint8_t sendBuf[1];
 	volatile uint8_t recvBuf[2];
 	volatile Bool readComplete = 0;
-	
+
 	sendBuf[0] = (addr | GYRO_SPI_READ_BIT);
-	
+
 	spi_master_blocking_send_request(gyro->spi_master,
 									&gyro->cs_info,
 									sendBuf,
@@ -46,12 +46,12 @@ static inline int16_t get_data_from_buffer(volatile uint8_t *buff, int axis)
 	   Signed or Unsigned for send, receive buffer
 	   In andrew's code, use of gAltimeterControl.final_vals?'*/
 	int16_t rawval = (int16_t) ( ((int16_t)buff[axis] << 8) | ((int16_t)buff[axis+1]));
-	
-	/* This conversion:   realval = rawval * 1/16 
+
+	/* This conversion:   realval = rawval * 1/16
 	   The above conversion has an error of + 2.5% from the accurate conversion of:
 				realval = rawval * 2000 / 32767, but I think we might need some tricks to
-				do this computation (or FPU) */ 
-	rawval = rawval >> 4; 
+				do this computation (or FPU) */
+	rawval = rawval >> 4;
 	return rawval;
 }
 
@@ -65,7 +65,6 @@ static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 	// Read bandwidth from sensor w/ blocking send request, then check if result is correct
 
 }
-
 
 static void bmx500Gyro_Get_XYZ_Data(void)
 {
@@ -113,13 +112,6 @@ sensor_status_t gyro_state_machine(void)
 	return returnStatus;
 }
 
-void gyro_get_data(gyro_data_raw_t *outdata)
-{
-	outdata->x_rot_data = gyroControl.raw_data.x_rot_data;
-	outdata->y_rot_data = gyroControl.raw_data.y_rot_data;
-	outdata->z_rot_data = gyroControl.raw_data.z_rot_data;
-}
-
 void bmx500Gyro_init(spi_master_t *spi_master)
 {
 	gyroControl.cs_info.csPort = &IMU_GYRO1_PORT;
@@ -131,7 +123,7 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	gyroControl.send_complete = false;
 
 
-	// while(!isBandwidthSet(&gyroControl)); 
+	/* while(!isBandwidthSet(&gyroControl));  */
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support
