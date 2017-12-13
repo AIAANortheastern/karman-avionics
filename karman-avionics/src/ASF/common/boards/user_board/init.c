@@ -97,10 +97,10 @@ void board_init(void)
     init_sensor_task();
 
     /* Initializes SPI for radio module, sets up cs pin for it */
-    //init_radio_task();
+    init_radio_task();
 
     /* Initializes SPI for External Flash Memory, sets up CS pin for it */
-   /* init_flashmem(); */
+    //init_flashmem();
 
     /* Initializes the USB CDC interface */
     //init_usb();

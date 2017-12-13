@@ -19,9 +19,10 @@
 #define GYRO_SELF_TEST (0x3C)
 #define GYRO_SLOW_OFFSET (0x31)
 #define GYRO_OFFSET_VALUES (0x36) /* 0x36 to 0x39 */
-#define GYRO_BANDWIDTH_MASK (0x6) /* 0x6 -> Decimation factor = 10, ODR=200Hz, Filter Bandwidth = 64Hz */
+#define GYRO_BANDWIDTH (0x6) /* 0x6 -> Decimation factor = 10, ODR=200Hz, Filter Bandwidth = 64Hz */
 #define GYRO_BANDWIDTH_REG  (0x10)
 #define GYRO_SPI_READ_BIT (1 << 7)
+#define GYRO_BANDWIDTH_MASK (0x1F)
 //--------------
 
 #define BYTES_PER_AXIS_SAMPLE (2)
@@ -80,22 +81,11 @@ typedef struct gyroscope_control_s
     } ms5607_02ba03_data_t;
     */
 
-void ms5607_02ba03_init(spi_master_t *spi_master);
+void bmx500Gyro_init(spi_master_t *spi_master);
 
 sensor_status_t gyro_state_machine(void);
 
-void ms5607_02ba03_reset(void);
+void gyro_get_data(gyro_data_raw_t *outdata);
 
-/* 128 bits of calibration */
-void ms5607_02ba03_read_prom(void);
-
-void ms5607_02ba03_d1_convert(void);
-
-void ms5607_02ba03_d2_convert(void);
-
-/* 24 bits pressure/temperature */
-void ms5607_02ba03_read_data(void);
-
-void ms5607_02ba03_calculate_temp(void);
 
 #endif /* MS5607-02BA03_H_ */

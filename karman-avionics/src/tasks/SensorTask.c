@@ -5,7 +5,7 @@
  *
  * Created: 12/1/2016 7:19:19 PM
  *  Author: Andrew Kaster
- */
+ */ 
 
 #include <compiler.h>
 #include <asf.h>
@@ -15,6 +15,7 @@
 #include "Tasks.h"
 
 #include "ms5607-02ba03.h"
+#include "BMX055Mag.h"
 #include "BMX005Gyro.h"
 
 #include "SensorDefs.h"
@@ -42,9 +43,9 @@ spi_master_t sensorSpiMaster;
 /** Contains all current sensor values for use in ... TBD. Processing. */
 sensor_data_t gCurrSensorValues;
 
-/**
+/** 
  * @brief Initialize all things the radio task needs
- *
+ * 
  * Setup USART in SPI Master Mode.
  * Setup SPI master
  * Intialize all sensor drivers
@@ -76,10 +77,19 @@ void init_sensor_task(void)
     /* init_fxls8471qr1() */
 
     /* 3 axis gyro */
-    bmx500Gyro_init(&sensorSpiMaster);
+    /* init_i3g4250d() */
 
     /* temp/humidity */
     /* init_si7021-a20() */
+
+    /* altimeter/pressure */
+    ms5607_02ba03_init(&sensorSpiMaster);
+	
+	/* magnetometer */
+	bmx055_mag_init(&sensorSpiMaster);
+	
+	/* gyro */
+	bmx500Gyro_init(&sensorSpiMaster);
 
 }
 
@@ -92,14 +102,31 @@ void init_sensor_task(void)
 void sensor_task_func(void)
 {
     sensor_status_t curr_status;
+	
+    curr_status = ms5607_02ba03_run();
 
-    curr_status = gyro_state_machine();
-   /* if (curr_status == SENSOR_COMPLETE) {
-        volatile int stop = 1;
-        while(stop);
-    } */
+    if (curr_status == SENSOR_COMPLETE)
+    {
+        /* Do fancy things with current temp/pressure data */
+        ms5607_02ba03_get_data(&(gCurrSensorValues.altimeter));
+    }
+	
+	
+	/* make this fit the new template scheme */
+	curr_status = bmx055_mag_run();
+		
+	if(curr_status == SENSOR_COMPLETE)
+	{	
+		/* do stuff with mag data */
+		bmx055_mag_get_data(&(gCurrSensorValues.magnetometer));	
+	}
+	
+	curr_status = gyro_state_machine();
 
-
+	if(curr_status == SENSOR_COMPLETE)
+	{
+		gyro_get_data(&(gCurrSensorValues.gyro));
+	}
 
     /* ----TEMPLATE----
      * curr_status = <foo>_run();
@@ -116,5 +143,5 @@ void sensor_task_func(void)
 /** Interrupt service routine for the USART RXC interrupt on port D. */
 ISR(SENSOR_SPI_INT)
 {
-    spi_master_ISR(&sensorSpiMaster);
+    spi_master_ISR(&sensorSpiMaster);   
 }
