@@ -72,8 +72,8 @@ static void bmx500Gyro_Get_XYZ_Data(void)
 {
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
 	gyroControl.spi_send_buffer[0] = GYRO_SEND_READ_CODE;
-
-	spi_master_blocking_send_request(gyroControl.spi_master,
+gyroControl.send_complete = 1;
+	spi_master_enqueue(gyroControl.spi_master,
 	&(gyroControl.cs_info),
 	gyroControl.spi_send_buffer,
 	1,
@@ -132,7 +132,7 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	gyroControl.send_complete = false;
 
 
-	 while(!isBandwidthSet(&gyroControl)); 
+	 while(!isBandwidthSet(&gyroControl));  
 
 	/* Call initial functions to prepare gyroscope. */
 	/* - Set Power Mode "Normal". Line 162 of support
