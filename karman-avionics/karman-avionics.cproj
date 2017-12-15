@@ -442,6 +442,12 @@
     <Compile Include="src\drivers\BMX055Mag.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\drivers\Xbee.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\drivers\Xbee.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\tasks\USBTask.c">
       <SubType>compile</SubType>
     </Compile>
