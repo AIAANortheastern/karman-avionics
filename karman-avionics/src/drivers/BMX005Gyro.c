@@ -68,7 +68,7 @@ static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 }
 
 
-//TODO don't use blocking request here
+//TODO setting send_complete to 1 here causes the state machine below to not wait for the transaction to complete. send_complete is set true by the SPI utility
 static void bmx500Gyro_Get_XYZ_Data(void)
 {
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
