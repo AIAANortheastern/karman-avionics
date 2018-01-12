@@ -68,19 +68,7 @@ void init_sensor_task(void)
     init_spi_master_service(&sensorSpiMaster, &SENSOR_SPI, &SENSOR_SPI_PORT, spi_bg_task);
     spi_bg_add_master(&sensorSpiMaster);
 
-    /* run initialization for all sensors. Most of these names are out of date */
-
-    /* 1 axis accelerometer */
-    /* init_mma6855bkcw() */
-
-    /* 3 axis accelerometer*/
-    /* init_fxls8471qr1() */
-
-    /* 3 axis gyro */
-    /* init_i3g4250d() */
-
-    /* temp/humidity */
-    /* init_si7021-a20() */
+    /* run initialization for all sensors */
 
     /* altimeter/pressure */
     ms5607_02ba03_init(&sensorSpiMaster);

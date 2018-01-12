@@ -59,20 +59,12 @@ void init_radio_task(void)
  * transfers them to the control loop.
  */
 void radio_task_func(void)
-{
-    static uint32_t radio_timer = 0;
-    //static uint8_t radio_debug_payload[13] = "Hello World\n\r";
+{   
 	xbeeSensorData.header = 'A';
 	xbeeSensorData.sensorData = *(&gCurrSensorValues);
 	xbeeSensorData.checksum = '\n';
 
-   /* Debug!!! */
-   if(radio_timer % 200 == 0)
-   {
-       xbee_tx_payload((void *)(&xbeeSensorData), sizeof(xbeeSensorData));
-   }
-
-   radio_timer++;
+    xbee_tx_payload((void *)(&xbeeSensorData), sizeof(xbeeSensorData));
    /* Handle sensor tx queue */
    /* Handle control loop tx queue */ 
 }

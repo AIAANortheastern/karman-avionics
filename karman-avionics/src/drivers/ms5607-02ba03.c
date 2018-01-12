@@ -293,6 +293,7 @@ void ms5607_02ba03_read_data(void)
  */
 void ms5607_02ba03_calculate_temp(void)
 {    
+    // TODO investigate why this doesn't make sense with real data while pressure does
     /* dT = D2 - TREF = D2 - C5 * 2^8 */
     gAltimeterControl.raw_vals.t_diff = (int32_t)(gAltimeterControl.raw_vals.dig_temp - ((uint32_t)gAltimeterControl.calibration_vals.t_ref << 8));
 

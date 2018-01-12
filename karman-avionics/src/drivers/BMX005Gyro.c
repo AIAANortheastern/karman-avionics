@@ -67,6 +67,7 @@ static uint8_t isBandwidthSet(gyroscope_control_t *gyroControl)
 }
 
 
+//TODO don't use blocking request here
 static void bmx500Gyro_Get_XYZ_Data(void)
 {
 	memset((void*)gyroControl.spi_send_buffer, 0, sizeof(gyroControl.spi_send_buffer));
