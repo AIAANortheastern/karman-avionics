@@ -33,11 +33,15 @@ void xbee_init()
  */
 void xbee_RX_ISR(void)
 {
-      static uint8_t i =0;
+    static uint8_t index =0;
 
-      gXbeeCtrl.rx_buffer[i] = RADIO_USART.DATA;
+    gXbeeCtrl.rx_buffer[index] = RADIO_USART.DATA;
 
-      i++;
+    /* The buffer is 256 bytes, so it can safely be indexed with a constantly
+     * incrementing 8 bit integer. If the buffer size changes this logic MUST change,
+     * since it relies on unsigned integer "overflow".
+     */
+    index++;
 }
 
 
@@ -59,6 +63,8 @@ Bool xbee_tx_payload(void *buf, uint16_t len)
 
     while(i < len)
     {
+        //TODO do this without using blocking function usart_putchar
+        //TODO investigate setting up DMA transfer
         usart_putchar(&RADIO_USART, ((uint8_t *)buf)[i]);
         i++;
     }

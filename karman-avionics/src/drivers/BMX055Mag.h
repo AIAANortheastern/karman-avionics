@@ -15,6 +15,8 @@
 /** Holds the current SPI input/output */
 #define MAGNETOMETER_SPI_BUFF_SIZE (9)
 
+// TODO include Bosch license here because this is really their code and we're modifying it
+
 /********************************************/
 /**\name	CHIP ID       */
 /********************************************/

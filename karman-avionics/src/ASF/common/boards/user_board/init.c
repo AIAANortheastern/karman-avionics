@@ -23,6 +23,8 @@ void board_init(void)
 	 * specific board configuration, found in conf_board.h.
     */
 
+    /* All pin and port defintions are from conf_board.h in src/config */
+
     /* setup Pin directions on all GPIO pins */
     /* FOR DIRECTION: 0 = input, 1 = output */
     /* SET --> OUTPUT, CLEAR --> INPUT */
@@ -71,6 +73,10 @@ void board_init(void)
     PYRO_34_PORT.DIRCLR = PYRO_SENSE4B | PYRO_SENSE4A | PYRO_SENSE3B | PYRO_SENSE3A;
     PYRO_34_PORT.DIRSET = PYRO_4A | PYRO_4B | PYRO_3A | PYRO_3B;
 
+    /* Set all output pins to a known state 
+     * For outputs: SET = 1, CLR = 0
+    */
+
     /* Pull all CS pins high */
     /* Radio and flash memory */
     RADIO_GPIO_PORT.OUTSET = RADIO_CS;
@@ -92,6 +98,16 @@ void board_init(void)
     SENSOR_SPI_PORT.OUTSET = SENSOR_MOSI;
     FLASH_PORT.OUTSET = FLASH_MOSI;
 
+    /* Set all Pyro pins low */
+    PYRO_12_PORT.OUTCLR = PYRO_1A;
+    PYRO_12_PORT.OUTCLR = PYRO_1B;
+    PYRO_12_PORT.OUTCLR = PYRO_2A;
+    PYRO_12_PORT.OUTCLR = PYRO_2B;
+
+    PYRO_34_PORT.OUTCLR = PYRO_3A;
+    PYRO_34_PORT.OUTCLR = PYRO_3B;
+    PYRO_34_PORT.OUTCLR = PYRO_4A;
+    PYRO_34_PORT.OUTCLR = PYRO_4B;
 
     /* Initializes SPI for sensors, and sets up CS pins for all sensors */
     init_sensor_task();
@@ -100,8 +116,8 @@ void board_init(void)
     init_radio_task();
 
     /* Initializes SPI for External Flash Memory, sets up CS pin for it */
-    //init_flashmem();
+    // TODO Make flash work init_flashmem();
 
     /* Initializes the USB CDC interface */
-    //init_usb();
+    // TODO Implement USB State machine on top of flash init_usb();
 }
