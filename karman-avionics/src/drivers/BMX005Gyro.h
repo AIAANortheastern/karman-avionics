@@ -17,7 +17,9 @@
 //--Init codes--
 #define GYRO_POWER_MODE (0x11)
 #define GYRO_SELF_TEST (0x3C)
-#define GYRO_SLOW_OFFSET (0x31)
+#define GYRO_SLOW_OFFSET_REG (0x31)
+#define GYRO_SLOW_OFFSET_ON (0x57)
+#define GYRO_SLOW_OFFSET_OFF (0x50)
 #define GYRO_OFFSET_VALUES (0x36) /* 0x36 to 0x39 */
 #define GYRO_BANDWIDTH (0x6) /* 0x6 -> Decimation factor = 10, ODR=200Hz, Filter Bandwidth = 64Hz */
 #define GYRO_BANDWIDTH_REG  (0x10)

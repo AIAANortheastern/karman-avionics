@@ -1,5 +1,5 @@
 #include "BMX005Gyro.h"
-
+#include "timer.h"
 #define DEG_PER_LSB 0.0610370189519944 
 gyroscope_control_t gyroControl;
 
@@ -142,6 +142,9 @@ void bmx500Gyro_init(spi_master_t *spi_master)
 	- bit 1 will stay 1 while running, when done bit2 will be set to 1 if failed, stay 0 if passed. */
 	/* - Measure offset by running slow compensation (GYR 0x31<0:2> slow_offset_en_x/y/z bits to enable)
 	   - After a time set the bits to 0s and the last calculated values should remain.*/
+	writeGyroReg(GYRO_SLOW_OFFSET_REG, (uint8_t)GYRO_SLOW_OFFSET_ON, &gyroControl);
+	timer_delay_ms((uint8_t)2000);
+	writeGyroReg(GYRO_SLOW_OFFSET_REG, (uint8_t)GYRO_SLOW_OFFSET_OFF, &gyroControl);
 	/* - Set Bandwidth of input data. Line 172 of support */
 
 }
